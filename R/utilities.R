@@ -171,6 +171,17 @@ add_blank_row <- function(x, location="below", vars = NULL){
     # rw[1, "..page"] <-  x[1, "..page"]
     rw[1, "..page"] <-  x[cpos, "..page"]
   }
+  # Set group together
+  if ("..group_cohesion" %in% names(x)){
+    rw[1, "..group_cohesion"] <-  x[cpos, "..group_cohesion"]
+  }
+  
+  # Keep break label
+  if (any(grepl("..break_label\\d+", names(x)))){
+    for (b in names(x)[grepl("..break_label\\d+", names(x))]) {
+      rw[1, b] <-  x[cpos, b]
+    }
+  }
   
   # Add the blank row to the specified location.
   ret <- x
@@ -395,19 +406,42 @@ split_cells <- function(x, col_widths, ts = NULL, char_width = NULL) {
         
         ind_blank_num <- 0
         
-        if (!is.null(defs)) {
-          def <- defs[[nm]]
-          if (!is.null(def$indent)) {
-            
-            ind_blank_num <- floor(def$indent / char_width)
-            
-          } else if (nm == "stub" & !is.null(ts$stub)) {
-            
-            stub_var <- x$..stub_var[i]
-            if (!is.null(defs[[stub_var]]$indent)) {
+        break_label_flg <- FALSE
+        if (any(grepl("..break_label\\d+", names(x)))) {
+          
+          # For break labels, prepare the break label columns for later use
+          break_label_col <- c()
+          for (d in 1:length(defs)) {
+            if (!is.null(defs[[d]]$break_label)){
+              break_label_col <- c(break_label_col, defs[[d]]$var_c)
+            }
+          }
+          
+          # Use original indentation setting
+          if (!is.na(x$..break_occur[i]) & x$..blank[i] == "L"){
+            cur_break_label_col <- break_label_col[as.numeric(x$..break_occur[i])]
+            if (!is.null(defs[[cur_break_label_col]]$indent)) {
+              ind_blank_num <- floor(defs[[cur_break_label_col]]$indent / char_width)
+            }
+            break_label_flg <- TRUE
+          }
+        }
+        
+        if (!break_label_flg) {
+          if (!is.null(defs)) {
+            def <- defs[[nm]]
+            if (!is.null(def$indent)) {
               
-              ind_blank_num <- floor(defs[[stub_var]]$indent / char_width)
+              ind_blank_num <- floor(def$indent / char_width)
               
+            } else if (nm == "stub" & !is.null(ts$stub)) {
+              
+              stub_var <- x$..stub_var[i]
+              if (!is.null(defs[[stub_var]]$indent)) {
+                
+                ind_blank_num <- floor(defs[[stub_var]]$indent / char_width)
+                
+              }
             }
           }
         }
@@ -465,8 +499,6 @@ split_cells <- function(x, col_widths, ts = NULL, char_width = NULL) {
   else
     names(dat) <- c(names(x), "..row")
 
-
-  
   return(dat)
 }
 
@@ -645,22 +677,59 @@ split_string_html <- function(strng, width, units, nm = "", char_width = 1) {
   indnt <- 0
   cstrng <- strng
   indntw <- 0
-  if (nm == "stub") {
-    
-    bpos <- regexpr("^\\s+", strng)
-    if (bpos > 0) {
-      
-      indnt <-  attr(bpos, "match.length")
-      blnks <- paste0(rep(" ", indnt), sep = "", collapse = "")
-      cstrng <- substr(strng, indnt + 1, nchar(strng))
-      indntw <- indnt * char_width 
-    }
-  }
+  # if (nm == "stub") {
+  #   
+  #   bpos <- regexpr("^\\s+", strng)
+  #   if (bpos > 0) {
+  #     
+  #     indnt <-  attr(bpos, "match.length")
+  #     blnks <- paste0(rep(" ", indnt), sep = "", collapse = "")
+  #     cstrng <- substr(strng, indnt + 1, nchar(strng))
+  #     indntw <- indnt * char_width 
+  #   }
+  # }
   
   
   res <- split_strings(cstrng, width - indntw, units, multiplier = 1)
   
   ret <- list(html = paste0(blnks, res$text, collapse = "\n"),
+              lines = length(res$text),
+              widths = res$widths + indntw)
+  
+  return(ret)
+}
+
+#' @noRd
+split_string_docx <- function(strng, width, units, nm = "", char_width = 1,
+                              font = "Arial") {
+  
+  if (tolower(font) == "courier") {
+    mp <- 1.01
+  } else {
+    mp <- 1.02
+  } 
+  
+  # Deal with indents
+  blnks <- ""
+  indnt <- 0
+  cstrng <- strng
+  indntw <- 0
+  # if (nm == "stub") {
+  #   
+  #   bpos <- regexpr("^\\s+", strng)
+  #   if (bpos > 0) {
+  #     
+  #     indnt <-  attr(bpos, "match.length")
+  #     blnks <- paste0(rep(" ", indnt), sep = "", collapse = "")
+  #     cstrng <- substr(strng, indnt + 1, nchar(strng))
+  #     indntw <- indnt * char_width 
+  #   }
+  # }
+  
+  
+  res <- split_strings(cstrng, width - indntw, units, multiplier = mp)
+  
+  ret <- list(docx = paste0(blnks, res$text, collapse = "\n"),
               lines = length(res$text),
               widths = res$widths + indntw)
   
@@ -727,6 +796,63 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
   pdf(NULL)
   par(family = fnt, ps = font_size)
   
+  # Parepare break_label temporary df
+  break_label_df <- NULL
+  if (any(grepl("..break_label\\d+", names(x)))) {
+    
+    break_label_df <- x[, grepl("..break_label", names(x))]
+    
+    # For break labels, prepare the break label columns for later use
+    break_label_col <- c()
+    for (d in 1:length(defs)) {
+      if (!is.null(defs[[d]]$break_label)){
+        break_label_col <- c(break_label_col, defs[[d]]$var_c)
+      }
+    }
+    
+    for (i in 1:nrow(break_label_df)) {
+      for (nm in names(break_label_df)) {
+        if (grepl("..break_label\\d+", nm)) {
+          
+          break_label_num <- sub(".*?([0-9]+).*", "\\1", nm)
+          
+          break_label_indent <- 0
+          cur_break_label_col <- break_label_col[as.numeric(break_label_num)]
+          if (!is.null(defs[[cur_break_label_col]]$indent)) {
+            break_label_indent <- defs[[cur_break_label_col]]$indent
+          }
+          
+          if (output_type %in% c("HTML")) {
+            break_label_res <- split_string_html(x[[i, nm]], sum(col_widths) - break_label_indent, units)
+            
+            break_label_df[i, nm] <- break_label_res$html
+            break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
+            
+          } else if (output_type == "RTF") {
+            break_label_res <- split_string_rtf(x[[i, nm]], sum(col_widths) - break_label_indent, units, font)
+            
+            break_label_df[i, nm] <- break_label_res$rtf
+            break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
+          } else if (output_type == "PDF") {
+            
+            break_label_res <- split_string_text(x[[i, nm]], sum(col_widths) - break_label_indent, units)
+            
+            break_label_df[i, nm] <- paste0(break_label_res$text, collapse = "\n")
+            break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
+          } else if (output_type == "DOCX") {
+            break_label_res <- split_string_docx(x[[i, nm]], sum(col_widths) - break_label_indent, units, font = font)
+            
+            break_label_df[i, nm] <- break_label_res$docx
+            break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
+          }
+          
+        }
+      }
+    }
+    
+    x <- x[, setdiff(names(x), names(break_label_df))]
+  }
+  
   
   for (i in seq_len(nrow(x))) {
     for (nm in names(x)) {
@@ -743,7 +869,7 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
           
         } else if ("..blank" %in% names(x) && x[[i, "..blank"]] == "L") {
           
-          if (output_type %in% c("HTML", "DOCX")) {
+          if (output_type %in% c("HTML")) {
             res <- split_string_html(x[[i, nm]], sum(col_widths), units)
             
             cell <- res$html
@@ -758,11 +884,15 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             
             cell <- paste0(res$text, collapse = "\n")
             
+          } else if (output_type == "DOCX") {
+            res <- split_string_docx(x[[i, nm]], sum(col_widths), units, font = font)
+            
+            cell <- res$docx
           }
           
         } else {
           
-          if (output_type %in% c("HTML", "DOCX")) {
+          if (output_type %in% c("HTML")) {
             # For indenting values, the width should be (col_widths - indentation)
             if (!is.null(defs[[nm]]$indent)) {
               res <- split_string_html(x[[i, nm]], col_widths[[nm]] - defs[[nm]]$indent, 
@@ -818,6 +948,24 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             
             cell <- paste0(res$text, collapse = "\n")
             
+          } else if (output_type == "DOCX") {
+            # For indenting values, the width should be (col_widths - indentation)
+            if (!is.null(defs[[nm]]$indent)) {
+              res <- split_string_docx(x[[i, nm]], col_widths[[nm]] - defs[[nm]]$indent, 
+                                       units, nm, char_width, font = font)
+            } else if (nm == "stub" & !is.null(ts$stub)) {
+              stub_var <- x$..stub_var[i]
+              if (!is.null(defs[[stub_var]]$indent)) {
+                res <- split_string_docx(x[[i, nm]], col_widths[[nm]] - defs[[stub_var]]$indent, 
+                                         units, nm, char_width, font = font)
+              } else {
+                res <- split_string_docx(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
+              }
+            } else {
+              res <- split_string_docx(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
+            }
+            
+            cell <- res$docx
           }
           nch <- res$lines
         }
@@ -870,6 +1018,10 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
   
   dev.off()
   
+  if (!is.null(break_label_df)) {
+    dat <- cbind(dat, break_label_df)
+  }
+  
   rownames(dat) <- NULL
   # # Reset names
   # if ("..row" %in% names(x)) 
@@ -901,7 +1053,8 @@ align_cells <- function(x, len) {
     t <- len - length(x[[nm]])
     
     if (t > 0) {
-      if (nm == "..blank") {
+      if (nm == "..blank" | grepl("..group_cohesion", nm) | grepl("..min_page_prop", nm)
+          | grepl("..break_label\\d+", nm)) {
         if (is.na(x[[nm]])) 
           v <- c(rep(NA, t))
         else
@@ -1466,6 +1619,41 @@ get_first_pos <- function(x){
   result <- c(TRUE, result)
   
   return(result)
+}
+
+#' Return the count of continuous group value. This the count_var is not input,
+#' the function will count each record as 1
+#' @noRd
+get_group_count <- function(group_var, count_var = NULL) {
+  if (length(group_var) == 0) {
+    return(integer(0))
+  } 
+  
+  # Find out the changing position
+  change_points <- c(TRUE, group_var[-1] != group_var[-length(group_var)])
+  
+  # Sum cumulatively to give ID for each group
+  group_id <- cumsum(change_points)
+  
+  # Calculate size of each group
+  if (is.null(count_var)) {
+    count_var <- rep(1, length(group_var))
+  }
+  group_sizes <- tapply(count_var, group_id, sum)
+  
+  # Put frequency back to the original position
+  result <- as.integer(group_sizes[group_id])
+  
+  return(result)
+}
+
+#' Return the sequence of continuous group value.
+#' @noRd
+get_group_seq <- function(x) {
+  # use rle (run length encoding) to find the continuous same group
+  ret <- rle(x)
+  # repeat group sequences
+  return(rep(seq_along(ret$lengths), ret$lengths))
 }
 
 # Sizing utilities --------------------------------------------------------

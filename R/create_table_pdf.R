@@ -83,6 +83,54 @@ create_table_pages_pdf <- function(rs, cntnt, lpg_rows) {
         dat[[nnm]] <- dat[[def$var_c]]
       }
     }
+    
+    # Deal with Group Cohesion
+    # Prepare ..group_cohesion and ..min_page_prop
+    group_cohesion <- c()
+    min_page_prop <- c()
+    
+    i <- 1
+    for (def in ts$col_defs) {
+      if (def$group_cohesion == TRUE) {
+        group_cohesion <- c(group_cohesion, def$var_c)
+        min_page_prop <- c(min_page_prop, def$min_page_prop)
+        
+        dat$..temp <- dat[[def$var_c]]
+        names(dat)[names(dat) == "..temp"] <-  paste0("..group_cohesion",i)
+        
+        dat$..temp <- def$min_page_prop
+        names(dat)[names(dat) == "..temp"] <-  paste0("..min_page_prop",i)
+        i <- i + 1
+      }
+    }
+    
+    if (length(group_cohesion) == 0) {
+      group_cohesion <- NULL
+    }
+    
+    if (length(min_page_prop) == 0) {
+      min_page_prop <- NULL
+    }
+    
+    # Prepare empty ..break_label and ..break_label_lines for later use
+    i <- 1
+    for (def in ts$col_defs) {
+      if (!is.null(def$break_label)) {
+        
+        dat$..temp <- ifelse(!is.na(dat[[def$var_c]]) & dat[[def$var_c]] != "",
+                             paste0(dat[[def$var_c]], " ", def$break_label),
+                             dat[[def$var_c]])
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label",i)
+        
+        dat$..temp <- rep(NA, nrow(dat))
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label_lines",i)
+        i <- i + 1
+      }
+    }
+    # Prepare repeated label occurrence for later use
+    if (any(grepl("..break_label", names(dat)))) {
+      dat$..break_occur <- rep(NA, nrow(dat))
+    }
   }
   
   # Get control column names 
@@ -227,24 +275,43 @@ create_table_pages_pdf <- function(rs, cntnt, lpg_rows) {
     
     # Subset text widths by current split rows
     #spend <- spstart + nrow(s) - 1
-    rnms <- rownames(s)
+    
+    # If the data is changed because of break labels, grab the original row labels
+    break_num <- NULL
+    if (any(grepl("break_label", rownames(s)))) {
+      rnms <- rownames(s)[!grepl("break_label", rownames(s))]
+      break_num <- sum(grepl("break_label", rownames(s)))
+    } else {
+      rnms <- rownames(s)
+    }
+    
     spstart <- rnms[1]
     spend <- rnms[length(rnms)]
     spwidths <- wdat[seq(spstart, spend)]
     
+    # Add additional objects for width data to align with new break label data
+    if (!is.null(break_num)) {
+      for (b in 1:break_num) {
+        spwidths <- append("", spwidths)
+      }
+    }
+    
+    
     for(pg in wraps) {
       counter <- counter + 1
       
-      if (counter < tot_count)
+      if (counter < tot_count) {
         wrap_flag <- TRUE
-      else 
+      } else {
         wrap_flag <- FALSE
+      } 
       
       #print(s)
-      if (!is.na(pgby_var))
+      if (!is.na(pgby_var)) {
         pgby <- trimws(s[1, "..page_by"])
-      else 
+      } else {
         pgby <- NULL
+      } 
       
       # Ensure content blank rows are added only to the first and last pages
       blnk_ind <- get_blank_indicator(counter, tot_count, content_blank_row,
@@ -296,11 +363,13 @@ create_table_pdf <- function(rs, ts, pi, content_blank_row, wrap_flag,
   if (content_blank_row %in% c("above", "both"))
     ys <- ys + rh
   
-  if (!is.null(ts$title_hdr))
+  if (!is.null(ts$title_hdr)) {
     ttls <- get_title_header_pdf(ts$title_hdr, ls, rs, pi$table_align, 
                                  ystart = ys)
-  else
+    
+  } else {
     ttls <- get_titles_pdf(ts$titles, ls, rs, pi$table_align, ystart = ys) 
+  }
   
   ys <-  ys + ttls$points 
   if (ttls$lines > 0)
@@ -310,11 +379,12 @@ create_table_pdf <- function(rs, ts, pi, content_blank_row, wrap_flag,
     pgby <- get_page_by_pdf(rs$page_by, rs$content_size[["width"]], 
                             pi$page_by, rs, pi$table_align, ystart = ys,
                             brdr_flag = bf)
-  } else if(!is.null(ts$page_by))
+  } else if(!is.null(ts$page_by)) {
     pgby <- get_page_by_pdf(ts$page_by, ls, pi$page_by, rs, pi$table_align, 
                             ystart = ys, brdr_flag = bf)
-  else 
+  } else {
     pgby <- c()
+  } 
   
   if (length(pgby) > 0) {
     ys <- ys + pgby$points
@@ -343,7 +413,6 @@ create_table_pdf <- function(rs, ts, pi, content_blank_row, wrap_flag,
     
     ys <- ys + hdrs$points
   }
-  
   
   # rs, ts, widths,  algns, halgns, talgn
   bdy <- get_table_body_pdf(rs, pi$data, pi$col_width, 
@@ -1109,10 +1178,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   
   border_flag <- FALSE
   
-  if ("..blank" %in% names(tbl))
+  if ("..blank" %in% names(tbl)) {
     flgs <- tbl$..blank
-  else 
+  } else {
     flgs <- NA
+  } 
   
   # Count lines per row
   rws <- c()
@@ -1125,17 +1195,19 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   
   #saveRDS(spwidths, "spwidths0a.rds")
   
-  if (!"..blank" %in% names(tbl)) 
+  if (!"..blank" %in% names(tbl)) {
     blnks <- rep("", nrow(tbl))
-  else 
+  } else {
     blnks <- tbl$..blank
+  } 
   
   # Deal with one column situation
   if (length(nms) == 1) {
     t <- as.data.frame(tbl[[nms]])
     names(t) <- nms
-  } else 
+  } else {
     t <- tbl[ , nms]
+  }
   
   conv <- rs$point_conversion
   unts <- rs$units
@@ -1147,13 +1219,12 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   if (all(tbrdrs == "body"))
     brdrs <- c("top", "bottom", "left", "right")
 
-  
   # Get line height.  Don't want to leave editor default.
-  if (any(brdrs %in% c("all", "inside")))
+  if (any(brdrs %in% c("all", "inside"))) {
     rh <- rs$row_height + bh
-  else 
+  } else {
     rh <- rs$row_height
-  
+  } 
   
   # Sum up widths 
   width <- sum(wdths, na.rm = TRUE)
@@ -1177,6 +1248,17 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   
   defs <- ts$col_defs
   
+  # For break labels, prepare the break label columns for later use
+  break_label_col <- c()
+  if (any(grepl("..break_label", names(tbl)))) {
+    
+    for (d in 1:length(defs)) {
+      if (!is.null(defs[[d]]$break_label)){
+        break_label_col <- c(break_label_col, defs[[d]]$var_c)
+      }
+    }
+  }
+  
   pdf(NULL)
   par(family = get_font_family(rs$font), ps = fs)
   
@@ -1192,10 +1274,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
       
       # Seems like this should be done already
       # Need to get widths from split_cells
-      if (all(class(tbl[i, j]) != "character"))
+      if (all(class(tbl[i, j]) != "character")) {
         vl <- as.character(tbl[i, j])
-      else 
+      } else {
         vl <- tbl[i, j]
+      } 
       
       if (flgs[i] %in% c("B", "A", "L")) {
         
@@ -1240,24 +1323,34 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
       
         # Loop for cell wraps
         for (ln in seq_len(length(tmp))) {
-          
           lb_cell <- lb
-          
           # Indenting with lb
-          if (!is.null(defs[[j]]$indent)) {
+          if (flgs[i] == "L" & any(grepl("..break_label", names(tbl)))) {
+            if (!is.na(tbl$..break_occur[i])) {
+              cur_break_label_col <- break_label_col[as.numeric(tbl$..break_occur[i])]
+              if (!is.null(defs[[cur_break_label_col]]$indent)) {
+                lb_cell <- lb_cell + defs[[cur_break_label_col]]$indent
+              }
+            }
+            width_cell <- width
+          } else if (!is.null(defs[[j]]$indent)) {
             lb_cell <- lb_cell + defs[[j]]$indent
+            width_cell <- spwidths[[i]][[j]][ln]
           } else if (j == "stub" & !is.null(ts$stub)) {
             stub_var <- tbl$..stub_var[i]
             if (!is.null(defs[[stub_var]]$indent)) {
               lb_cell <- lb_cell + defs[[stub_var]]$indent
             }
+            width_cell <- spwidths[[i]][[j]][ln]
+          } else {
+            width_cell <- spwidths[[i]][[j]][ln]
           }
           
           ret[[length(ret) + 1]] <- page_text(tmp[ln], fs, 
                                               bold = bflg,
                                               xpos = get_points(lb_cell, 
                                                                 rb,
-                                                                spwidths[[i]][[j]][ln],
+                                                                width_cell,
                                                                 units = unts,
                                                                 align = algns[j]),
                                               ypos = yline)

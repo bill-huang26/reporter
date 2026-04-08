@@ -164,10 +164,11 @@ paginate_content_docx <- function(rs, ls) {
     imgs <- list()
     
     # Set last object flag
-    if (i == length(ls))
+    if (i == length(ls)){
       last_object <- TRUE
-    else 
+    } else {
       last_object <- FALSE
+    } 
     
     # Put content and object in variables for convenience
     cntnt <- ls[[i]] 
@@ -584,7 +585,7 @@ page_setup_docx <- function(rs) {
     radj <- -42
   }
   
-  rh <- get_rh(rs$font, rs$font_size)
+  rh <- get_rh2(rs$font, rs$font_size)
   
   rs$border_height <- 1/72/2
   
@@ -729,11 +730,11 @@ page_setup_docx <- function(rs) {
 
   # Get the page template row count
   # Include all the rows associated with the page template
-  rs$page_template_header_count <- sum(pt$page_header$lines, pt$titles$lines,
+  rs$page_template_header_count <- sum(max(pt$page_header$lines, 1), pt$titles$lines,
                                        pt$title_hdr$lines, pt$page_by$lines)
   
   # DOCX would still have one blank row on top even no page headers
-  rs$page_template_header_count <- max(c(1, rs$page_template_header_count))
+  # rs$page_template_header_count <- max(c(1, rs$page_template_header_count))
   
   if (debug)
     print(paste("Page Template Header Count:", rs$page_template_header_count))

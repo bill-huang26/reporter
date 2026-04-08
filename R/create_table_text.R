@@ -75,6 +75,54 @@ create_table_pages_text <- function(rs, cntnt, lpg_rows) {
         dat[[nnm]] <- dat[[def$var_c]]
       }
     }
+    
+    # Deal with Group Cohesion
+    # Prepare ..group_cohesion and ..min_page_prop
+    group_cohesion <- c()
+    min_page_prop <- c()
+    
+    i <- 1
+    for (def in ts$col_defs) {
+      if (def$group_cohesion == TRUE) {
+        group_cohesion <- c(group_cohesion, def$var_c)
+        min_page_prop <- c(min_page_prop, def$min_page_prop)
+        
+        dat$..temp <- dat[[def$var_c]]
+        names(dat)[names(dat) == "..temp"] <-  paste0("..group_cohesion",i)
+        
+        dat$..temp <- def$min_page_prop
+        names(dat)[names(dat) == "..temp"] <-  paste0("..min_page_prop",i)
+        i <- i + 1
+      }
+    }
+    
+    if (length(group_cohesion) == 0) {
+      group_cohesion <- NULL
+    }
+    
+    if (length(min_page_prop) == 0) {
+      min_page_prop <- NULL
+    }
+    
+    # Prepare empty ..break_label and ..break_label_lines for later use
+    i <- 1
+    for (def in ts$col_defs) {
+      if (!is.null(def$break_label)) {
+        
+        dat$..temp <- ifelse(!is.na(dat[[def$var_c]]) & dat[[def$var_c]] != "",
+                             paste0(dat[[def$var_c]], " ", def$break_label),
+                             dat[[def$var_c]])
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label",i)
+        
+        dat$..temp <- rep(NA, nrow(dat))
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label_lines",i)
+        i <- i + 1
+      }
+    }
+    # Prepare repeated label occurrence for later use
+    if (any(grepl("..break_label", names(dat)))) {
+      dat$..break_occur <- rep(NA, nrow(dat))
+    }
   }
   
   # Get control column names 
@@ -160,6 +208,10 @@ create_table_pages_text <- function(rs, cntnt, lpg_rows) {
 
   # Split long text strings into multiple rows
   fdat <- split_cells(fdat, widths_char, ts, rs$char_width)
+  
+  # Derive lines for break label if needed
+  fdat <- get_break_lines(fdat, widths_char, ts, rs$char_width)
+
   # print("split_cells")
   # print(fdat)
 
@@ -207,6 +259,15 @@ create_table_pages_text <- function(rs, cntnt, lpg_rows) {
   
   pg_lst <- list()
   for(s in splits) {
+    
+    # Impute records for break labels
+    if (any(grepl("break_label", row.names(s)))) {
+      break_label_df <- s[grepl("break_label", row.names(s)),]
+      break_label_df <- split_cells(break_label_df, widths_char, ts, rs$char_width)
+      break_label_df[, 1] <- stri_pad_right(break_label_df[, 1], sum(widths_char))
+      s <- rbind(break_label_df, s[!grepl("break_label", row.names(s)),])
+    }
+    
     for(pg in wraps) {
       counter <- counter + 1
 
@@ -856,3 +917,38 @@ get_blank_indicator <- function(pg_num, tot_pg, content_blanks,
   return(blnk_ind)
 }
 
+get_break_lines <- function(dat, widths_char, ts, char_width){
+  defs <- ts$col_defs
+  if (any(grepl("..break_label", names(dat)))) {
+    
+    # For break labels, prepare the break label columns for later use
+    break_label_col <- c()
+    for (d in 1:length(defs)) {
+      if (!is.null(defs[[d]]$break_label)){
+        break_label_col <- c(break_label_col, defs[[d]]$var_c)
+      }
+    }
+    
+    for (b in names(dat)[grepl("..break_label\\d+", names(dat))]) {
+      break_label_num <- sub(".*?([0-9]+).*", "\\1", b)
+      # Get the indentation from original variable
+      break_label_indent <- 0
+      cur_break_label_col <- break_label_col[as.numeric(break_label_num)]
+      if (!is.null(defs[[cur_break_label_col]]$indent)) {
+        break_label_indent <- defs[[cur_break_label_col]]$indent
+      }
+      
+      ind_blank_num <- floor(break_label_indent / char_width)
+      
+      get_lines <- function(input, ind = ind_blank_num, txt_width = sum(widths_char)){
+        txt_wrap <- stri_wrap(unlist(
+          strsplit(input, split = "\n", fixed = TRUE)),
+          width = txt_width, normalize = FALSE, indent = ind, exdent = ind)
+        return(length(txt_wrap))
+      }
+      
+      dat[[paste0("..break_label_lines",break_label_num)]] <- vapply(dat[[b]], get_lines, numeric(1))
+    }
+  }
+  return(dat)
+}

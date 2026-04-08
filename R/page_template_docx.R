@@ -1873,7 +1873,6 @@ get_page_by_docx <- function(pgby, width, value, rs, talgn,
       label_buffer <- ifelse(bold[1] == TRUE, 0.5, 0.2)
       label_split <- split_string_html(pgby$label, width - label_buffer, rs$units)
       cnt <- cnt + label_split$lines
-      tmp_cnt <- tmp_cnt + label_split$lines # To be deleted
 
       # Split value
       value_buffer <- ifelse(bold[2] == TRUE, 0.5, 0.2)
@@ -1887,7 +1886,6 @@ get_page_by_docx <- function(pgby, width, value, rs, talgn,
         value_split <- split_string_html(value, width, rs$units)
         cnt <- cnt + value_split$lines
         remain_value_lines <- value_split$lines
-        tmp_cnt <- tmp_cnt + value_split$lines # To be deleted
         value_split_txt <- value_split$html
       } else {
         # If not, calculate from second line with full width
@@ -1896,7 +1894,6 @@ get_page_by_docx <- function(pgby, width, value, rs, talgn,
           remain_value <- trimws(sub(splt[[1]][1], "", value), which = "left")
           remain_value_split <- split_string_html(remain_value, width - value_buffer, rs$units)
           cnt <- cnt + remain_value_split$lines
-          tmp_cnt <- tmp_cnt + remain_value_split$lines # To be deleted
           remain_value_lines <- remain_value_split$lines
           
           value_split_txt <- paste0(splt[[1]][1], "\n", remain_value_split$html)

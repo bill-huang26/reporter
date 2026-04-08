@@ -804,3 +804,15 @@ test_that("utils34: add_group_border_ind works as expected.", {
                                                "bottom","bottom","","","bottom"))
   expect_equal(df, df_expect) 
 })
+
+test_that("utils35: get_group_count works as expected.", {
+  
+  group <- c("A", "A", "A", "B", "B", "C", "C", "C")
+  count <- c(1, 1, 1, 2, 1, 3, 0, 2)
+  
+  group_counts <- get_group_count(group, count)
+  expect_equal(group_counts, c(3, 3, 3, 3, 3, 5, 5, 5))
+  
+  group_counts2 <- get_group_count(group)
+  expect_equal(group_counts2, c(3, 3, 3, 2, 2, 3, 3, 3))
+})

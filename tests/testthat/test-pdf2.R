@@ -4010,6 +4010,242 @@ test_that("pdf2-108: Return error when header_image/footer_image is used without
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("pdf2-109: group_cohesion puts the group in same page as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test109.pdf")
+    
+    dat <- iris[1:91,]
+    
+    dat$test_group <- c(
+      rep("A", 14),
+      rep("B", 6),
+      rep("C", 22),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 14), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 22)),
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 31)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = TRUE, label = "Group", blank_after = T)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    # page size 34.6
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-110: group_cohesion with min page proportion works as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test110.pdf")
+    
+    dat <- iris[1:95,]
+    
+    dat$test_group <- c(
+      rep("A", 14),
+      rep("B", 6),
+      rep("C", 22),
+      rep("D", 18),
+      rep("E", 35)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 14), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 22)),
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 35)) # 35 lines + 1 -> Still break because more than page size 34.6
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = 0.7, label = "Group", blank_after = T)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-111: Multiple group_cohesion work as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test111.pdf")
+    
+    dat <- iris[1:91,]
+    
+    dat$test_group <- c(
+      rep("A", 14),
+      rep("B", 6),
+      rep("C", 22),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 14), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 3), # 12 lines + 1
+      rep("Flower B\nSubgroup B2", 3),
+      c(rep("Flower C1", 17)),
+      c(rep("Flower C2", 5)),
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E1", 2)), # 31 lines + 1
+      c(rep("Flower E2", 29)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = TRUE, label = "Group", blank_after = T) %>%
+      define(test_string, group_cohesion = TRUE)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-112: Multiple group_cohesion with different cohesion strengths work as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test112.pdf")
+    
+    dat <- iris[1:91,]
+    
+    dat$test_group <- c(
+      rep("A", 14),
+      rep("B", 6),
+      rep("C", 22),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 14), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 3), # 12 lines + 1
+      rep("Flower B\nSubgroup B2", 3),
+      c(rep("Flower C1", 17)),
+      c(rep("Flower C2", 5)),
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E1", 8)), # 31 lines + 1
+      c(rep("Flower E2", 23)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = TRUE, label = "Group", blank_after = T) %>%
+      define(test_string, group_cohesion = 0.1)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    # C2 is not moved but E2 is moved.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-113: break_label works as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test113.pdf")
+    
+    dat <- iris[1:86,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 19)), # 19 lines + 1
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 31)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, break_label = "(Continued)", blank_before = T) %>%
+      define(test_string, 
+             break_label = paste0("(This is a long text which should take more ",
+                                  "than one line. It's to test if the package is able to handle this ",
+                                  "situation.)"),
+             indent = 0.16)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Break Label") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
 # # User Tests --------------------------------------------------------------
 
 # Lots of special characters not working

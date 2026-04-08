@@ -134,10 +134,11 @@ paginate_content_pdf <- function(rs, doc) {
     lns <- c()
     
     # Set last object flag
-    if (i == length(ls))
+    if (i == length(ls)) {
       last_object <- TRUE
-    else 
+    } else {
       last_object <- FALSE
+    }
     
     # Put content and object in variables for convenience
     cntnt <- ls[[i]] 

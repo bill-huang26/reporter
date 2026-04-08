@@ -2909,6 +2909,242 @@ test_that("docx-81: Return error when header_image/footer_image is used without 
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("docx-82: group_cohesion puts the group in same page as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test82.docx")
+    
+    dat <- iris[1:86,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 19)), # 19 lines + 1
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 31)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = T, label = "Group", blank_after = T)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-83: group_cohesion with min page proportion works as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test83.docx")
+    
+    dat <- iris[1:86,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 19)), # 19 lines + 1
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 31)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = 0.6,
+             label = "Group", blank_after = T) %>%
+      define(test_string, label = "Flower")
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-84: Multiple group_cohesion work as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test84.docx")
+    
+    dat <- iris[1:86,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 3), # 12 lines + 1
+      rep("Flower B\nSubgroup B2", 3),
+      c(rep("Flower C1", 11)), # C1 ends at 24 lines, which is the minimum requirement
+      c(rep("Flower C2", 8)), # C2 would be moved to next page
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E1", 24), rep("Flower E2", 7)) # E2 would be moved to next page
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = TRUE, label = "Group", blank_after = T) %>%
+      define(test_string, group_cohesion = TRUE)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    # C2 would be moved to next page
+    # E2 would be moved to next page
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-85: Multiple group_cohesion with different cohesion strengths work as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test85.docx")
+    
+    dat <- iris[1:89,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 34)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C1", 11)), # C1 ends at 24 lines, which is the minimum requirement
+      c(rep("Flower C2", 8)), # C2 would be not moved to next page
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E1", 30), rep("Flower E2", 4)) # E2 would be moved to next page
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, group_cohesion = TRUE, label = "Group", blank_after = T) %>%
+      define(test_string, group_cohesion = 0.1)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    # C2 would not be moved to next page because previous lines are only 24
+    # E2 would be moved to next page because previous lines are 27, which meets 30*0.9
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-86: break_label works as expected.", {
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test86.docx")
+    
+    dat <- iris[1:86,]
+    
+    dat$test_group <- c(
+      rep("A", 12),
+      rep("B", 6),
+      rep("C", 19),
+      rep("D", 18),
+      rep("E", 31)
+    )
+    
+    dat$test_string <- c(
+      rep("Flower A\nSubgroup A1", 12), # 24 lines + 1
+      rep("Flower B\nSubgroup B1", 6), # 12 lines + 1
+      c(rep("Flower C", 19)), # 19 lines + 1
+      c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)), # 20 lines + 1
+      c(rep("Flower E", 31)) # 31 lines + 1
+    )
+    
+    dat <- dat[, c("test_group", "test_string", "Sepal.Length", 
+                   "Sepal.Width", "Petal.Length","Petal.Width")]
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      define(test_group, break_label = "(Continued)", blank_before = T) %>%
+      define(test_string, 
+             break_label = paste0("(This is a long text which should take more ",
+                                  "than one line. It's to test if the package is able to handle this ",
+                                  "situation.)"),
+             indent = 0.16)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      titles("Table 1.0", "My Nice Report with Break Label") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none",
+                blank_row = "none")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # User Tests --------------------------------------------------------------
 
 
@@ -3459,7 +3695,10 @@ test_that("user7: Borders with spanning headers work as expected.", {
       set_margins(top = 1, bottom = 1) %>%
       add_content(tbl) %>%
       page_footer(left = paste("Date:", Sys.time()), right = "Page [pg] of [tpg]", blank_row="none") %>%
-      footnotes("Program: C:/Users/Home/AppData/Local/Temp/tdemo.R", blank_row="above")
+      footnotes("Program: C:/Users/Home/AppData/Local/Temp/tdemo.R", blank_row="above")  %>%
+      # Turn them down for issue 355
+      titles("Table 1.0", "My Nice Table") %>%
+      page_header("Test")
 
     res <- write_report(rpt)
 
