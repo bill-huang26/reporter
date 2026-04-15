@@ -373,6 +373,9 @@ create_table_html <- function(rs, ts, pi, content_blank_row, wrap_flag,
                                   wrap_flag, content_blank_row,  pi$table_align, 
                                   rws$border_flag)
   
+  # Replace the page number for table footnote
+  temp_footnote <- gsub("[pg]", unique(pi$data$..page), ftnts$html, fixed = TRUE) 
+  ftnts$html <- temp_footnote
 
   
   u <- rs$units
@@ -400,7 +403,6 @@ get_page_footnotes_html <- function(rs, spec, spec_width, lpg_rows, row_count,
   ftnts <- list(lines = 0, twips = 0, border_flag = FALSE)
   vflag <- "none"
 
-  
   # Deal with valign parameter
   if (!is.null(spec$footnotes)) {
     if (!is.null(spec$footnotes[[length(spec$footnotes)]])) {
