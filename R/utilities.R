@@ -1456,6 +1456,9 @@ get_spanning_info <- function(rs, ts, pi, widths, gutter = 1) {
     for (i in 1:length(slvl[[l]])) {
       cl <- slvl[[l]][[i]]$span_cols
       
+      # Make sure only visible columns are included
+      # cl <- cl[cl %in% t$colname]
+      
       # Span specifications can be a vector of column names or numbers
       if (typeof(cl) == "character")
         t$span_num <- ifelse(t$colname %in% cl, i, t$span_num)

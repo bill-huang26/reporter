@@ -542,7 +542,7 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
   
   if (ts$headerless == FALSE) {
     
-    # Spanning headers now inside get_table_header_html
+    # Spanning headers now inside get_table_header_docx
     hdrs <- get_table_header_docx(rs, ts, pi)  
   }
   
@@ -713,10 +713,10 @@ get_table_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
           b <- c("bottom", "top")
       
       # Split label strings if they exceed column width
-      tmp <- split_string_html(lbls[k], widths[k], rs$units)
+      tmp <- split_string_docx(lbls[k], widths[k], rs$units, font = rs$font)
 
       #if (b == "") {
-        ret[1] <- paste0(ret[1], cell_abs(tmp$html, ha[k], sz[k], 
+        ret[1] <- paste0(ret[1], cell_abs(tmp$docx, ha[k], sz[k], 
                                           borders = b, 
                                           valign = "bottom", 
                                           bold = ts$header_bold))
@@ -767,7 +767,7 @@ get_table_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
 }
 
 
-#' @description Return a vector of html strings for the table spanning headers
+#' @description Return a vector of docx strings for the table spanning headers
 #' @details Basic idea of this function is to figure out which columns 
 #' the header spans, add widths, then call get_table_header.  Everything
 #' from there is the same.  
@@ -801,6 +801,14 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
   # Add indenting information for gap
   if (length(wlvl) > 0) {
     wlvl <- get_spanning_gap_docx(wlvl) 
+    
+    # Do not create gaps for all and inside border
+    if (ts$borders %in% c("all", "inside")) {
+      for (i in 1:length(wlvl)) {
+        wlvl[[i]]$indent_left <- NA
+        wlvl[[i]]$indent_right <- NA
+      }
+    }
   }
   
   # Get borders
@@ -847,7 +855,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
     for(k in seq_along(lbls)) {
       
       # Split label strings if they exceed column width
-      tmp <- split_string_html(lbls[k], widths[k], rs$units)
+      tmp <- split_string_docx(lbls[k], widths[k], rs$units, font = rs$font)
       
       
       # b <- get_table_borders_docx(length(lvls) - l + 1, k, length(lvls) + 1, 
@@ -855,7 +863,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
       #                            exclude = exclude_top)
       
       # Add colspans
-      vl <- tmp$html
+      vl <- tmp$docx
       tb <- ""
       bb <- ""
       
@@ -1185,8 +1193,8 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
         #   vl <- gsub("\n", " ", vl, fixed = TRUE)
         #   
         #   # Redo splits
-        #   vtmp <- split_string_html(vl, sum(wdths), rs$units)
-        #   vl <- vtmp$html
+        #   vtmp <- split_string_docx(vl, sum(wdths), rs$units)
+        #   vl <- vtmp$docx
         #   
         # }
         
@@ -1200,7 +1208,7 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
         
         
         if (!(tb[i] %in% c("B", "A", "L") & j > 1)) {
-          # Construct html
+          # Construct docx
           
           # Put indent information into paragraph properties
           if (rs$units == "inches") {

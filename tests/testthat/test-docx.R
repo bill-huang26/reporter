@@ -2061,6 +2061,112 @@ test_that("docx-58: Spanning header gap works as expected.", {
   
 })
 
+test_that("docx-58-2: Spanning header gap should not exist with all border.", {
+  
+  if (dev == TRUE) {
+    
+    fp <- file.path(base_path, "docx/test58-2.docx")
+    
+    dat <- mtcars[1:15, ]
+    
+    tbl <- create_table(dat, borders = c("all")) %>%
+      spanning_header(cyl, disp, "Span 1", label_align = "left") %>%
+      spanning_header(hp, wt, "Span 2", underline = TRUE) %>%
+      spanning_header(qsec, vs, "Span 3", n = 10) %>%
+      spanning_header(cyl, hp, "Super Span", n = 11, level = 2) |> 
+      spanning_header(drat, gear, "Super Duper\nWrapped Span", n = 11, level = 2)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1", "Right2", "Right3"), blank_row = "below") %>%
+      titles("Table 1.0", "My Nice Table") %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2") %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    res <- write_report(rpt)
+    res
+    res$column_widths
+    
+    expect_equal(file.exists(fp), TRUE)
+    expect_equal(res$pages, 1)
+    
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-58-3: Spanning header gap should not exist with inside border.", {
+  
+  if (dev == TRUE) {
+    
+    fp <- file.path(base_path, "docx/test58-3.docx")
+    
+    dat <- mtcars[1:15, ]
+    
+    tbl <- create_table(dat, borders = c("inside")) %>%
+      spanning_header(cyl, disp, "Span 1", label_align = "left") %>%
+      spanning_header(hp, wt, "Span 2", underline = TRUE) %>%
+      spanning_header(qsec, vs, "Span 3", n = 10) %>%
+      spanning_header(cyl, hp, "Super Span", n = 11, level = 2) |> 
+      spanning_header(drat, gear, "Super Duper\nWrapped Span", n = 11, level = 2)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1", "Right2", "Right3"), blank_row = "below") %>%
+      titles("Table 1.0", "My Nice Table") %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2") %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    res <- write_report(rpt)
+    res
+    res$column_widths
+    
+    expect_equal(file.exists(fp), TRUE)
+    expect_equal(res$pages, 1)
+    
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-58-4: Spanning header with invisible columns works as expected.", {
+  
+  if (dev == TRUE) {
+    
+    fp <- file.path(base_path, "docx/test58-4.docx")
+    
+    dat <- mtcars[1:20,]
+    
+    tbl <- create_table(dat, borders = c("all")) %>%
+      spanning_header(mpg, qsec, "Span 1", label_align = "left") %>%
+      spanning_header(vs, carb, "Span 2", underline = TRUE) %>%
+      define(cyl, visible = FALSE)
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1", "Right2", "Right3"), blank_row = "below") %>%
+      titles("Table 1.0", "My Nice Table") %>%
+      add_content(tbl) %>%
+      footnotes("My footnote 1", "My footnote 2") %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    # Make sure spanning header width is matched.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+    expect_equal(res$pages, 1)
+    
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+
 test_that("docx-59: Table with blank_before works as expected.", {
   
   

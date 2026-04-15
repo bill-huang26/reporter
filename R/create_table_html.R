@@ -813,7 +813,14 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
   
   # Add information for gap
   if (length(wlvl) > 0) {
-    wlvl <- get_spanning_gap_html(wlvl) 
+    wlvl <- get_spanning_gap_html(wlvl)
+    
+    # Do not create gaps for all and inside border
+    if (ts$borders %in% c("all", "inside")) {
+      for (i in 1:length(wlvl)) {
+        wlvl[[i]]$gap_width <- NA
+      }
+    }
   }
   
   # Get borders

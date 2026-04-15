@@ -828,7 +828,8 @@ get_spanning_header_rtf <- function(rs, ts, pi) {
   talgn <- pi$table_align
   
   # Detect continuous underline and insert gap, adjust widths
-  if (length(wlvl) > 0) {
+  # Do not create gaps for all and inside border
+  if (length(wlvl) > 0 & !ts$borders %in% c("all", "inside")) {
     wlvl <- get_spanning_gap_rtf(wlvl, conv)
   }
 
