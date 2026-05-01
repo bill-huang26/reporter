@@ -1571,5 +1571,35 @@ test_that("rtf46: Path variable is returned properly from write_report().", {
   
 })
 
-
+test_that("rtf47: Page numbers work every in title, footnote, header, and footer.", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "rtf/test47.rtf")
+    
+    dat <- iris
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      titles("Table Title: Page [pg] of [tpg]") %>%
+      titles("Second table title") %>%
+      footnotes("Table footnote: Page [pg] of [tpg]") %>%
+      footnotes("Second table footnote")
+    
+    rpt <- create_report(fp, output_type = "RTF", font = "fixed",
+                         orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      add_content(tbl) %>%
+      titles("Report Title: Page [pg] of [tpg]") %>%
+      titles("Second report title") %>%
+      footnotes("Report footnote: Page [pg] of [tpg]", borders = "none") %>%
+      footnotes("Second report footnote") %>%
+      page_header("Header: Page [pg] of [tpg]") %>%
+      page_footer("Footer: Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 

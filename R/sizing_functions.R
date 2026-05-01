@@ -375,6 +375,13 @@ create_stub <- function(dat, ts) {
     # Have to restore names, otherwise data.frame will mess them up
     names(dat) <- c("stub", names(d))
     
+    # Issue 373: Remove row label when it's NA. If it's "", will consider it as
+    # a real value
+    if ("..blank" %in% names(dat)) {
+      dat <- dat[!(is.na(dat$stub) & dat$..blank == "L"),]
+      # dat <- dat[!(dat$stub == "" & dat$..blank == "L"),]
+    }
+    
     # print("Names after")
     # print(names(dat))
   }
@@ -1440,6 +1447,7 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
     # print(paste0("row: ", i))
     # print(paste0("counter: ", counter))
     # print(paste0("ttfl: ", ttfl))
+    # print(paste0("page_size: ", page_size))
     # print(paste0("Capacity: ", page_size  - offset - ttfl))
     # print(paste0("Page before: ", pg))
 

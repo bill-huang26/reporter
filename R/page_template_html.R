@@ -1313,7 +1313,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
         if (length(ttlhdr$right) >= i) {
           tmp2 <- split_string_html(ttlhdr$right[[i]],
                                    width * .3, rs$units)
-          hdr <- get_page_numbers_html(tmp2$html, FALSE)
+          # hdr <- get_page_numbers_html(tmp2$html, FALSE)
           
           hdr <- tmp2$html
           hcnt <- tmp2$lines

@@ -386,14 +386,28 @@ write_content_html <- function(rs, hdr, body, pt) {
                      useBytes = TRUE)
         
         if (!is.null(rs$titles) & !is.null(pt$titles$html))
-          writeLines(pt$titles$html, con = f, useBytes = TRUE)
+          writeLines(update_page(pt$titles$html, rs$pages), con = f, useBytes = TRUE)
         
       }
       
       if (!is.null(pg)) {
-        
+        # Replace page numbers in title/footnote of report/content
+        pg <- page_replace_html(pg, rs, "titles", rs$pages)
+        pg <- page_replace_html(pg, rs, "footnotes", rs$pages)
+        pg <- page_replace_html(pg, cont$object, "titles", rs$pages)
+        pg <- page_replace_html(pg, cont$object, "footnotes", rs$pages)
+        # 
+        # if (!is.null(rs$titles)) {
+        #   for (rt in rs$titles) {
+        #     for (rt_string in rt$titles) {
+        #       raw_title <- encodeHTML(rt_string)
+        #       new_title <- update_page(raw_title, rs$pages)
+        #       pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
+        #     }
+        #   }
+        # }
+        # 
         writeLines(pg, con = f, useBytes = TRUE)
-        
       }
       
       # Set page_open flag based on status of page_break and current objects
@@ -612,3 +626,20 @@ page_setup_html <- function(rs) {
   return(rs)
 }
 
+#' @description Replace page number in title and footnote
+#' @details  Replace page number in title and footnote
+#' @noRd
+page_replace_html <- function(pg, target, type = "titles", page) {
+  if (!is.null(target[[type]])) {
+    for (v in target[[type]]) {
+      for (v_string in v[[type]]) {
+        if (v_string != "") {
+          raw_title <- encodeHTML(v_string)
+          new_title <- update_page(raw_title, page)
+          pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
+        }
+      }
+    }
+  }
+  return(pg)
+}

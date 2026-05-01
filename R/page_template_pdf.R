@@ -822,7 +822,8 @@ get_titles_pdf <- function(ttllst, content_width, rs,
                                                                   tmp$widths[ln],
                                                                   units = rs$units,
                                                                   align = calgn),
-                                                ypos = yline + rwln)
+                                                ypos = yline + rwln,
+                                                titles = TRUE)
             rwln <- rwln + lh
           }
           

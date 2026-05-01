@@ -284,7 +284,10 @@ test_that("get_page_footnotes_docx works as expected.", {
   res2 <- get_page_footnotes_docx(rpt2, tbl2, 6,
                                  0, 25, TRUE, "below", "center")
   res2
-  expect_equal(res2$lines, 12)   # Need to do something with this
+  # expect_equal(res2$lines, 12)   # Need to do something with this
+  # 20260422: After updating top blank line of header and row height, 
+  # the imputed blank lines reduce.
+  expect_equal(res2$lines, 10)
 
 
   tbl3 <- create_table(iris)  %>%
@@ -300,7 +303,10 @@ test_that("get_page_footnotes_docx works as expected.", {
                                  0, 25, TRUE, "below", "center")
 
   res3
-  expect_equal(res3$lines, 14)
+  # expect_equal(res3$lines, 14)
+  # 20260422: After updating top blank line of header and row height, 
+  # the imputed blank lines reduce.
+  expect_equal(res3$lines, 12)
 
   tbl4 <- create_table(iris)  %>%
     footnotes("Here is a footnote", valign = "top")

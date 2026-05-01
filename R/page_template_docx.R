@@ -1354,8 +1354,8 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
     }
     
 
-    
-    ret <- get_page_numbers_docx(ret)
+    # For Issue 341, comment out the page process
+    # ret <- get_page_numbers_docx(ret)
 
   }
 

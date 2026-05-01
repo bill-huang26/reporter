@@ -261,6 +261,22 @@ update_page_numbers <- function(rs, lns) {
       }
     }
     
+    if (!is.null(rs$titles)) {
+      for (t in rs$titles) {
+        if (token_check(t$titles)) {
+          lns[[pg]] <- replace_tokens(lns[[pg]], t$titles, t$align)
+        }
+      }
+    }
+    
+    if (!is.null(rs$footnotes)) {
+      for (f in rs$footnotes) {
+        if (token_check(f$footnotes)) {
+          lns[[pg]] <- replace_tokens(lns[[pg]], f$footnotes, f$align)
+        }
+      }
+    }
+    
     for (cntnt in rs$content) {
       if (!is.null(cntnt$object$title_hdr)) { 
         if (token_check(cntnt$object$title_hdr$right)) {
@@ -271,6 +287,22 @@ update_page_numbers <- function(rs, lns) {
           }
         }
         
+      }
+      
+      if (!is.null(cntnt$object$titles)) {
+        for (t in cntnt$object$titles) {
+          if (token_check(t$titles)) {
+            lns[[pg]] <- replace_tokens(lns[[pg]], t$titles, t$align)
+          }
+        }
+      }
+      
+      if (!is.null(cntnt$object$footnotes)) {
+        for (f in cntnt$object$footnotes) {
+          if (token_check(f$footnotes)) {
+            lns[[pg]] <- replace_tokens(lns[[pg]], f$footnotes, f$align)
+          }
+        }
       }
     }
     
@@ -742,6 +774,24 @@ write_page_numbers <- function(rs) {
     }
   }
   
+  if (!is.null(rs$titles)) {
+    for (t in rs$titles) {
+      if (token_check(t$titles)) {
+        pg <- 1
+        lns <- replace_tokens(lns, t$titles, t$align)
+      }
+    }
+  }
+  
+  if (!is.null(rs$footnotes)) {
+    for (f in rs$footnotes) {
+      if (token_check(f$footnotes)) {
+        pg <- 1
+        lns <- replace_tokens(lns, f$footnotes, f$align)
+      }
+    }
+  }
+  
   for (cntnt in rs$content) {
    if (!is.null(cntnt$object$title_hdr)) { 
      for (th in cntnt$object$title_hdr) {
@@ -755,6 +805,24 @@ write_page_numbers <- function(rs) {
        }
      }
    }
+    
+    if (!is.null(cntnt$object$titles)) {
+      for (t in cntnt$object$titles) {
+        if (token_check(t$titles)) {
+          pg <- 1
+          lns <- replace_tokens(lns, t$titles, t$align)
+        }
+      }
+    }
+    
+    if (!is.null(cntnt$object$footnotes)) {
+      for (f in cntnt$object$footnotes) {
+        if (token_check(f$footnotes)) {
+          pg <- 1
+          lns <- replace_tokens(lns, f$footnotes, f$align)
+        }
+      }
+    }
   }
   
   # Replace file with updated lines

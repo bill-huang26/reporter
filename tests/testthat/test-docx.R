@@ -201,8 +201,9 @@ test_that("docx5: Multi page table works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(res$modified_path), TRUE)
-  expect_equal(res$pages, 8)  # Temporary.  Should be 7
-
+  # expect_equal(res$pages, 8)  # Temporary.  Should be 7
+  # After updating row height, the page should be updated
+  expect_equal(res$pages, 9)
 
 })
 
@@ -293,9 +294,7 @@ test_that("docx8: Page by works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(res$modified_path), TRUE)
-  expect_equal(res$pages, 6)
-
-
+  expect_equal(res$pages, 9) # Change from 6 to 9 because of row height adjustment
 })
 
 
@@ -328,7 +327,8 @@ test_that("docx9: Page by on report works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(fp), TRUE)
-  expect_equal(res$pages, 9)
+  # Adjust the row height, top blank row consideration, and remove 1 buffer.
+  expect_equal(res$pages, 12)
 
   } else
     expect_equal(TRUE, TRUE)
@@ -1833,7 +1833,9 @@ test_that("docx51: Page by with format works as expected.", {
   res$column_widths
 
   expect_equal(file.exists(fp), TRUE)
-  expect_equal(res$pages, 6)
+  # expect_equal(res$pages, 6)
+  # After modify line height, pages increase.
+  expect_equal(res$pages, 9)
   expect_equal(length(res$column_widths[[1]]), 5)
 
 
@@ -1945,7 +1947,7 @@ test_that("docx55: Top margin 1.5 works as expected.", {
   res$column_widths
 
   expect_equal(file.exists(fp), TRUE)
-  expect_equal(res$pages, 6)
+  expect_equal(res$pages, 9) # Change from 6 to 9 because of row height adjustment
   expect_equal(length(res$column_widths[[1]]), 5)
 
 
@@ -3246,6 +3248,37 @@ test_that("docx-86: break_label works as expected.", {
     
     res <- write_report(rpt)
     
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("docx-87: Page numbers work in every title, footnote, header, and footer.", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "docx/test87.docx")
+    
+    dat <- iris
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      titles("Table Title: Page [pg] of [tpg]", "", "Third table title") %>%
+      footnotes("Table footnote: Page [pg] of [tpg]", "", "Third table footnote")
+    
+    rpt <- create_report(fp, output_type = "docx", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      add_content(tbl) %>%
+      titles("Report Title: Page [pg] of [tpg]", "Second report title") %>%
+      # footnotes("Report footnote: Page [pg] of [tpg]", "Second report footnote",
+      #           borders = "none") %>%
+      footnotes("Report footnote: Page [pg] of [tpg]",
+                borders = "none") %>%
+      page_header("Header: Page [pg] of [tpg]") %>%
+      page_footer("Footer: Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
     expect_equal(file.exists(fp), TRUE)
   } else {
     expect_equal(TRUE, TRUE)

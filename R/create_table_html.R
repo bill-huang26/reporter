@@ -374,8 +374,8 @@ create_table_html <- function(rs, ts, pi, content_blank_row, wrap_flag,
                                   rws$border_flag)
   
   # Replace the page number for table footnote
-  temp_footnote <- gsub("[pg]", unique(pi$data$..page), ftnts$html, fixed = TRUE) 
-  ftnts$html <- temp_footnote
+  # temp_footnote <- gsub("[pg]", unique(pi$data$..page), ftnts$html, fixed = TRUE) 
+  # ftnts$html <- temp_footnote
 
   
   u <- rs$units
@@ -818,7 +818,7 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
     wlvl <- get_spanning_gap_html(wlvl)
     
     # Do not create gaps for all and inside border
-    if (ts$borders %in% c("all", "inside")) {
+    if (any(ts$borders %in% c("all", "inside"))) {
       for (i in 1:length(wlvl)) {
         wlvl[[i]]$gap_width <- NA
       }

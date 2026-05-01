@@ -803,7 +803,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
     wlvl <- get_spanning_gap_docx(wlvl) 
     
     # Do not create gaps for all and inside border
-    if (ts$borders %in% c("all", "inside")) {
+    if (any(ts$borders %in% c("all", "inside"))) {
       for (i in 1:length(wlvl)) {
         wlvl[[i]]$indent_left <- NA
         wlvl[[i]]$indent_right <- NA

@@ -4535,6 +4535,71 @@ test_that("rtf2-123: break_label works as expected.", {
   }
 })
 
+test_that("rtf2-124: Page numbers work every in title, footnote, header, and footer.", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "rtf2/test124.rtf")
+    
+    dat <- iris
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      titles("Table Title: Page [pg] of [tpg]") %>%
+      footnotes("Table footnote: Page [pg] of [tpg]")
+    
+    rpt <- create_report(fp, output_type = "rtf", font = fnt,
+                         font_size = fsz, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      add_content(tbl) %>%
+      titles("Report Title: Page [pg] of [tpg]") %>%
+      footnotes("Report footnote: Page [pg] of [tpg]", borders = "none") %>%
+      page_header("Header: Page [pg] of [tpg]") %>%
+      page_footer("Footer: Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+
+test_that("rtf2-125: Missing stub row label won't be displayed.", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "rtf2/test125.rtf")
+    
+    df <- read.table(header = TRUE, text = '
+      var label A B
+      "A" "Some text 1" "11" "8"
+      "A" "Some text 2" "10" "7"
+      "RACE" " White" "6 (54.5)" "4 (50.0)"
+      "RACE" " Black" "4 (36.4)" "3 (37.5)"
+      "RACE" " Others" "1 (9.1)" "1 (12.5)"
+      "B" "Some text 3" "6 (54.5)" "4 (50.0)"
+      "B" "Some text 4" "4 (36.4)" "3 (37.5)"
+      ')
+    
+    df$var <- ifelse(df$var == "A", NA, df$var)
+    df$var <- ifelse(df$var == "B", "", df$var)
+    
+    tbl <- create_table(df, first_row_blank = TRUE, borders = c("top", "bottom")) %>%
+      titles("Table 1.0 Demographics", font_size = 10) %>%
+      stub(vars = c("var", "label"), "", width = 2.5) %>%
+      define(var, blank_after = TRUE, label_row = TRUE) %>%
+      define(A, align = "center", width=1.2, label = "Placebo", n=11) %>%
+      define(B, align = "center", width=1.2, label = "Drug", n=8)
+    
+    rpt <- create_report(fp, output_type = "RTF", font = "Arial") %>%
+      add_content(tbl)
+    
+    # "" will still be row label. Only remove NA
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # User Tests --------------------------------------------------------------
 
 test_that("user1: demo table works.", {
