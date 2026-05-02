@@ -50,6 +50,84 @@ test_that("get_page_breaks works as expected", {
   
 })
 
+test_that("get_page_breaks with count_row_var works as expected", {
+  
+  off <- c(upper = 0, lower = 0, blank_upper = 0, blank_lower = 0)
+  dat <- iris[1:10,]
+  dat$..page <- NA
+  dat$..row <- c(rep(1,9), 3)
+  mdm <- get_page_breaks(dat, 10, 0, off, count_row_var = TRUE)
+  
+  expect_equal(mdm$..page, c(rep(1,9), 2))
+})
+
+test_that("get_page_breaks with group_cohesion works as expected", {
+  
+  off <- c(upper = 0, lower = 0, blank_upper = 0, blank_lower = 0)
+  dat <- iris[1:20,]
+  
+  dat$..group_cohesion <- c(
+    rep("A", 4),
+    rep("B", 2),
+    rep("C", 3),
+    rep("D", 4),
+    rep("E", 7)
+  )
+  
+  dat$..row <- c(
+    rep(2, 4),
+    rep(2, 2),
+    c(3, 3, 1),
+    c(rep(2, 4)),
+    c(1, rep(2, 6))
+  )
+  
+  dat$..page <- NA
+  
+  mdm <- get_page_breaks(dat, 10, 0, off, count_row_var = TRUE,
+                         group_cohesion = "..group_cohesion")
+  
+  # test results variable for review
+  mdm$test_group_cnt <- get_group_count(mdm$..group_cohesion, mdm$..row)
+  mdm$cum_lines <- unlist(tapply(mdm$..row, mdm$..page, cumsum))
+
+  expect_equal(mdm$..page, c(1,1,1,1,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,5))
+})
+
+test_that("get_page_breaks with group_cohesion and min_page_prop works as expected", {
+  
+  off <- c(upper = 0, lower = 0, blank_upper = 0, blank_lower = 0)
+  dat <- iris[1:20,]
+  
+  dat$..group_cohesion <- c(
+    rep("A", 4),
+    rep("B", 2),
+    rep("C", 3),
+    rep("D", 4),
+    rep("E", 7)
+  )
+  
+  dat$..row <- c(
+    rep(2, 4),
+    rep(2, 2),
+    c(3, 3, 1),
+    c(rep(2, 4)),
+    c(1, rep(2, 6))
+  )
+  
+  dat$..page <- NA
+  
+  mdm <- get_page_breaks(dat, 10, 0, off, count_row_var = TRUE,
+                         group_cohesion = "..group_cohesion",
+                         min_page_prop = 0.4)
+  
+  # test results variable for review
+  mdm$test_group_cnt <- get_group_count(mdm$..group_cohesion, mdm$..row)
+  mdm$cum_lines <- unlist(tapply(mdm$..row, mdm$..page, cumsum))
+  
+  expect_equal(mdm$..page, c(1,1,1,1,2,2,3,3,3,4,4,4,4,4,5,5,5,5,5,6))
+})
+
 
 test_that("get_splits_text works as expected", {
   

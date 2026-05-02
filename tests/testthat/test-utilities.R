@@ -182,6 +182,33 @@ test_that("utils9: create_stub works as expected.", {
   expect_equal(d$..stub_var, c("a1", "b1", "c1", "a1", "b1", "c1"))
 })
 
+test_that("utils9-2: create_stub works as expected.", {
+  
+  x <- data.frame(var = c(rep(NA, 4), rep("RACE", 5), rep("", 4)), 
+                  label = c("", "txt1", "txt2", "", "", "txt3", "txt4", "txt5", "",
+                            "", "txt6", "txt7", ""), 
+                  A = c("", "txt1", "txt2", "", "", "txt3", "txt4", "txt5", "",
+                         "", "txt6", "txt7", ""), 
+                  B = c("", "txt1", "txt2", "", "", "txt3", "txt4", "txt5", "",
+                         "", "txt6", "txt7", ""), 
+                  ..blank = c("L", "", "", "B", "L", "", "", "", "B", "L", "",
+                              "", "B"),
+                  stringsAsFactors = FALSE)
+  
+  tbl <- create_table(x) %>% stub(c("var", "label"))
+  
+  d <- create_stub(x, tbl)
+  row.names(d) <- 1:nrow(d)
+  
+  exp_d <- data.frame(
+    stub = c("txt1", "txt2", "", "RACE", "txt3", "txt4", "txt5", "", "", "txt6", "txt7", ""),
+    A = c("txt1", "txt2", "", "", "txt3", "txt4", "txt5", "", "", "txt6", "txt7", ""),
+    B = c("txt1", "txt2", "", "", "txt3", "txt4", "txt5", "", "", "txt6", "txt7", ""),
+    ..blank = c("", "", "B", "L", "", "", "", "B", "L", "", "", "B")
+  )
+  
+  expect_equal(d[, setdiff(names(d), "..stub_var")], exp_d)
+})
 
 test_that("utils10: quote_names function works as expected.", {
 
@@ -803,4 +830,16 @@ test_that("utils34: add_group_border_ind works as expected.", {
                           "..group_border" = c("", "", "bottom", "","","","",
                                                "bottom","bottom","","","bottom"))
   expect_equal(df, df_expect) 
+})
+
+test_that("utils35: get_group_count works as expected.", {
+  
+  group <- c("A", "A", "A", "B", "B", "C", "C", "C")
+  count <- c(1, 1, 1, 2, 1, 3, 0, 2)
+  
+  group_counts <- get_group_count(group, count)
+  expect_equal(group_counts, c(3, 3, 3, 3, 3, 5, 5, 5))
+  
+  group_counts2 <- get_group_count(group)
+  expect_equal(group_counts2, c(3, 3, 3, 2, 2, 3, 3, 3))
 })

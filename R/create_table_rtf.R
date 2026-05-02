@@ -82,6 +82,54 @@ create_table_pages_rtf <- function(rs, cntnt, lpg_rows) {
         dat[[nnm]] <- dat[[def$var_c]]
       }
     }
+    
+    # Deal with Group Cohesion
+    # Prepare ..group_cohesion and ..min_page_prop
+    group_cohesion <- c()
+    min_page_prop <- c()
+    
+    i <- 1
+    for (def in ts$col_defs) {
+      if (def$group_cohesion == TRUE) {
+        group_cohesion <- c(group_cohesion, def$var_c)
+        min_page_prop <- c(min_page_prop, def$min_page_prop)
+        
+        dat$..temp <- dat[[def$var_c]]
+        names(dat)[names(dat) == "..temp"] <-  paste0("..group_cohesion",i)
+        
+        dat$..temp <- def$min_page_prop
+        names(dat)[names(dat) == "..temp"] <-  paste0("..min_page_prop",i)
+        i <- i + 1
+      }
+    }
+    
+    if (length(group_cohesion) == 0) {
+      group_cohesion <- NULL
+    }
+    
+    if (length(min_page_prop) == 0) {
+      min_page_prop <- NULL
+    }
+    
+    # Prepare empty ..break_label and ..break_label_lines for later use
+    i <- 1
+    for (def in ts$col_defs) {
+      if (!is.null(def$break_label)) {
+
+        dat$..temp <- ifelse(!is.na(dat[[def$var_c]]) & dat[[def$var_c]] != "",
+                             paste0(dat[[def$var_c]], " ", def$break_label),
+                             dat[[def$var_c]])
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label",i)
+        
+        dat$..temp <- rep(NA, nrow(dat))
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label_lines",i)
+        i <- i + 1
+      }
+    }
+    # Prepare repeated label occurrence for later use
+    if (any(grepl("..break_label", names(dat)))) {
+      dat$..break_occur <- rep(NA, nrow(dat))
+    }
   }
   
   # Get control column names 
@@ -220,15 +268,17 @@ create_table_pages_rtf <- function(rs, cntnt, lpg_rows) {
     for(pg in wraps) {
       counter <- counter + 1
       
-      if (counter < tot_count)
+      if (counter < tot_count){
         wrap_flag <- TRUE
-      else 
+      } else {
         wrap_flag <- FALSE
+      }
       
-      if (!is.na(pgby_var))
+      if (!is.na(pgby_var)){
         pgby <- trimws(s[1, "..page_by"])
-      else 
+      } else {
         pgby <- NULL
+      }
       
       #print(s)
       # Ensure content blank rows are added only to the first and last pages
@@ -238,11 +288,12 @@ create_table_pages_rtf <- function(rs, cntnt, lpg_rows) {
       #print(blnk_ind)
       
       pgind <- ""
-      if (counter == 1)
+      if (counter == 1) {
         pgind <- "first"
-      if (counter == tot_count)
+      }
+      if (counter == tot_count) {
         pgind[length(pgind) + 1] <- "last"
-
+      }
       
       # Get page info for this page
       pi <- page_info(data= s[, pg], keys = pg, label=labels[pg],
@@ -777,7 +828,8 @@ get_spanning_header_rtf <- function(rs, ts, pi) {
   talgn <- pi$table_align
   
   # Detect continuous underline and insert gap, adjust widths
-  if (length(wlvl) > 0) {
+  # Do not create gaps for all and inside border
+  if (length(wlvl) > 0 & all(!ts$borders %in% c("all", "inside"))) {
     wlvl <- get_spanning_gap_rtf(wlvl, conv)
   }
 
@@ -1144,6 +1196,18 @@ get_table_body_rtf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   pdf(NULL)
   par(family = get_font_family(rs$font), ps = rs$font_size)
   
+  # For break labels, prepare the break label columns for later use
+  defs <- ts$col_defs
+  break_label_col <- c()
+  if (any(grepl("..break_label", names(tbl)))) {
+    
+    for (d in 1:length(defs)) {
+      if (!is.null(defs[[d]]$break_label)){
+        break_label_col <- c(break_label_col, defs[[d]]$var_c)
+      }
+    }
+  }
+  
   # Table Body
   for(i in seq_len(nrow(t))) {
     
@@ -1203,8 +1267,6 @@ get_table_body_rtf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     # Prepare indenting convert
     conv_twips <- rs$twip_conversion
   
-    defs <- ts$col_defs
-
     if (flgs[i] %in% c("B", "A", "L")) {
       
       # Deal with label rows
@@ -1240,17 +1302,33 @@ get_table_body_rtf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
       
       # Get indenting information
       rtf_ind <- ""
-      if (!is.null(defs[[nms[1]]]$indent)) {
-        
-        ind <- floor(defs[[nms[1]]]$indent*conv_twips)
-        rtf_ind <- paste0("\\li", ind, " ")
-        
-      } else if (nms[1] == "stub" & !is.null(ts$stub)) {
-        
-        stub_var <- tbl$..stub_var[i]
-        if (!is.null(defs[[stub_var]]$indent)) {
-          ind <- floor(defs[[stub_var]]$indent*conv_twips)
+      
+      # For break labels, use the indenting info from original column
+      repeat_break_label <- FALSE
+      if (any(grepl("..break_label", names(tbl)))) {
+        if (!is.na(tbl$..break_occur[i])) {
+          cur_break_label_col <- break_label_col[as.numeric(tbl$..break_occur[i])]
+          if (!is.null(defs[[cur_break_label_col]]$indent)) {
+            ind <- floor(defs[[cur_break_label_col]]$indent*conv_twips)
+            rtf_ind <- paste0("\\li", ind, " ")
+          }
+          repeat_break_label <- TRUE
+        }
+      }
+      
+      if (!repeat_break_label) {
+        if (!is.null(defs[[nms[1]]]$indent)) {
+          
+          ind <- floor(defs[[nms[1]]]$indent*conv_twips)
           rtf_ind <- paste0("\\li", ind, " ")
+          
+        } else if (nms[1] == "stub" & !is.null(ts$stub)) {
+          
+          stub_var <- tbl$..stub_var[i]
+          if (!is.null(defs[[stub_var]]$indent)) {
+            ind <- floor(defs[[stub_var]]$indent*conv_twips)
+            rtf_ind <- paste0("\\li", ind, " ")
+          }
         }
       }
       

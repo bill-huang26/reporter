@@ -83,6 +83,54 @@ create_table_pages_docx <- function(rs, cntnt, lpg_rows) {
         dat[[nnm]] <- dat[[def$var_c]]
       }
     }
+    
+    # Deal with Group Cohesion
+    # Prepare ..group_cohesion and ..min_page_prop
+    group_cohesion <- c()
+    min_page_prop <- c()
+    
+    i <- 1
+    for (def in ts$col_defs) {
+      if (def$group_cohesion == TRUE) {
+        group_cohesion <- c(group_cohesion, def$var_c)
+        min_page_prop <- c(min_page_prop, def$min_page_prop)
+        
+        dat$..temp <- dat[[def$var_c]]
+        names(dat)[names(dat) == "..temp"] <-  paste0("..group_cohesion",i)
+        
+        dat$..temp <- def$min_page_prop
+        names(dat)[names(dat) == "..temp"] <-  paste0("..min_page_prop",i)
+        i <- i + 1
+      }
+    }
+    
+    if (length(group_cohesion) == 0) {
+      group_cohesion <- NULL
+    }
+    
+    if (length(min_page_prop) == 0) {
+      min_page_prop <- NULL
+    }
+    
+    # Prepare empty ..break_label and ..break_label_lines for later use
+    i <- 1
+    for (def in ts$col_defs) {
+      if (!is.null(def$break_label)) {
+        
+        dat$..temp <- ifelse(!is.na(dat[[def$var_c]]) & dat[[def$var_c]] != "",
+                             paste0(dat[[def$var_c]], " ", def$break_label),
+                             dat[[def$var_c]])
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label",i)
+        
+        dat$..temp <- rep(NA, nrow(dat))
+        names(dat)[names(dat) == "..temp"] <-  paste0("..break_label_lines",i)
+        i <- i + 1
+      }
+    }
+    # Prepare repeated label occurrence for later use
+    if (any(grepl("..break_label", names(dat)))) {
+      dat$..break_occur <- rep(NA, nrow(dat))
+    }
   }
   
   # Get control column names 
@@ -494,7 +542,7 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
   
   if (ts$headerless == FALSE) {
     
-    # Spanning headers now inside get_table_header_html
+    # Spanning headers now inside get_table_header_docx
     hdrs <- get_table_header_docx(rs, ts, pi)  
   }
   
@@ -665,10 +713,10 @@ get_table_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
           b <- c("bottom", "top")
       
       # Split label strings if they exceed column width
-      tmp <- split_string_html(lbls[k], widths[k], rs$units)
+      tmp <- split_string_docx(lbls[k], widths[k], rs$units, font = rs$font)
 
       #if (b == "") {
-        ret[1] <- paste0(ret[1], cell_abs(tmp$html, ha[k], sz[k], 
+        ret[1] <- paste0(ret[1], cell_abs(tmp$docx, ha[k], sz[k], 
                                           borders = b, 
                                           valign = "bottom", 
                                           bold = ts$header_bold))
@@ -719,7 +767,7 @@ get_table_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
 }
 
 
-#' @description Return a vector of html strings for the table spanning headers
+#' @description Return a vector of docx strings for the table spanning headers
 #' @details Basic idea of this function is to figure out which columns 
 #' the header spans, add widths, then call get_table_header.  Everything
 #' from there is the same.  
@@ -753,6 +801,14 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
   # Add indenting information for gap
   if (length(wlvl) > 0) {
     wlvl <- get_spanning_gap_docx(wlvl) 
+    
+    # Do not create gaps for all and inside border
+    if (any(ts$borders %in% c("all", "inside"))) {
+      for (i in 1:length(wlvl)) {
+        wlvl[[i]]$indent_left <- NA
+        wlvl[[i]]$indent_right <- NA
+      }
+    }
   }
   
   # Get borders
@@ -799,7 +855,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
     for(k in seq_along(lbls)) {
       
       # Split label strings if they exceed column width
-      tmp <- split_string_html(lbls[k], widths[k], rs$units)
+      tmp <- split_string_docx(lbls[k], widths[k], rs$units, font = rs$font)
       
       
       # b <- get_table_borders_docx(length(lvls) - l + 1, k, length(lvls) + 1, 
@@ -807,7 +863,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
       #                            exclude = exclude_top)
       
       # Add colspans
-      vl <- tmp$html
+      vl <- tmp$docx
       tb <- ""
       bb <- ""
       
@@ -1066,6 +1122,18 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   pdf(NULL)
   par(family = get_font_family(rs$font), ps = rs$font_size)
   
+  # For break labels, prepare the break label columns for later use
+  defs <- ts$col_defs
+  break_label_col <- c()
+  if (any(grepl("..break_label", names(tbl)))) {
+    
+    for (d in 1:length(defs)) {
+      if (!is.null(defs[[d]]$break_label)){
+        break_label_col <- c(break_label_col, defs[[d]]$var_c)
+      }
+    }
+  }
+  
   # Table Body
   for(i in seq_len(nrow(t))) {
     
@@ -1125,8 +1193,8 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
         #   vl <- gsub("\n", " ", vl, fixed = TRUE)
         #   
         #   # Redo splits
-        #   vtmp <- split_string_html(vl, sum(wdths), rs$units)
-        #   vl <- vtmp$html
+        #   vtmp <- split_string_docx(vl, sum(wdths), rs$units)
+        #   vl <- vtmp$docx
         #   
         # }
         
@@ -1140,7 +1208,7 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
         
         
         if (!(tb[i] %in% c("B", "A", "L") & j > 1)) {
-          # Construct html
+          # Construct docx
           
           # Put indent information into paragraph properties
           if (rs$units == "inches") {
@@ -1150,21 +1218,34 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
           }
           ind_twips <- NA
           
-          defs <- ts$col_defs
-          if (!is.null(defs[[nms[j]]]$indent)) {
-            
-            ind_twips <- defs[[nms[j]]]$indent * twips_conv
-            
-          } else if (nms[j] == "stub" & !is.null(ts$stub)) {
-            
-            stub_var <- tbl$..stub_var[i]
-            if (!is.null(defs[[stub_var]]$indent)) {
-              
-              ind_twips <- defs[[stub_var]]$indent * twips_conv
-              
+          # For break labels, use the indenting info from original column
+          repeat_break_label <- FALSE
+          if (any(grepl("..break_label", names(tbl)))) {
+            if (!is.na(tbl$..break_occur[i]) & tb[i] == "L") {
+              cur_break_label_col <- break_label_col[as.numeric(tbl$..break_occur[i])]
+              if (!is.null(defs[[cur_break_label_col]]$indent)) {
+                ind_twips <- defs[[cur_break_label_col]]$indent*twips_conv
+              }
+              repeat_break_label <- TRUE
             }
           }
           
+          if (!repeat_break_label) {
+            if (!is.null(defs[[nms[j]]]$indent)) {
+              
+              ind_twips <- defs[[nms[j]]]$indent * twips_conv
+              
+            } else if (nms[j] == "stub" & !is.null(ts$stub)) {
+              
+              stub_var <- tbl$..stub_var[i]
+              if (!is.null(defs[[stub_var]]$indent)) {
+                
+                ind_twips <- defs[[stub_var]]$indent * twips_conv
+                
+              }
+            }
+          }
+ 
           ret[i] <- paste0(ret[i], "<w:tc>", b,
                            para(vl, ca[j], bold = bflg, indent_left = ind_twips), "</w:tc>")
         }

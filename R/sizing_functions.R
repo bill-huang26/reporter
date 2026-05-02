@@ -375,6 +375,13 @@ create_stub <- function(dat, ts) {
     # Have to restore names, otherwise data.frame will mess them up
     names(dat) <- c("stub", names(d))
     
+    # Issue 373: Remove row label when it's NA. If it's "", will consider it as
+    # a real value
+    if ("..blank" %in% names(dat)) {
+      dat <- dat[!(is.na(dat$stub) & dat$..blank == "L"),]
+      # dat <- dat[!(dat$stub == "" & dat$..blank == "L"),]
+    }
+    
     # print("Names after")
     # print(names(dat))
   }
@@ -1169,8 +1176,26 @@ get_splits_text <- function(x, widths, page_size, lpg_rows,
   # Calculate where page breaks should occur
   # Based on available height, content size, and offsets
   # Function adds a ..page variable with page indicator
-  pgs <- get_page_breaks(x, page_size, lpg_rows, content_offsets, count_row_var)
-
+  if (any(grepl("..group_cohesion", names(x)))) {
+    group_cohesion <- names(x)[grepl("..group_cohesion", names(x))]
+    group_cohesion <- group_cohesion[order(group_cohesion)]
+  } else {
+    group_cohesion <- NULL
+  }
+  if (any(grepl("..min_page_prop",names(x)))) {
+    min_page_prop_col <- names(x)[grepl("..min_page_prop", names(x))]
+    min_page_prop <- c()
+    for (col in min_page_prop_col) {
+      min_page_prop <- c(min_page_prop, unique(x[[col]][!is.na(x[[col]])]))
+    }
+    
+  } else {
+    min_page_prop <- NULL
+  }
+  
+  pgs <- get_page_breaks(x, page_size, lpg_rows, content_offsets, count_row_var,
+                         group_cohesion = group_cohesion, 
+                         min_page_prop = min_page_prop)
   
   # Eliminate pages that have only blank lines
   sb <- subset(pgs, trimws(pgs$..blank) == "")
@@ -1181,6 +1206,47 @@ get_splits_text <- function(x, widths, page_size, lpg_rows,
   first_page_pos <- get_first_pos(sbst$..page)
   rm_blank <- first_page_pos & sbst$..blank == "B"
   sbst <- sbst[!rm_blank,]
+  
+  # Add break labels if needed
+  if (any(grepl("..break_label", names(sbst)))) {
+    sbst$..temp_seq <- 1:nrow(sbst)
+    break_pos <- which(!is.na(sbst$..break_occur))
+    
+    for (p in break_pos) {
+      rep_col <- as.numeric(strsplit(sbst$..break_occur[p], ",")[[1]])
+      rev_order <- rep_col[order(rep_col, decreasing = T)]
+      for (r in rep_col) {
+        temp_df <- sbst[p,]
+        
+        # If first row is blank before, add after it
+        if (temp_df$..blank[1] == "A") {
+          temp_df$..temp_seq[1] <- temp_df$..temp_seq[1] + 1
+        }
+        
+        # Revise to label of row
+        temp_df$..blank[1] <-  "L"
+        
+        # Create label of row
+        temp_df[1, !grepl("^\\.\\.", names(temp_df))] <- ""
+        temp_df[1,1] <- temp_df[[paste0("..break_label", r)]]
+        temp_df$..temp_seq[1] <- temp_df$..temp_seq[1] - rev_order[r]*0.1
+        
+        # Set ..break_occur for current column for later use
+        temp_df$..break_occur <- r
+        
+        # Reset the row name for PDF process
+        row.names(temp_df) <- paste0("break_label", 1:nrow(temp_df))
+        
+        # Stack to original data
+        sbst <- rbind(sbst, temp_df)
+      }
+    }
+    # re-order to put repeated label in right position
+    sbst <- sbst[order(sbst$..temp_seq),]
+    
+    # drop temporary variable
+    sbst <- sbst[, setdiff(names(sbst), c("..temp_seq"))]
+  }
   
   # Split the data frame at the page indicators
   ret <- split(sbst, sbst$..page)
@@ -1209,7 +1275,9 @@ get_splits_text <- function(x, widths, page_size, lpg_rows,
 #' @return Data frame with ..page column populated with page numbers.
 #' @noRd
 get_page_breaks <- function(x, page_size, lpg_rows, content_offsets, 
-                            count_row_var = FALSE ){
+                            count_row_var = FALSE,
+                            group_cohesion = NULL,
+                            min_page_prop = NULL){
   
   pg <- 1
   counter <- 0
@@ -1240,6 +1308,52 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
   # print(paste("Last Page Rows:", lpg_rows))
   # print(paste("Content offset:", offset))
   
+  if (!is.null(group_cohesion)) {
+    # Set min page percent as 0.8 if not assigned
+    if (is.null(min_page_prop)) {
+      min_page_prop <- rep(0.8, length(group_cohesion))
+    }
+
+    group_change_df <- as.data.frame(matrix(NA, dim(x)[1], length(group_cohesion)))
+    group_counts_df <- as.data.frame(matrix(NA, dim(x)[1], length(group_cohesion)))
+    
+    for (i in 1:length(group_cohesion)) {
+      col <- group_cohesion[i]
+      
+      if (count_row_var) {
+        group_counts <- get_group_count(x[[col]], x$..row)
+      } else {
+        group_counts <- get_group_count(x[[col]])
+      }
+      group_counts_df[[i]] <- group_counts
+      
+      group_change <- c(FALSE, x[[col]][-1] != x[[col]][-length(x[[col]])])
+      
+      group_change_df[[i]] <- group_change
+    }
+  }
+  
+  # Transfer break labels into sequence to detect the change
+  break_label_df <- NULL
+  if (any(grepl("..break_label", names(x)))) {
+    break_label_df <- x[,names(x)[grepl("..break_label", names(x))]]
+    for (nm in names(break_label_df)) {
+      if (grepl("..break_label\\d+", nm)){
+        break_label_df[[nm]] <- get_group_seq(break_label_df[[nm]])
+        break_label_num <- sub(".*?([0-9]+).*", "\\1", nm)
+        break_label_df[[paste0("..break_group_first", break_label_num)]] <- get_first_pos(break_label_df[[nm]])
+      }
+    }
+    break_label_col <- names(break_label_df)[grepl("..break_label\\d+", names(break_label_df))]
+    break_label_col <- break_label_col[order(break_label_col)]
+    break_label_lines_col <- names(break_label_df)[grepl("..break_label_lines\\d+", names(break_label_df))]
+    break_label_lines_col <- break_label_lines_col[order(break_label_lines_col)]
+    
+    break_label_retain <- break_label_df[1, break_label_col]
+    
+    pre_pg <- pg
+  }
+  
   for (i in seq_len(nrow(x))){
     
     if (using_pgby_up & !using_pgby_low) {
@@ -1251,11 +1365,15 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
     if (count_row_var) {
       if (is.na(x$..row[i])) {
         counter <- counter + 1
-      } else
+        cur_count <- 1
+      } else {
         counter <- counter + x$..row[i]
-      
-    } else
+        cur_count <- x$..row[i]
+      }
+    } else {
       counter <- counter + 1
+      cur_count <- 1
+    }
     
     if (i == nrow(x)) {
       # Exception where last line is equal to number of available lines
@@ -1287,26 +1405,52 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
     lastPage <- currentPage
     
     # Force a break if the next row has wraps that exceed the page size
-    if (count_row_var & i < nrow(x)) {
-      nextRowCount <- x$..row[i + 1]
-      if (!is.na(nextRowCount)) {
-        if (nextRowCount > 1) {
-          if (page_size  - offset - ttfl - nextRowCount - counter < -1) {
+    # if (count_row_var & i < nrow(x)) {
+    #   nextRowCount <- x$..row[i + 1]
+    #   if (!is.na(nextRowCount)) {
+    #     if (nextRowCount > 1) {
+    #       if (page_size  - offset - ttfl - nextRowCount - counter < -1) {
+    #         userForce <- TRUE
+    #         # print(pg)
+    #         # print(page_size  - offset - ttfl - nextRowCount - counter)
+    #       }
+    #     }
+    #   }
+    # }
+    
+    if (!is.null(group_cohesion)) {
+      j <- 1
+      while (j <= length(group_cohesion) & userForce == FALSE) {
+        group_change <- group_change_df[[j]]
+        group_counts <- group_counts_df[[j]]
+        min_page_prop_j <- min_page_prop[j]
+        
+        # Rules of moving a group into next page
+        # - Remaining space is not enough for a whole group
+        # - After moving, the existed lines meet minimum requirement
+        # - A whole group is not bigger than the capacity for a page
+        if (group_change[i]) {
+          pre_counter <- counter - cur_count
+          if ((group_counts[i] > (page_size  - offset - ttfl - pre_counter)) &
+              (pre_counter >= round((page_size  - offset - ttfl) * min_page_prop_j)) &
+              (group_counts[i] <= (page_size - offset - ttfl))) {
             userForce <- TRUE
-            # print(pg)
-            # print(page_size  - offset - ttfl - nextRowCount - counter)
           }
         }
+        
+        j <- j + 1
       }
     }
     
     # print("--------------------------------------")
+    # print(paste0("userForce is ", userForce))
     # print(paste0("row: ", i))
     # print(paste0("counter: ", counter))
     # print(paste0("ttfl: ", ttfl))
+    # print(paste0("page_size: ", page_size))
     # print(paste0("Capacity: ", page_size  - offset - ttfl))
     # print(paste0("Page before: ", pg))
-    
+
     # If line count is greater than page size, start a new page
     if ((counter > (page_size  - offset - ttfl)) | userForce) {
       
@@ -1327,6 +1471,50 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
         }
       } else {
         counter <- 1
+      }
+      
+      # If last record of last page is blank before, move it to new page
+      if ("..blank" %in% names(x) & i > 1) {
+        if (x$..blank[i-1] == "A") {
+          x$..page[i-1] <- pg
+          counter <- counter + 1
+        }
+      }
+      
+      # Break label process
+      if (!is.null(break_label_df) & i > 1) {
+        break_label_cur <- break_label_df[i, break_label_col]
+        break_label_pre <- break_label_df[i-1, break_label_col]
+
+        # In case the break label are all NA, need to detect first
+        if (any(!is.na(break_label_pre == break_label_cur))) {
+          # Check if same break label is spanned across pages
+          if (any(break_label_pre == break_label_cur)){
+            # If the break label is blank value, no need to repeat it
+            break_idx <- (break_label_pre == break_label_cur) & break_label_cur != ""
+            
+            if ("..blank" %in% names(x)) {
+              if (x$..blank[i-1] == "A") {
+                break_group_first_col <- names(break_label_df)[grepl("..break_group_first\\d+", names(break_label_df))]
+                break_label_first <- break_label_df[i - 1, break_group_first_col]
+                break_idx <- (break_label_pre == break_label_cur) & (!break_label_first)
+              }
+            }
+            
+            if (any(break_idx)) {
+              counter <- counter + sum(x[i, break_label_lines_col[break_idx]])
+              x$..break_occur[i] <- paste0(which(break_idx), collapse = ", ")
+            }
+          }
+        }
+      }
+      
+      # If the first row is blank line from blank_after, set as 0 because it
+      # will be removed later
+      if ("..blank" %in% names(x)){
+        if (x$..blank[i] == "B") {
+          counter <- 0
+        }
       }
 
       # Set offset to zero on first page

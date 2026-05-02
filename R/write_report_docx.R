@@ -164,10 +164,11 @@ paginate_content_docx <- function(rs, ls) {
     imgs <- list()
     
     # Set last object flag
-    if (i == length(ls))
+    if (i == length(ls)){
       last_object <- TRUE
-    else 
+    } else {
       last_object <- FALSE
+    } 
     
     # Put content and object in variables for convenience
     cntnt <- ls[[i]] 
@@ -360,6 +361,9 @@ write_content_docx <- function(rs, hdr, body, pt) {
     }
   }
   
+  # Derive total page for later use
+  tpg <- sum(sapply(body$pages, function(x){length(x$pages)}))
+  
   for (cont in body$pages) {
     
     # Copy images to document folder
@@ -417,18 +421,36 @@ write_content_docx <- function(rs, hdr, body, pt) {
 
 
         if (!is.null(rs$title_hdr) & !is.null(pt$title_hdr$docx))
-          writeLines(update_page(pt$title_hdr$docx,  rs$pages), con = f,
+          writeLines(update_page_docx(pt$title_hdr$docx,  rs$pages, tpg), con = f,
                      useBytes = TRUE)
 
         if (!is.null(rs$titles) & !is.null(pt$titles$docx))
-          writeLines(pt$titles$docx, con = f, useBytes = TRUE)
+          writeLines(update_page_docx(pt$titles$docx, rs$pages, tpg), con = f,
+                     useBytes = TRUE)
 
       }
 
       if (!is.null(pg)) {
-
+        
+        # Replace page numbers in title/footnote of report/content
+        pg <- page_replace_docx(pg, rs, "titles", rs$pages, tpg)
+        pg <- page_replace_docx(pg, rs, "footnotes", rs$pages, tpg)
+        pg <- page_replace_docx(pg, cont$object, "titles", rs$pages, tpg)
+        pg <- page_replace_docx(pg, cont$object, "footnotes", rs$pages, tpg)
+        
+        # if (!is.null(rs$titles)) {
+        #   for (rt in rs$titles) {
+        #     for (rt_string in rt$titles) {
+        #       if (rt_string != "") {
+        #         raw_title <- rt_string
+        #         new_title <- update_page_docx(raw_title,  rs$pages, tpg)
+        #         pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
+        #       }
+        #     }
+        #   }
+        # }
+        
         writeLines(pg, con = f, useBytes = TRUE)
-
       }
 
       # Set page_open flag based on status of page_break and current objects
@@ -440,7 +462,7 @@ write_content_docx <- function(rs, hdr, body, pt) {
       if (page_open == FALSE) {
 
         if (!is.null(rs$footnotes) & !is.null(pt$footnotes$docx))
-          writeLines(update_page(pt$footnotes$docx,  rs$pages),
+          writeLines(update_page_docx(pt$footnotes$docx, rs$pages, tpg),
                      con = f, useBytes = TRUE)
 
         # Content div
@@ -510,9 +532,13 @@ update_page_numbers_docx <- function(path, tpg) {
   
 }
 
-update_page <- function(lns, pg) {
+update_page_docx <- function(lns, pg, tpg = NULL) {
   
  ret <- gsub("[pg]", pg + 1, lns, fixed = TRUE) 
+ 
+ if (!is.null(tpg)) {
+   ret <- gsub("[tpg]", tpg, ret, fixed = TRUE) 
+ }
  
  return(ret)
   
@@ -584,7 +610,7 @@ page_setup_docx <- function(rs) {
     radj <- -42
   }
   
-  rh <- get_rh(rs$font, rs$font_size)
+  rh <- get_rh2(rs$font, rs$font_size)
   
   rs$border_height <- 1/72/2
   
@@ -729,11 +755,11 @@ page_setup_docx <- function(rs) {
 
   # Get the page template row count
   # Include all the rows associated with the page template
-  rs$page_template_header_count <- sum(pt$page_header$lines, pt$titles$lines,
+  rs$page_template_header_count <- sum(max(pt$page_header$lines, 1), pt$titles$lines,
                                        pt$title_hdr$lines, pt$page_by$lines)
   
   # DOCX would still have one blank row on top even no page headers
-  rs$page_template_header_count <- max(c(1, rs$page_template_header_count))
+  # rs$page_template_header_count <- max(c(1, rs$page_template_header_count))
   
   if (debug)
     print(paste("Page Template Header Count:", rs$page_template_header_count))
@@ -890,4 +916,22 @@ get_rh2 <- function(font, font_size) {
   }
   
   return(rh)
+}
+
+#' @description Replace page number in title and footnote
+#' @details  Replace page number in title and footnote
+#' @noRd
+page_replace_docx <- function(pg, target, type = "titles", page, tpg) {
+  if (!is.null(target[[type]])) {
+    for (v in target[[type]]) {
+      for (v_string in v[[type]]) {
+        if (v_string != "") {
+          raw_title <- v_string
+          new_title <- update_page_docx(raw_title, page, tpg)
+          pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
+        }
+      }
+    }
+  }
+  return(pg)
 }

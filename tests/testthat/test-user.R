@@ -1347,3 +1347,350 @@ HEMO-LOW,ARM C,3,9,Total,45 100.0%,3   6.7%,9  20.0%,10  22.2%,19  42.2%,4   8.9
   }
   
 })
+
+test_that("user18: Adverse Events table with break labels works.", {
+  
+  if (dev) {
+    library(dplyr)
+    library(tidyr)
+    
+    # Data File path
+    dir_data <- file.path(data_dir, "data")
+    
+    dp <- file.path(dir_data, "ADAE.csv")
+    
+    dat <- read.csv(dp)
+    
+    # ------------------------------------------------------- #
+    #           Step 1. Prepare subject unique data
+    # ------------------------------------------------------- #
+    # Subset ADSL for needed rows and columns
+    df_pre <- dat %>% 
+      select(TRTAN, AESEVN, AESOC, AEDECOD, USUBJID) %>%
+      distinct(TRTAN, AESEVN, AESOC, AEDECOD, USUBJID)
+    
+    df_pre$TRTAN[df_pre$TRTAN == 4] <- 3
+    df_pre$total <- "Number of subjects with adverse events"
+    
+    # Get population counts
+    df_dis <- df_pre %>%
+      distinct(TRTAN, USUBJID, .keep_all = T)
+    arm_pop <- table(df_dis$TRTAN)  
+    
+    # ------------------------------------------------------- #
+    #           Step 2. Prepare data for every level
+    # ------------------------------------------------------- #
+    
+    # SOC data
+    df_soc <- df_pre
+    df_soc$AEDECOD <- ""
+    df_soc$AESEVN <- 0
+    df_soc <- df_soc %>%
+      distinct(TRTAN, AESOC, USUBJID, .keep_all = T)
+    
+    df_soc_any <- df_soc
+    df_soc_any$AESOC <- "Any system organ class"
+    df_soc_any <- df_soc_any %>%
+      distinct(TRTAN, AESOC, USUBJID, .keep_all = T)
+    
+    df_soc <- rbind(df_soc_any, df_soc)
+    
+    # Preferred Term data
+    df_pt <- df_pre
+    df_pt$AESEVN <- 0
+    df_pt <- df_pt %>%
+      distinct(TRTAN, AESOC, AEDECOD, USUBJID, .keep_all = T)
+    
+    df_pt_any_pt <- df_pt
+    df_pt_any_pt$AEDECOD <- "Any preferred term"
+    df_pt_any_pt <- df_pt_any_pt %>%
+      distinct(TRTAN, AESOC, AEDECOD, USUBJID, .keep_all = T)
+    
+    df_pt_any_soc <- df_pt
+    df_pt_any_soc$AESOC <- "Any system organ class"
+    df_pt_any_soc$AEDECOD <- "Any preferred term"
+    df_pt_any_soc <- df_pt_any_soc %>%
+      distinct(TRTAN, AESOC, AEDECOD, USUBJID, .keep_all = T)
+    
+    df_pt <- rbind(df_pt_any_soc, df_pt_any_pt, df_pt)
+    
+    # SEV data
+    df_sev <- df_pre
+    
+    df_sev_any_pt <- df_sev
+    df_sev_any_pt$AEDECOD <- "Any preferred term"
+    df_sev_any_pt <- df_sev_any_pt %>%
+      distinct(TRTAN, AESOC, AEDECOD, AESEVN, USUBJID, .keep_all = T)
+    
+    df_sev_any_soc <- df_sev
+    df_sev_any_soc$AESOC <- "Any system organ class"
+    df_sev_any_soc$AEDECOD <- "Any preferred term"
+    df_sev_any_soc <- df_sev_any_soc %>%
+      distinct(TRTAN, AESOC, AEDECOD, AESEVN, USUBJID, .keep_all = T)
+    
+    df_sev <- rbind(df_sev_any_soc, df_sev_any_pt, df_sev)
+    
+    # Sub data
+    df_sub <- df_dis
+    df_sub$AESOC <- ""
+    df_sub$AEDECOD <- ""
+    df_sub$AESEVN <- 0
+    
+    # Stack all
+    df_all <- rbind(df_sub, df_soc, df_pt, df_sev)
+    
+    # ------------------------------------------------------- #
+    #           Step 2. Calculate Frequency
+    # ------------------------------------------------------- #
+    # Set up severity format
+    sev_fmt <- value(
+      condition(x == 0, ""),
+      condition(x == 1, "Mild"),
+      condition(x == 2, "Moderate"),
+      condition(x == 3, "Severe")
+    )
+    
+    # Get counts and percents
+    df_freq <- df_all %>% 
+      group_by(TRTAN, total, AESOC, AEDECOD, AESEVN) %>% 
+      summarize(cnt = n()) %>% 
+      pivot_wider(names_from = c(TRTAN),
+                  values_from = cnt, 
+                  values_fill = 0,
+                  names_prefix = "trt") %>% 
+      transmute(total = total,
+                AESOC = AESOC, 
+                AEDECOD = AEDECOD,
+                AESEVN = AESEVN,
+                `trt1` = fmt_cnt_pct(`trt1`, arm_pop[1]),
+                `trt2` = fmt_cnt_pct(`trt2`, arm_pop[2]),
+                `trt3` = fmt_cnt_pct(`trt3`, arm_pop[3])) %>%
+      ungroup() 
+    
+    df_freq$AESEV <- fapply(df_freq$AESEVN, sev_fmt)
+    
+    # Sorting
+    df_freq$AEDECOD_any <- 1
+    df_freq$AEDECOD_any[df_freq$AEDECOD == "Any preferred term"] <- 0
+    df_freq$AEDECOD_any[df_freq$AEDECOD == ""] <- -1
+    
+    df_freq <- df_freq[order(df_freq$AESOC, df_freq$AEDECOD_any, df_freq$AEDECOD, df_freq$AESEVN),]
+    
+    # Final process
+    df_freq <- df_freq[, c("total", "AESOC", "AEDECOD", "AESEV", "trt1", "trt2", "trt3")]
+    
+    df_freq$blank_grp <- paste(df_freq$total, 
+                                       df_freq$AESOC, 
+                                       ifelse(df_freq$AEDECOD == "", "Any preferred term", df_freq$AEDECOD), 
+                                       sep = "|")
+    
+    for (nm in names(df_freq)) {
+      df_freq[[nm]][df_freq[[nm]] == ""] <- NA 
+    }
+    
+    # ------------------------------------------------------- #
+    #           Step 3. Output
+    # ------------------------------------------------------- #
+    custom_n_format <- function(x){
+      return(paste0("\n(N = ",x,")\nn(%)"))
+    }
+    
+    # Footnote setting: Output Date and Time
+    current_date <- gsub(" ","",toupper(format(Sys.Date(),"%d %b %Y")))
+    current_time <- substr(Sys.time(),12,19)
+    output_name <- "user18.rtf"
+    program_path <- "/dummy/tables/t-teae-soc-pt-gr-saf.R"
+    last_footnote <- paste0("Output: ",output_name," (Date Generated: ",current_date,":",current_time,") Source: adae")
+    
+    # Capable width: 6 inches
+    total_width <- 6
+    trt_width <- 1.04
+    # trt_width <- 1.2
+    item_width <- total_width - (trt_width*3)
+    
+    tbl <- create_table(df_freq, 
+                        borders = "outside",
+                        n_format = custom_n_format) %>%
+      
+      # ----- Column setting -----#
+      column_defaults(from = trt1, to = trt3, align = "center", width = trt_width) %>%
+      define(blank_grp, blank_before = T, visible = FALSE) %>%
+      stub(vars = c("total", "AESOC", "AEDECOD", "AESEV"), 
+           label = "System Organ Class\n  Preferred Term\n    Grade", 
+           width = item_width) %>%
+      define(AESOC, break_label = "(Continued)") %>%
+      # define(AESOC, break_label = "(This sentence is very long so that the break label will take at least two lines and the page is still good.)") %>%
+      # define(AESOC, break_label = TRUE) %>%
+      define(AEDECOD, indent = 0.16, break_label = "(Cont.)") %>%
+      define(AESEV, indent = 0.32) %>%
+      define(trt1, label = "Treatment A", n=arm_pop[1]) %>%
+      define(trt2, label = "Treatment B", n=arm_pop[2]) %>%
+      define(trt3, label = "Treatment C", n=arm_pop[3]) %>%
+
+      # ----- Footnote setting -----#
+      footnotes("Page [pg] of [tpg]", align = "right", blank_row = "none", valign = "top") %>%
+      footnotes("Safety Analysis Set includes all subjects who are received at least one dose of study drug.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("The analysis is performed on the maximum severity grade.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("Coded using MedDRA version 22.1.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("Severity of adverse event will be graded using CTCAE version 4.0 criteria.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("{supsc('*')} Reported Verbatim Term are displayed for Uncoded AEs.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes(paste0("Program: ", program_path), italics = TRUE) %>%
+      footnotes(last_footnote, blank_row = "none", italics = TRUE ) 
+    
+    # Define custom style
+    sty <- create_style(font_name = "Arial",
+                        font_size = 9)
+    
+    # Create report and add content
+    
+    # -------------------------------------------- #
+    #                   RTF                        #
+    # -------------------------------------------- #
+    fp <- file.path(base_path, "user/user18.rtf")
+    rpt <- create_report(fp, 
+                         orientation = "portrait", 
+                         output_type = "RTF")  %>%
+      add_style(style = sty) %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11)
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # -------------------------------------------- #
+    #                   PDF                        #
+    # -------------------------------------------- #
+    fp <- file.path(base_path, "user/user18.pdf")
+    rpt <- create_report(fp, 
+                         orientation = "portrait", 
+                         output_type = "PDF")  %>%
+      add_style(style = sty) %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11) %>%
+      footnotes("All the data is from dummy database.")
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # -------------------------------------------- #
+    #                   DOCX                       #
+    # -------------------------------------------- #
+    fp <- file.path(base_path, "user/user18.docx")
+    rpt <- create_report(fp, 
+                         font = "Arial",
+                         font_size = 9,
+                         orientation = "portrait", 
+                         output_type = "DOCX")  %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11)
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # -------------------------------------------- #
+    #                   HTML                       #
+    # -------------------------------------------- #
+    fp <- file.path(base_path, "user/user18.html")
+    rpt <- create_report(fp, 
+                         orientation = "portrait", 
+                         output_type = "HTML")  %>%
+      add_style(style = sty) %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11)
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # -------------------------------------------- #
+    #                   TXT                        #
+    # -------------------------------------------- #
+    tbl <- create_table(df_freq, 
+                        borders = "outside",
+                        n_format = custom_n_format) %>%
+      
+      # ----- Column setting -----#
+      column_defaults(from = trt1, to = trt3, align = "center", width = trt_width) %>%
+      define(blank_grp, blank_before = T, visible = FALSE) %>%
+      stub(vars = c("total", "AESOC", "AEDECOD", "AESEV"), 
+           label = "System Organ Class\n  Preferred Term\n    Grade", 
+           width = item_width) %>%
+      define(AESOC, break_label = "(Continued)") %>%
+      define(AEDECOD, indent = 0.16, break_label = "(Cont.)") %>%
+      define(AESEV, indent = 0.32) %>%
+      define(trt1, label = "Treatment A", n=arm_pop[1]) %>%
+      define(trt2, label = "Treatment B", n=arm_pop[2]) %>%
+      define(trt3, label = "Treatment C", n=arm_pop[3]) %>%
+      
+      # ----- Footnote setting -----#
+      # footnotes("Safety Analysis Set includes all subjects.",
+      #           align = "left", blank_row = "above", valign = "top") %>%
+      footnotes("The analysis is performed on the maximum severity grade.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("Coded using MedDRA version 22.1.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("Severity of adverse event will be graded using CTCAE version 4.0.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes("{supsc('*')} Reported Verbatim Term are displayed for Uncoded AEs.",
+                align = "left", blank_row = "none", valign = "top") %>%
+      footnotes(paste0("Program: ", program_path)) %>%
+      footnotes(last_footnote, blank_row = "none") 
+    
+    fp <- file.path(base_path, "user/user18.txt")
+    rpt <- create_report(fp, 
+                         orientation = "portrait", 
+                         output_type = "TXT")  %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14.1  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11)
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+  } else
+    expect_equal(TRUE, TRUE)
+})
+

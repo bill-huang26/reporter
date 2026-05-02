@@ -1331,3 +1331,31 @@ test_that("pdf40: Three level stub and indentation work as expected.", {
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("pdf41: Page numbers work every in title, footnote, header, and footer.", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "pdf/test41.pdf")
+    
+    dat <- iris
+    
+    tbl <- create_table(dat, borders = "outside") %>%
+      titles("Table Title: Page [pg] of [tpg]") %>%
+      footnotes("Table footnote: Page [pg] of [tpg]")
+    
+    rpt <- create_report(fp, output_type = "PDF", font = "fixed",
+                         orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      add_content(tbl) %>%
+      add_content(tbl) %>%
+      titles("Report Title: Page [pg] of [tpg]") %>%
+      footnotes("Report footnote: Page [pg] of [tpg]", borders = "none") %>%
+      page_header("Header: Page [pg] of [tpg]") %>%
+      page_footer("Footer: Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})

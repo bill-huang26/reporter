@@ -106,7 +106,7 @@ add_info <- function(x,
 page_text <- function(text, font_size = NULL, 
                       xpos = NULL, ypos = NULL, bold = FALSE,
                       align = NULL, alignx = NULL, has_page_numbers = NULL,
-                      italics = FALSE, footnotes = FALSE) {
+                      italics = FALSE, footnotes = FALSE, titles = FALSE) {
   
   txt <- structure(list(), class = c("page_text", "page_content", "list"))
   
@@ -119,6 +119,7 @@ page_text <- function(text, font_size = NULL,
   txt$align <- align
   txt$alignx <- alignx  # In units of measure
   txt$footnotes <- footnotes
+  txt$titles <- titles
   
   res1 <- grepl("[pg]", text, fixed = TRUE)
   res2 <- grepl("[tpg]", text, fixed = TRUE)
@@ -570,7 +571,17 @@ get_pages <- function(pages, margin_left, margin_top, page_height, page_width,
                                    lh, ifelse(is.null(cnt$font_size), 
                                               fontsize, cnt$font_size),
                                    fontscale, cnt$bold, cnt$italics)
-          } else {
+            
+          } else if (cnt$titles & cnt$has_page_numbers) {
+            
+            txt <- get_page_numbers_pdf(cnt$text, pgnum, tpg)
+            tmp <- get_byte_stream(txt, 
+                                   stx + cnt$xpos, sty - cnt$ypos, 
+                                   lh, ifelse(is.null(cnt$font_size), 
+                                              fontsize, cnt$font_size),
+                                   fontscale, cnt$bold, cnt$italics)
+            
+          }else {
             
             # For other PDF2
             tmp <- get_byte_stream(cnt$text, 
