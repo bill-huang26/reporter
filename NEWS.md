@@ -6,7 +6,6 @@
 * Fixed issues with spanning header borders.
 * Allow user to remove stub row label by passing an NA.
 * Fixed some issues with blank rows.
-* Fixed indentation issue with TXT output.
 
 # reporter 1.4.6
 

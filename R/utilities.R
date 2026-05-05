@@ -172,8 +172,10 @@ add_blank_row <- function(x, location="below", vars = NULL){
     rw[1, "..page"] <-  x[cpos, "..page"]
   }
   # Set group together
-  if ("..group_cohesion" %in% names(x)){
-    rw[1, "..group_cohesion"] <-  x[cpos, "..group_cohesion"]
+  if (any(grepl("..group_cohesion\\d+", names(x)))){
+    for (g in names(x)[grepl("..group_cohesion\\d+", names(x))]) {
+      rw[1, g] <-  x[cpos, g]
+    }
   }
   
   # Keep break label
