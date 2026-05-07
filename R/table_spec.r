@@ -535,7 +535,7 @@ define <- function(x, vars, label = NULL, format = NULL,
   # If gorup_cohesion is a fraction, assign it to min_page_prop for internal using
   min_page_prop <- NULL
   if (group_cohesion != FALSE) {
-    if (group_cohesion == TRUE) {
+    if (group_cohesion == TRUE & !is.numeric(group_cohesion)) {
       
       min_page_prop <- 0.8
       
