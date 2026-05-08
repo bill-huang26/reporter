@@ -469,7 +469,7 @@ test_that("user4: Adverse Events table works.", {
       spanning_header("ARM C_1", "ARM C_3", label = "ARM C", n = arm_pop["ARM C"]) %>%
       spanning_header("ARM D_1", "ARM D_3", label = "ARM D", n = arm_pop["ARM D"]) %>%
       stub(vars = c("AESOC", "AEDECOD"), label = "System Organ Class\n   Preferred Term", width = 5) %>% 
-      define(AESOC, blank_after = TRUE, label_row = TRUE, group_cohesion = TRUE, break_label = "Cont.") %>% 
+      define(AESOC, blank_after = TRUE, label_row = TRUE, group_cohesion = 1, break_label = "Cont.") %>% 
       define(AEDECOD, indent = .25) %>% 
       define(`ARM A_1`, align = "center", label = "Mild") %>% 
       define(`ARM A_2`, align = "center", label = "Mod**") %>% 
