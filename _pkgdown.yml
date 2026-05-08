@@ -19,6 +19,7 @@ articles:
   - reporter-super
   - reporter-break
   - reporter-hfimage
+  - reporter-grouping
   - reporter-more
   - reporter-faq
 

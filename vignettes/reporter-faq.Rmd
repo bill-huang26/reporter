@@ -2,7 +2,7 @@
 title: "Frequently Asked Questions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{FAQ}
+  %\VignetteIndexEntry{Frequently Asked Questions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

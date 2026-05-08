@@ -376,23 +376,10 @@ create_table <- function(x, show_cols = "all", use_attributes = "all",
 #' Valid values are TRUE or FALSE. Default is FALSE. The group border is
 #' another way to separate analysis groups, and can be used in addition
 #' to or instead of the "blank_before" and "blank_after" parameters.
-#' @param group_cohesion Decide whether to let a group be in the same page as 
-#' possible as it can be. Default is FALSE. If TRUE, when there is no space to put 
-#' a whole group, the group would be moved to next page so that the group wouldn't 
-#' be split. However, each page should meet minimum page proportion 0.8, or group
-#' cohesion would not affect. For example, suppose the content size is 30 lines, 
-#' so minimum are 24 lines. If the lines before the group are less than 24, the group
-#' will be split into different pages, if lines before the group are greater than
-#' 24 and the rest space isn't enough for this group, the whole group would be
-#' moved to next page. Users can input numeric value from 0 to 1 to adjust the
-#' strength of group cohesion. Default \code{group_cohesion} is 0.2.
-#' The relation is 1 - \code{group_cohesion} = minimum page proportion.
-#' E.g., If we set \code{group_cohesion = 0.4}, it means the minimum page required 
-#' lines are 30 x 0.6 = 18 lines, which is less than default 30 x 0.8 = 24, so it
-#' would be more easier to meet the minimum and the next group would be moved to
-#' next page to stay together more likely. The higher \code{group_cohesion}, 
-#' the lower minimum page proportion, the more likely the next group would be moved 
-#' to next page to keep it in the same page.
+#' @param group_cohesion Default is FALSE. If TRUE, it would avoid splitting the 
+#' same group across multiple pages with default strength 0.2. Users can increase
+#' the strength to make groups on the same page more likely. The accepted value
+#' is 0 to 1.
 #' @param break_label Decide whether to repeat the grouping value when the group 
 #' spans multiple pages. If set it as TRUE, when a group spans, the break label will 
 #' be displayed as a label of the first row. If set it as a text such as "(Continued)",
