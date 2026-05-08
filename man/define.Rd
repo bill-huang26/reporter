@@ -131,7 +131,7 @@ to or instead of the "blank_before" and "blank_after" parameters.}
 \item{group_cohesion}{Default is FALSE. If TRUE, it would avoid splitting the 
 same group across multiple pages with default strength 0.2. Users can increase
 the strength to make groups on the same page more likely. The accepted value
-is 0 to 1. For more details, please refer to `vignette("reporter-grouping")`}
+is 0 to 1.}
 
 \item{break_label}{Decide whether to repeat the grouping value when the group 
 spans multiple pages. If set it as TRUE, when a group spans, the break label will 
