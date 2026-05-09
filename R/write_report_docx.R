@@ -610,7 +610,7 @@ page_setup_docx <- function(rs) {
     radj <- -42
   }
   
-  rh <- get_rh2(rs$font, rs$font_size)
+  rh <- get_rh(rs$font, rs$font_size)
   
   rs$border_height <- 1/72/2
   
