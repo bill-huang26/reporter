@@ -518,9 +518,9 @@ split_strings <- function(strng, width, units, multiplier = 1.03) {
     w <- cin(width)
   
   
-  if (!is.na(strng) & strng != "") {
+  if (!is.na(strng) & as.character(strng) != "") {
     
-    splits <- unlist(stri_split_fixed(strng, "\n"))
+    splits <- unlist(stri_split_fixed(as.character(strng), "\n"))
     
     for (split in splits) {
       
