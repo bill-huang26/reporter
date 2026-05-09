@@ -1539,7 +1539,7 @@ test_that("test48: Three level stub and indentation work as expected.", {
           NA, "95% confidence interval",
           NA, "95% confidence interval",
           NA, "95% confidence interval",
-          NA, "95% confidence interval")
+          NA, "95% confidence interval and more and more and still more")
   values <- c(41, 53, 43, 39, 47, 52, 38, 25, 37, 23, 78, 21)
 
   # Create data frame
@@ -3466,3 +3466,4 @@ test_that("text103: Page numbers work every in title, footnote, header, and foot
     expect_equal(TRUE, TRUE)
   }
 })
+

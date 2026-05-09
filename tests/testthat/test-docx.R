@@ -201,9 +201,7 @@ test_that("docx5: Multi page table works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(res$modified_path), TRUE)
-  # expect_equal(res$pages, 8)  # Temporary.  Should be 7
-  # After updating row height, the page should be updated
-  expect_equal(res$pages, 9)
+  expect_equal(res$pages, 8)
 
 })
 
@@ -294,7 +292,7 @@ test_that("docx8: Page by works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(res$modified_path), TRUE)
-  expect_equal(res$pages, 9) # Change from 6 to 9 because of row height adjustment
+  expect_equal(res$pages, 6) 
 })
 
 
@@ -327,8 +325,7 @@ test_that("docx9: Page by on report works as expected.", {
   res <- write_report(rpt)
 
   expect_equal(file.exists(fp), TRUE)
-  # Adjust the row height, top blank row consideration, and remove 1 buffer.
-  expect_equal(res$pages, 12)
+  expect_equal(res$pages, 9)
 
   } else
     expect_equal(TRUE, TRUE)
@@ -1833,9 +1830,7 @@ test_that("docx51: Page by with format works as expected.", {
   res$column_widths
 
   expect_equal(file.exists(fp), TRUE)
-  # expect_equal(res$pages, 6)
-  # After modify line height, pages increase.
-  expect_equal(res$pages, 9)
+  expect_equal(res$pages, 6)
   expect_equal(length(res$column_widths[[1]]), 5)
 
 
@@ -1947,7 +1942,7 @@ test_that("docx55: Top margin 1.5 works as expected.", {
   res$column_widths
 
   expect_equal(file.exists(fp), TRUE)
-  expect_equal(res$pages, 9) # Change from 6 to 9 because of row height adjustment
+  expect_equal(res$pages, 6) 
   expect_equal(length(res$column_widths[[1]]), 5)
 
 
@@ -3044,7 +3039,8 @@ test_that("docx-82: group_cohesion puts the group in same page as expected.", {
                    "Sepal.Width", "Petal.Length","Petal.Width")]
     
     tbl <- create_table(dat, borders = "outside") %>%
-      define(test_group, group_cohesion = T, label = "Group", blank_after = T)
+      define(test_group, group_cohesion = T, 
+             label = "Group", blank_after = T)
     
     rpt <- create_report(fp, output_type = "docx", font = fnt,
                          font_size = fsz, orientation = "landscape") %>%
@@ -3243,7 +3239,7 @@ test_that("docx-86: break_label works as expected.", {
       titles("Table 1.0", "My Nice Report with Break Label") %>%
       set_margins(top = 1, bottom = 1) %>%
       add_content(tbl) %>%
-      footnotes("My footnote 1", "My footnote 2", borders = "none",
+      footnotes("My footnote 1", "", "My footnote 2", borders = "none",
                 blank_row = "none")
     
     res <- write_report(rpt)

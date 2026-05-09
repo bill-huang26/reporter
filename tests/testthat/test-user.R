@@ -527,6 +527,10 @@ test_that("user4: Adverse Events table works.", {
     expect_equal(file.exists(docxpth), TRUE)
       #print(res)
     
+    htmlpth <- file.path(base_path, "user/user4.html")
+    res <- write_report(rpt, htmlpth, output_type = "HTML")
+    expect_equal(file.exists(htmlpth), TRUE)
+    
   } else
     expect_equal(TRUE, TRUE)
 })

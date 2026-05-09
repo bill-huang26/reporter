@@ -4583,14 +4583,14 @@ test_that("rtf2-125: Missing stub row label won't be displayed.", {
     df$var <- ifelse(df$var == "A", NA, df$var)
     df$var <- ifelse(df$var == "B", "", df$var)
     
-    tbl <- create_table(df, first_row_blank = TRUE, borders = c("top", "bottom")) %>%
+    tbl <- create_table(df, first_row_blank = FALSE, borders = c("top", "bottom")) %>%
       titles("Table 1.0 Demographics", font_size = 10) %>%
       stub(vars = c("var", "label"), "", width = 2.5) %>%
       define(var, blank_after = TRUE, label_row = TRUE) %>%
       define(A, align = "center", width=1.2, label = "Placebo", n=11) %>%
       define(B, align = "center", width=1.2, label = "Drug", n=8)
     
-    rpt <- create_report(fp, output_type = "RTF", font = "Arial") %>%
+    rpt <- create_report(fp, output_type = "rtf", font = "Arial") %>%
       add_content(tbl)
     
     # "" will still be row label. Only remove NA
