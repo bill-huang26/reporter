@@ -1500,6 +1500,7 @@ test_that("user18: Adverse Events table with break labels works.", {
     }
     
     # Footnote setting: Output Date and Time
+    syslocal <- Sys.setlocale("LC_TIME", "C") # Let date be English
     current_date <- gsub(" ","",toupper(format(Sys.Date(),"%d %b %Y")))
     current_time <- substr(Sys.time(),12,19)
     output_name <- "user18.rtf"
