@@ -775,8 +775,13 @@ page_setup_docx <- function(rs) {
 
   # Body line count is the number of rows available for content on each page
   # - 1 adjustment needed for footer buffer
-  
-  rs$body_line_count <- rs$line_count - rs$page_template_row_count - 1
+  if (rs$orientation == "landscape") {
+    rs$body_line_count <- rs$line_count - rs$page_template_row_count - 1
+  } else {
+    # More buffer more portrait because the row height estimated error is bigger
+    # in portrait
+    rs$body_line_count <- rs$line_count - rs$page_template_row_count - 2
+  }
   if (debug)
     print(paste0("Body Line Count: ", rs$body_line_count))
   
