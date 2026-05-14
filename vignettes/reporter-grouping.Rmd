@@ -65,110 +65,11 @@ res <- write_report(rpt)
 ```
 <img src="../man/images/example16a.png" alt="Styles example image A"/>
 
-
-
-## Group Cohesion
-
-In AE tables and summary statistics tables, there are groups for each section,
-and sometimes we want to avoid splitting the same group across multiple pages. With
-group cohesion, the **reporter** package can keep the group on in the same page 
-as much as possible by setting `group_cohesion = TRUE` in `define()`.
-
-Here is an example:
-```{r eval=FALSE, echo=TRUE} 
-library(reporter)
-
-fp <- file.path(tempdir(), "example16b.pdf")
-
-dat <- iris[1:91,]
-
-dat$group_1 <- c(
-  rep("A", 14),
-  rep("B", 6),
-  rep("C", 22),
-  rep("D", 18),
-  rep("E", 31)
-)
-
-dat$group_2 <- c(
-  rep("Flower A\nSubgroup A1", 14),
-  rep("Flower B\nSubgroup B1", 3),
-  rep("Flower B\nSubgroup B2", 3),
-  c(rep("Flower C1", 17)),
-  c(rep("Flower C2", 5)),
-  c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)),
-  c(rep("Flower E1", 2)),
-  c(rep("Flower E2", 29))
-)
-
-dat <- dat[, c("group_1", "group_2", "Sepal.Length", 
-               "Sepal.Width", "Petal.Length","Petal.Width")]
-
-tbl <- create_table(dat, borders = "outside") %>%
-  define(group_1, group_cohesion = TRUE, label = "Group 1", blank_after = T) %>%
-  define(group_2, group_cohesion = TRUE, label = "Group 2")
-
-rpt <- create_report(fp, output_type = "pdf", font = "Arial",
-                     font_size = 10, orientation = "landscape") %>%
-  titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
-  set_margins(top = 1, bottom = 1) %>%
-  add_content(tbl) %>%
-  footnotes("My footnote 1", "My footnote 2", borders = "none",
-            blank_row = "none")
-
-res <- write_report(rpt)
-```
-
-Page 1:
-<img src="../man/images/example16b_p1.png" alt="Styles example image A"/>
-
-<br>
-<br>
-Page 2:
-<img src="../man/images/example16b_p2.png" alt="Styles example image A"/>
-
-<br>
-<br>
-<br>
-We can see that there is still space in the end of page 1, but it's not enough
-for the entire group B. To keep group B in the same page, it is moved to the
-page 2.
-
-<br>
-<br>
-Page 3:
-<img src="../man/images/example16b_p3.png" alt="Styles example image A"/>
-
-<br>
-<br>
-<br>
-After group B, the remaining space is not enough for entire group C, and we cannot
-move the entire group C to page 3 or the remaining space would be too much in page 2.
-As a result, group C will be split from page 2 to page 3. However, because we set
-`group_cohesion = TRUE` for both Group1 and Group2, when Group1 is split,
-**reporter** will still keep Group2 on the same page as much as possible. Therefore, we
-can see that the entire "Flower C2" is moved to page 3 because the remaining space
-after "Flower C1" is not enough for "Flower C2".
-
-#### Logic of Group Cohesion
-The logic of group cohesion is very simple. If a group is to split, the entire
-group will be moved to next page only if occupies at least 80% of the current page.
-Accordingly, Group B moves to the next page because Group A occupies at least 80% 
-of the page. Similarly, Group C2 moves to the next page because the combined data 
-from Group B and Group C1 reaches the 80% threshold.
-When `group_cohesion = TRUE`, the default strength of group cohesion is 0.2, 
-which means the required proportion is `1 - 0.2 = 0.8`. Users can change the 
-required proportion by assigning more strength such as `group_cohesion = 0.6`, 
-which means the requirement of proportion is 0.4. Once the previous group has reached 
-40% of page, the next group can be moved to next page if the remaining space is not enough.
-That's say, the more strength of group cohesion, the lower the required proportion,
-and the less likely the group is to split.
-
 ## Break Label
 
 For the outputs with hierarchy levels such as AE tables. Taking SOC as an example,
 when SOC continues onto the next page, we might want to display the SOC again 
-with suffix wording such as "Continued". With `break_label = "Continued"` in 
+with suffix wording such as *"Continued"*. With `break_label = "Continued"` in 
 `define()`, the **reporter** package will automatically generate the repeated SOC
 with "Continued" at the top of next page.
 
@@ -177,7 +78,7 @@ Here is an example:
 ```{r eval=FALSE, echo=TRUE} 
 library(reporter)
 
-fp <- file.path(tempdir(), "example16c.pdf")
+fp <- file.path(tempdir(), "example16b.pdf")
 
 # Prepare data
 adae <- data.frame(
@@ -274,7 +175,6 @@ tbl <- create_table(adae,
 sty <- create_style(font_name = "Arial",
                     font_size = 9)
 
-# fp <- file.path("C:/Users/HuangC3/OneDrive - Parexel/Documents/reporter_bill/tests/testthat/user/example16c.pdf")
 rpt <- create_report(fp, 
                      orientation = "portrait", 
                      output_type = "PDF")  %>%
@@ -296,25 +196,141 @@ res <- write_report(rpt)
 
 Page 1:
 
-<img src="../man/images/example16c_p1.png" alt="Styles example image A"/>
+<img src="../man/images/example16b_p1.png" alt="Styles example image A"/>
 
 <br>
 Page 2:
 
-<img src="../man/images/example16c_p2.png" alt="Styles example image A"/>
+<img src="../man/images/example16b_p2.png" alt="Styles example image A"/>
 
 <br>
-SOC "Infections and infestations" continues onto the next page, so it is repeated 
-at the top of page 2 with suffix "(Continued)".
+SOC *"Infections and infestations"* continues onto the next page, so it is repeated 
+at the top of page 2 with suffix *"(Continued)"*.
 
-<br>
 <br>
 Page 3:<br>
 <br>
-Both SOC "Injury, poisoning and procedural complications" and preferred term
-"MUSCLE INJURY" continue onto page 3, so they're repeated at the top with different
+Both SOC *"Injury, poisoning and procedural complications"* and preferred term
+*"MUSCLE INJURY"* continue onto page 3, so they're repeated at the top with different
 suffix words.
 
 <br>
 <br>
+<img src="../man/images/example16b_p3.png" alt="Styles example image A"/>
+
+## Group Cohesion
+
+Continuing from the previous example. If you want to avoid splitting the same 
+group across multiple pages. You can use `group_cohesion = TRUE` in `define()` 
+for AESOC and AEDECOD such like:<br> 
+```{r eval=FALSE, echo=TRUE} 
+define(AESOC, break_label = "(Continued)", group_cohesion = TRUE)
+define(AEDECOD, indent = 0.16, break_label = "(Cont.)" , group_cohesion = TRUE)
+```
+Then the result will be:
+
+Page 1:
+
+<img src="../man/images/example16d_p1.png" alt="Styles example image A"/>
+
+<br>
+Page 2:
+
+<img src="../man/images/example16d_p2.png" alt="Styles example image A"/>
+
+<br>
+We can see that the SOC *"Infections and infestations"* is not split because the
+entire group is moved to page 2. That's how `group_cohesion` works to avoid 
+splitting the same group across multiple pages. 
+
+<br>
+Let's see another example to learn more about `group_cohesion`:
+
+```{r eval=FALSE, echo=TRUE} 
+library(reporter)
+
+fp <- file.path(tempdir(), "example16b.pdf")
+
+dat <- iris[1:91,]
+
+dat$group_1 <- c(
+  rep("A", 14),
+  rep("B", 6),
+  rep("C", 22),
+  rep("D", 18),
+  rep("E", 31)
+)
+
+dat$group_2 <- c(
+  rep("Flower A\nSubgroup A1", 14),
+  rep("Flower B\nSubgroup B1", 3),
+  rep("Flower B\nSubgroup B2", 3),
+  c(rep("Flower C1", 17)),
+  c(rep("Flower C2", 5)),
+  c(rep("Flower D", 16), rep("Flower D\nSubgroup D1", 2)),
+  c(rep("Flower E1", 2)),
+  c(rep("Flower E2", 29))
+)
+
+dat <- dat[, c("group_1", "group_2", "Sepal.Length", 
+               "Sepal.Width", "Petal.Length","Petal.Width")]
+
+tbl <- create_table(dat, borders = "outside") %>%
+  define(group_1, group_cohesion = TRUE, label = "Group 1", blank_after = T) %>%
+  define(group_2, group_cohesion = TRUE, label = "Group 2")
+
+rpt <- create_report(fp, output_type = "pdf", font = "Arial",
+                     font_size = 10, orientation = "landscape") %>%
+  titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+  set_margins(top = 1, bottom = 1) %>%
+  add_content(tbl) %>%
+  footnotes("My footnote 1", "My footnote 2", borders = "none",
+            blank_row = "none")
+
+res <- write_report(rpt)
+```
+
+Page 1:
+<img src="../man/images/example16c_p1.png" alt="Styles example image A"/>
+
+<br>
+<br>
+Page 2:
+<img src="../man/images/example16c_p2.png" alt="Styles example image A"/>
+
+<br>
+<br>
+<br>
+We can see that there is still space in the end of page 1, but it's not enough
+for the entire group B. To keep group B in the same page, it is moved to the
+page 2.
+
+<br>
+<br>
+Page 3:
 <img src="../man/images/example16c_p3.png" alt="Styles example image A"/>
+
+<br>
+<br>
+<br>
+After group B, the remaining space is not enough for entire group C, and we cannot
+move the entire group C to page 3 or the remaining space would be too much in page 2.
+As a result, group C will be split from page 2 to page 3. However, because we set
+`group_cohesion = TRUE` for both Group1 and Group2, when Group1 is split,
+**reporter** will still keep Group2 on the same page as much as possible. Therefore, we
+can see that the entire "Flower C2" is moved to page 3 because the remaining space
+after "Flower C1" is not enough for "Flower C2".
+
+#### Logic of Group Cohesion
+The logic of group cohesion is very simple. If a group is to split, the entire
+group will be moved to next page only if occupies at least 80% of the current page.
+Accordingly, Group B moves to the next page because Group A occupies at least 80% 
+of the page. Similarly, Group C2 moves to the next page because the combined data 
+from Group B and Group C1 reaches the 80% threshold.
+When `group_cohesion = TRUE`, the default strength of group cohesion is 0.2, 
+which means the required proportion is `1 - 0.2 = 0.8`. Users can change the 
+required proportion by assigning more strength such as `group_cohesion = 0.6`, 
+which means the requirement of proportion is 0.4. Once the previous group has reached 
+40% of page, the next group can be moved to next page if the remaining space is not enough.
+That's say, the more strength of group cohesion, the lower the required proportion,
+and the less likely the group is to split.
