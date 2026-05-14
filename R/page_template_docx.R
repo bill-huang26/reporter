@@ -374,16 +374,20 @@ get_page_header_docx <- function(rs) {
     }
     
   }
-    
+  
+  # Prepare lines for converting to content font size
+  cnt_content <- cnt
   if (!is.null(rs$header_titles)) {
     
     tret <- get_titles_docx(rs$header_titles, rs$content_size[["width"]], rs)
     ret <- paste0(ret, rs$table_break, tret$docx)
     cnt <- cnt + tret$lines
+    cnt_content <- cnt_content + tret$lines_content
     
   }
 
-  res <- list(docx = ret, lines = cnt, image_path = image_path)
+  res <- list(docx = ret, lines = cnt, image_path = image_path,
+              lines_content = cnt_content)
   
   return(res)
 }
@@ -675,11 +679,14 @@ get_page_footer_docx <- function(rs) {
     ret <- paste0(ret, "</w:tbl>\n")
   }
   
+  # Prepare lines for converting to content font size
+  cnt_content <- cnt
   if (!is.null(rs$footer_footnotes)) {
     
     tret <- get_footnotes_docx(rs$footer_footnotes, rs$content_size[["width"]], rs)
     ret <- paste0(tret$docx, rs$table_break, ret)
     cnt <- cnt + tret$lines
+    cnt_content <- cnt_content + tret$lines_content
     
   }
 
@@ -687,7 +694,8 @@ get_page_footer_docx <- function(rs) {
   
   res <- list(docx = paste0(ret, collapse = ""),
               lines = cnt,
-              image_path = image_path)
+              image_path = image_path,
+              lines_content = cnt_content)
   
   return(res)
 }
@@ -705,6 +713,10 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
   rht <- get_row_height(round(rs$row_height * conv))
   cflag <- FALSE
   
+  # The heights for converting to content font size
+  total_height <- 0
+  title_size_flag <- FALSE
+  cnt_content <- 0
   
   if (length(ttllst) > 0) {
     
@@ -757,6 +769,9 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
       alcnt <- 0
       blcnt <- 0
       
+      # Lines per each title object for converting to content size later
+      cnt_ttl <- 0
+      
       # Open device context
       pdf(NULL)
       
@@ -793,6 +808,7 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
         ret <- append(ret, al)
         
         cnt <- cnt + 1
+        cnt_ttl <- cnt_ttl + 1
       }
       
       
@@ -816,7 +832,9 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
         bb <- ""  # needed?
         
         cnt <- cnt + 1
+        cnt_ttl <- cnt_ttl + 1
       }
+      
       
       
       i <- 1
@@ -881,6 +899,7 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
         } else {
           
           srht <- get_row_height(round(get_rh(rs$font, ttls$font_size) * mxlns * conv))
+          title_size_flag <- TRUE
           
         }
         
@@ -889,8 +908,16 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
         
         # Track lines
         cnt <- cnt + mxlns
-
+        cnt_ttl <- cnt_ttl + mxlns
       }
+      
+      # Sum of total height
+      if (!is.null(ttls$font_size)) {
+        total_height <- total_height + cnt_ttl * get_rh(rs$font, ttls$font_size)
+      } else {
+        total_height <- total_height + cnt_ttl * rs$row_height
+      }
+      
       
       if (bl != "")
         ret <- append(ret, bl)
@@ -911,13 +938,19 @@ get_titles_docx <- function(ttllst, content_width, rs, talgn = "center",
 
     }
     
+    if (title_size_flag) {
+      cnt_content <- ceiling(total_height / rs$row_height)
+    } else {
+      cnt_content <- cnt
+    }
   }
   
 
   
   res <- list(docx = paste0(ret, collapse = ""), 
               lines = cnt,
-              border_flag = border_flag)
+              border_flag = border_flag,
+              lines_content = cnt_content)
   
   return(res)
 }
@@ -1118,6 +1151,12 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
   rht <- get_row_height(round(rs$row_height * conv))
 
   u <- rs$units
+  
+  # The heights for converting to content font size
+  total_height <- 0
+  footnote_size_flag <- FALSE
+  cnt_content <- 0
+  
   if (rs$units == "inches")
     u <- "in"
   
@@ -1171,6 +1210,8 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
       alcnt <- 0
       blcnt <- 0
 
+      # Lines per each footnote object for converting to content size later
+      cnt_ft <- 0
 
       pdf(NULL)
       
@@ -1211,6 +1252,7 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
         ret <- append(ret, al)
         
         cnt <- cnt + 1
+        cnt_ft <- cnt_ft + 1
         bb <- ""
         
       }
@@ -1239,6 +1281,7 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
         bb <- "" 
         
         cnt <- cnt + 1
+        cnt_ft <- cnt_ft + 1
       }
 
       i <- 1
@@ -1318,6 +1361,7 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
         } else {
           
           srht <- get_row_height(round(get_rh(rs$font, ftnts$font_size) * mxlns * conv))
+          footnote_size_flag <- TRUE
           
         }
         
@@ -1329,13 +1373,16 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
         
         # Track lines
         cnt <- cnt + mxlns
-        
+        cnt_ft <- cnt_ft + mxlns
         
       }
       
-
-      
-
+      # Sum of total height
+      if (!is.null(ftnts$font_size)) {
+        total_height <- total_height + cnt_ft * get_rh(rs$font, ftnts$font_size)
+      } else {
+        total_height <- total_height + cnt_ft * rs$row_height
+      }
       
       # ret <- append(ret, paste0("<w:tr>", trht, 
       #                           "<w:tc>", bb, para(tmp$docx, algn, 
@@ -1353,6 +1400,11 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
 
     }
     
+    if (footnote_size_flag) {
+      cnt_content <- ceiling(total_height / rs$row_height)
+    } else {
+      cnt_content <- cnt
+    }
 
     # For Issue 341, comment out the page process
     # ret <- get_page_numbers_docx(ret)
@@ -1361,7 +1413,7 @@ get_footnotes_docx <- function(ftnlst, content_width, rs, talgn = "center",
 
   
   res <- list(docx = paste0(paste0(ret,  collapse = ""), rs$table_break),
-              lines = cnt)
+              lines = cnt, lines_content = cnt_content)
   
   return(res)
 }

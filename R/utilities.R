@@ -1459,7 +1459,7 @@ get_spanning_info <- function(rs, ts, pi, widths, gutter = 1) {
       cl <- slvl[[l]][[i]]$span_cols
       
       # Make sure only visible columns are included
-      # cl <- cl[cl %in% t$colname]
+      cl <- cl[cl %in% t$colname]
       
       # Span specifications can be a vector of column names or numbers
       if (typeof(cl) == "character")
@@ -1635,7 +1635,9 @@ get_group_count <- function(group_var, count_var = NULL) {
   } 
   
   # Find out the changing position
-  change_points <- c(TRUE, group_var[-1] != group_var[-length(group_var)])
+  change_points <- as.logical(c(TRUE, mapply(function(x, y) !identical(x, y), 
+                                             group_var[-1], 
+                                             group_var[-length(group_var)])))
   
   # Sum cumulatively to give ID for each group
   group_id <- cumsum(change_points)

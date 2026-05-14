@@ -200,107 +200,19 @@ separate different groups by setting <code>group_border = TRUE</code> in
 <p><img src="../man/images/example16a.png" alt="Styles example image A"></p>
 </div>
 <div class="section level2">
-<h2 id="group-cohesion">Group Cohesion<a class="anchor" aria-label="anchor" href="#group-cohesion"></a>
+<h2 id="break-label">Break Label<a class="anchor" aria-label="anchor" href="#break-label"></a>
 </h2>
-<p>In AE tables and summary statistics tables, there are groups for each
-section, and sometimes we want to avoid splitting the same group across
-multiple pages. With group cohesion, the <strong>reporter</strong>
-package can keep the group on in the same page as much as possible by
-setting <code>group_cohesion = TRUE</code> in <code><a href="../reference/define.html">define()</a></code>.</p>
+<p>For the outputs with hierarchy levels such as AE tables. Taking SOC
+as an example, when SOC continues onto the next page, we might want to
+display the SOC again with suffix wording such as <em>“Continued”</em>.
+With <code>break_label = "Continued"</code> in <code><a href="../reference/define.html">define()</a></code>,
+the <strong>reporter</strong> package will automatically generate the
+repeated SOC with “Continued” at the top of next page.</p>
 <p>Here is an example:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example16b.pdf"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">91</span>,<span class="op">]</span></span>
-<span></span>
-<span><span class="va">dat</span><span class="op">$</span><span class="va">group_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="fl">14</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="fl">6</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">22</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"D"</span>, <span class="fl">18</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"E"</span>, <span class="fl">31</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dat</span><span class="op">$</span><span class="va">group_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower A\nSubgroup A1"</span>, <span class="fl">14</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower B\nSubgroup B1"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower B\nSubgroup B2"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower C1"</span>, <span class="fl">17</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower C2"</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower D"</span>, <span class="fl">16</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower D\nSubgroup D1"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower E1"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower E2"</span>, <span class="fl">29</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group_1"</span>, <span class="st">"group_2"</span>, <span class="st">"Sepal.Length"</span>, </span>
-<span>               <span class="st">"Sepal.Width"</span>, <span class="st">"Petal.Length"</span>,<span class="st">"Petal.Width"</span><span class="op">)</span><span class="op">]</span></span>
-<span></span>
-<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_table.html">create_table</a></span><span class="op">(</span><span class="va">dat</span>, borders <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_1</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 1"</span>, blank_after <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_2</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 2"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, output_type <span class="op">=</span> <span class="st">"pdf"</span>, font <span class="op">=</span> <span class="st">"Arial"</span>,</span>
-<span>                     font_size <span class="op">=</span> <span class="fl">10</span>, orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"My Nice Report with Group Cohesion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/add_content.html">add_content</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"My footnote 1"</span>, <span class="st">"My footnote 2"</span>, borders <span class="op">=</span> <span class="st">"none"</span>,</span>
-<span>            blank_row <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
-<p>Page 1:
-<img src="../man/images/example16b_p1.png" alt="Styles example image A"></p>
-<p><br><br> Page 2:
-<img src="../man/images/example16b_p2.png" alt="Styles example image A"></p>
-<p><br><br><br> We can see that there is still space in the end of
-page 1, but it’s not enough for the entire group B. To keep group B in
-the same page, it is moved to the page 2.</p>
-<p><br><br> Page 3:
-<img src="../man/images/example16b_p3.png" alt="Styles example image A"></p>
-<p><br><br><br> After group B, the remaining space is not enough for
-entire group C, and we cannot move the entire group C to page 3 or the
-remaining space would be too much in page 2. As a result, group C will
-be split from page 2 to page 3. However, because we set
-<code>group_cohesion = TRUE</code> for both Group1 and Group2, when
-Group1 is split, <strong>reporter</strong> will still keep Group2 on the
-same page as much as possible. Therefore, we can see that the entire
-“Flower C2” is moved to page 3 because the remaining space after “Flower
-C1” is not enough for “Flower C2”.</p>
-<div class="section level4">
-<h4 id="logic-of-group-cohesion">Logic of Group Cohesion<a class="anchor" aria-label="anchor" href="#logic-of-group-cohesion"></a>
-</h4>
-<p>The logic of group cohesion is very simple. If a group is to split,
-the entire group will be moved to next page only if occupies at least
-80% of the current page. Accordingly, Group B moves to the next page
-because Group A occupies at least 80% of the page. Similarly, Group C2
-moves to the next page because the combined data from Group B and Group
-C1 reaches the 80% threshold. When <code>group_cohesion = TRUE</code>,
-the default strength of group cohesion is 0.2, which means the required
-proportion is <code>1 - 0.2 = 0.8</code>. Users can change the required
-proportion by assigning more strength such as
-<code>group_cohesion = 0.6</code>, which means the requirement of
-proportion is 0.4. Once the previous group has reached 40% of page, the
-next group can be moved to next page if the remaining space is not
-enough. That’s say, the more strength of group cohesion, the lower the
-required proportion, and the less likely the group is to split.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="break-label">Break Label<a class="anchor" aria-label="anchor" href="#break-label"></a>
-</h2>
-<p>For the outputs with hierarchy levels such as AE tables. Taking SOC
-as an example, when SOC continues onto the next page, we might want to
-display the SOC again with suffix wording such as “Continued”. With
-<code>break_label = "Continued"</code> in <code><a href="../reference/define.html">define()</a></code>, the
-<strong>reporter</strong> package will automatically generate the
-repeated SOC with “Continued” at the top of next page.</p>
-<p>Here is an example:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example16c.pdf"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Prepare data</span></span>
 <span><span class="va">adae</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -397,7 +309,6 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span><span class="va">sty</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_style.html">create_style</a></span><span class="op">(</span>font_name <span class="op">=</span> <span class="st">"Arial"</span>,</span>
 <span>                    font_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># fp &lt;- file.path("C:/Users/HuangC3/OneDrive - Parexel/Documents/reporter_bill/tests/testthat/user/example16c.pdf")</span></span>
 <span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, </span>
 <span>                     orientation <span class="op">=</span> <span class="st">"portrait"</span>, </span>
 <span>                     output_type <span class="op">=</span> <span class="st">"PDF"</span><span class="op">)</span>  <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -416,15 +327,117 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span><span class="co"># Write the report</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
 <p>Page 1:</p>
-<p><img src="../man/images/example16c_p1.png" alt="Styles example image A"></p>
+<p><img src="../man/images/example16b_p1.png" alt="Styles example image A"></p>
 <p><br> Page 2:</p>
-<p><img src="../man/images/example16c_p2.png" alt="Styles example image A"></p>
-<p><br> SOC “Infections and infestations” continues onto the next page,
-so it is repeated at the top of page 2 with suffix “(Continued)”.</p>
-<p><br><br> Page 3:<br><br> Both SOC “Injury, poisoning and procedural
-complications” and preferred term “MUSCLE INJURY” continue onto page 3,
-so they’re repeated at the top with different suffix words.</p>
-<p><br><br><img src="../man/images/example16c_p3.png" alt="Styles example image A"></p>
+<p><img src="../man/images/example16b_p2.png" alt="Styles example image A"></p>
+<p><br> SOC <em>“Infections and infestations”</em> continues onto the
+next page, so it is repeated at the top of page 2 with suffix
+<em>“(Continued)”</em>.</p>
+<p><br> Page 3:<br><br> Both SOC <em>“Injury, poisoning and procedural
+complications”</em> and preferred term <em>“MUSCLE INJURY”</em> continue
+onto page 3, so they’re repeated at the top with different suffix
+words.</p>
+<p><br><br><img src="../man/images/example16b_p3.png" alt="Styles example image A"></p>
+</div>
+<div class="section level2">
+<h2 id="group-cohesion">Group Cohesion<a class="anchor" aria-label="anchor" href="#group-cohesion"></a>
+</h2>
+<p>Continuing from the previous example. If you want to avoid splitting
+the same group across multiple pages. You can use
+<code>group_cohesion = TRUE</code> in <code><a href="../reference/define.html">define()</a></code> for AESOC
+and AEDECOD such like,<br><code>define(AESOC, break_label = "(Continued)", group_cohesion = TRUE)</code><br><code>define(AEDECOD, indent = 0.16, break_label = "(Cont.)" , group_cohesion = TRUE)</code><br></p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AESOC</span>, break_label <span class="op">=</span> <span class="st">"(Continued)"</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AEDECOD</span>, indent <span class="op">=</span> <span class="fl">0.16</span>, break_label <span class="op">=</span> <span class="st">"(Cont.)"</span> , group_cohesion <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>then the result will be:</p>
+<p>Page 1:</p>
+<p><img src="../man/images/example16d_p1.png" alt="Styles example image A"></p>
+<p><br> Page 2:</p>
+<p><img src="../man/images/example16d_p2.png" alt="Styles example image A"></p>
+<p><br> We can see that the SOC <em>“Infections and infestations”</em>
+is not split because the entire group is moved to page 2. That’s how
+<code>group_cohesion</code> works to avoid splitting the same group
+across multiple pages.</p>
+<p><br><br> Let’s see another example to learn more about
+<code>group_cohesion</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example16b.pdf"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">91</span>,<span class="op">]</span></span>
+<span></span>
+<span><span class="va">dat</span><span class="op">$</span><span class="va">group_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="fl">14</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">22</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"D"</span>, <span class="fl">18</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"E"</span>, <span class="fl">31</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span><span class="op">$</span><span class="va">group_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower A\nSubgroup A1"</span>, <span class="fl">14</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower B\nSubgroup B1"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower B\nSubgroup B2"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower C1"</span>, <span class="fl">17</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower C2"</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower D"</span>, <span class="fl">16</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower D\nSubgroup D1"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower E1"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Flower E2"</span>, <span class="fl">29</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group_1"</span>, <span class="st">"group_2"</span>, <span class="st">"Sepal.Length"</span>, </span>
+<span>               <span class="st">"Sepal.Width"</span>, <span class="st">"Petal.Length"</span>,<span class="st">"Petal.Width"</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_table.html">create_table</a></span><span class="op">(</span><span class="va">dat</span>, borders <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_1</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 1"</span>, blank_after <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_2</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 2"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, output_type <span class="op">=</span> <span class="st">"pdf"</span>, font <span class="op">=</span> <span class="st">"Arial"</span>,</span>
+<span>                     font_size <span class="op">=</span> <span class="fl">10</span>, orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"My Nice Report with Group Cohesion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/add_content.html">add_content</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"My footnote 1"</span>, <span class="st">"My footnote 2"</span>, borders <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>            blank_row <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
+<p>Page 1:
+<img src="../man/images/example16c_p1.png" alt="Styles example image A"></p>
+<p><br><br> Page 2:
+<img src="../man/images/example16c_p2.png" alt="Styles example image A"></p>
+<p><br><br><br> We can see that there is still space in the end of
+page 1, but it’s not enough for the entire group B. To keep group B in
+the same page, it is moved to the page 2.</p>
+<p><br><br> Page 3:
+<img src="../man/images/example16c_p3.png" alt="Styles example image A"></p>
+<p><br><br><br> After group B, the remaining space is not enough for
+entire group C, and we cannot move the entire group C to page 3 or the
+remaining space would be too much in page 2. As a result, group C will
+be split from page 2 to page 3. However, because we set
+<code>group_cohesion = TRUE</code> for both Group1 and Group2, when
+Group1 is split, <strong>reporter</strong> will still keep Group2 on the
+same page as much as possible. Therefore, we can see that the entire
+“Flower C2” is moved to page 3 because the remaining space after “Flower
+C1” is not enough for “Flower C2”.</p>
+<div class="section level4">
+<h4 id="logic-of-group-cohesion">Logic of Group Cohesion<a class="anchor" aria-label="anchor" href="#logic-of-group-cohesion"></a>
+</h4>
+<p>The logic of group cohesion is very simple. If a group is to split,
+the entire group will be moved to next page only if occupies at least
+80% of the current page. Accordingly, Group B moves to the next page
+because Group A occupies at least 80% of the page. Similarly, Group C2
+moves to the next page because the combined data from Group B and Group
+C1 reaches the 80% threshold. When <code>group_cohesion = TRUE</code>,
+the default strength of group cohesion is 0.2, which means the required
+proportion is <code>1 - 0.2 = 0.8</code>. Users can change the required
+proportion by assigning more strength such as
+<code>group_cohesion = 0.6</code>, which means the requirement of
+proportion is 0.4. Once the previous group has reached 40% of page, the
+next group can be moved to next page if the remaining space is not
+enough. That’s say, the more strength of group cohesion, the lower the
+required proportion, and the less likely the group is to split.</p>
+</div>
 </div>
   </div>
 

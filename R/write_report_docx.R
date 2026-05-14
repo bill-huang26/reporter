@@ -755,7 +755,8 @@ page_setup_docx <- function(rs) {
 
   # Get the page template row count
   # Include all the rows associated with the page template
-  rs$page_template_header_count <- sum(max(pt$page_header$lines, 1), pt$titles$lines,
+  rs$page_template_header_count <- sum(max(pt$page_header$lines_content, 1), 
+                                       pt$titles$lines_content,
                                        pt$title_hdr$lines, pt$page_by$lines)
   
   # DOCX would still have one blank row on top even no page headers
@@ -764,7 +765,8 @@ page_setup_docx <- function(rs) {
   if (debug)
     print(paste("Page Template Header Count:", rs$page_template_header_count))
 
-  rs$page_template_footer_count <- sum(pt$footnotes$lines, pt$page_footer$lines)
+  rs$page_template_footer_count <- sum(pt$footnotes$lines_content, 
+                                       pt$page_footer$lines_content)
   if (debug)
     print(paste("Page Template Footer Count:", rs$page_template_footer_count))
 
@@ -775,8 +777,8 @@ page_setup_docx <- function(rs) {
 
   # Body line count is the number of rows available for content on each page
   # - 1 adjustment needed for footer buffer
-  
   rs$body_line_count <- rs$line_count - rs$page_template_row_count - 1
+
   if (debug)
     print(paste0("Body Line Count: ", rs$body_line_count))
   

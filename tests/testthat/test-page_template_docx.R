@@ -32,6 +32,7 @@ test_that("get_titles_docx function works as expected with font_size.", {
   expect_equal(length(t9$docx), 1)
   expect_equal(t9$lines, 2)
   
+  # Lines_content returns corrent lines in content size
   rpt <- create_report("", output_type = "DOCX", font = "Arial",
                        font_size = 9) %>%
     titles("a a a a a a a a a",
@@ -42,6 +43,7 @@ test_that("get_titles_docx function works as expected with font_size.", {
   t14 <- get_titles_docx(rpt$titles, 1, rpt)
   expect_equal(length(t14$docx), 1)
   expect_equal(t14$lines, 3)
+  expect_equal(t14$lines_content, 5)
   
 })
 
@@ -87,6 +89,18 @@ test_that("get_footnotes_docx function works as expected with font_size.", {
   expect_equal(length(f8$docx), 1)
   expect_equal(f8$lines, 2)
   
+  # Lines_content returns corrent lines in content size
+  rpt <- create_report("", output_type = "DOCX", font = "Arial",
+                       font_size = 8) %>%
+    footnotes("a a a a a a a a a",
+              width = 1, font_size = 12)
+  
+  rpt <- page_setup_docx(rpt)
+  
+  f12_8 <- get_footnotes_docx(rpt$footnotes, 1, rpt)
+  expect_equal(length(f12_8$docx), 1)
+  expect_equal(f12_8$lines, 3)
+  expect_equal(f12_8$lines_content, 5)
 })
 
 
