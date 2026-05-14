@@ -416,7 +416,7 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
                                    col_widths = NULL, 
                                    content_brdrs = NULL) {
   
-  ftnts <- list(lines = 0, twips = 0, border_flag = FALSE)
+  ftnts <- list(lines = 0, twips = 0, border_flag = FALSE, lines_content = 0)
   vflag <- "none"
 
   
@@ -487,7 +487,7 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
   if (rs$paper_size != "none") {
     
     # Determine number of filler lines needed
-    len_diff <- rs$body_line_count - row_count - ftnts$lines - lpg_rows - blen - boff
+    len_diff <- rs$body_line_count - row_count - ftnts$lines_content - lpg_rows - blen - boff
     
     if (vflag == "bottom" & len_diff > 0) {
   
@@ -511,7 +511,8 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
     }
   }
   
-  tlns <- sum(ftnts$lines, length(ublnks), length(lblnks))
+  # Note that the returned lines have been converted to content font size
+  tlns <- sum(ftnts$lines_content, length(ublnks), length(lblnks))
   ret <- list(docx = c(ublnks, tbr, ftnts$docx, lblnks),
               lines = tlns)
   
@@ -549,8 +550,10 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
   # Get title headers or titles
   if (is.null(ts$title_hdr))
     ttls <- get_titles_docx(ts$titles, wdth, rs) 
-  else 
+  else {
     ttls <- get_title_header_docx(ts$title_hdr, wdth, rs)
+    ttls$lines_content <- ttls$lines
+  }
   
   # Get page by if it exists
   # if (!is.null(ts$page_by))
@@ -578,7 +581,7 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
       pgby_temp <- get_page_by_docx(page_by_info, wdth, pgby_unique[i], rs, pi$table_align, pgby_cnt = pgby_cnt)
       
       # Add everything up
-      cnt[["upper"]][[i]] <- shdrs$lines + hdrs$lines + ttls$lines + pgby_temp$lines
+      cnt[["upper"]][[i]] <- shdrs$lines + hdrs$lines + ttls$lines_content + pgby_temp$lines
     }
     
     names(cnt[["upper"]]) <- pgby_unique
@@ -589,7 +592,7 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
     cnt <- c(upper = 0, lower = 0, blank_upper = 0, blank_lower = 0)
     
     # Add everything up
-    cnt[["upper"]] <- shdrs$lines + hdrs$lines + ttls$lines + pgb$lines
+    cnt[["upper"]] <- shdrs$lines + hdrs$lines + ttls$lines_content + pgb$lines
     
   }
   
@@ -602,9 +605,9 @@ get_content_offsets_docx <- function(rs, ts, pi, content_blank_row, pgby_cnt = N
   rftnts <- get_footnotes_docx(rs$footnotes, wdth, rs)
   
   if (has_top_footnotes(rs)) {
-    cnt[["lower"]] <- ftnts$lines + rftnts$lines
+    cnt[["lower"]] <- ftnts$lines_content + rftnts$lines_content
   } else {
-    cnt[["lower"]] <- ftnts$lines
+    cnt[["lower"]] <- ftnts$lines_content
   }
   
   # Add extra offsets if table has a lot of borders turned on
