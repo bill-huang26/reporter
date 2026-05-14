@@ -1237,8 +1237,10 @@ get_splits_text <- function(x, widths, page_size, lpg_rows,
         # Reset the row name for PDF process
         row.names(temp_df) <- paste0("break_label", 1:nrow(temp_df))
         
-        # Stack to original data
-        sbst <- rbind(sbst, temp_df)
+        # Stack to original data, no need to repeat if blank
+        if (temp_df[1,1] != "") {
+          sbst <- rbind(sbst, temp_df)
+        }
       }
     }
     # re-order to put repeated label in right position
@@ -1327,7 +1329,9 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
       }
       group_counts_df[[i]] <- group_counts
       
-      group_change <- c(FALSE, x[[col]][-1] != x[[col]][-length(x[[col]])])
+      group_change <- as.logical(c(TRUE, mapply(function(x, y) !identical(x, y), 
+                                                x[[col]][-1], 
+                                                x[[col]][-length(x[[col]])])))
       
       group_change_df[[i]] <- group_change
     }
