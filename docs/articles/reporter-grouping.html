@@ -386,17 +386,18 @@ illustrate, let’s look at another example:</p>
 <span></span>
 <span><span class="co"># Create table</span></span>
 <span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_table.html">create_table</a></span><span class="op">(</span><span class="va">dat</span>, borders <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_1</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 1"</span>, blank_after <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_2</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 2"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_1</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Region"</span>, blank_after <span class="op">=</span> <span class="cn">T</span>, </span>
+<span>         width <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_2</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Sector"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create report</span></span>
 <span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, output_type <span class="op">=</span> <span class="st">"pdf"</span>, font <span class="op">=</span> <span class="st">"Arial"</span>,</span>
 <span>                     font_size <span class="op">=</span> <span class="fl">10</span>, orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"My Nice Report with Group Cohesion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"Analysis of Iris Flowers"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_content.html">add_content</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"My footnote 1"</span>, <span class="st">"My footnote 2"</span>, borders <span class="op">=</span> <span class="st">"none"</span>,</span>
-<span>            blank_row <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Program: /test/example16b.R"</span>, </span>
+<span>            <span class="st">"Output: /test/example16b.pdf"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Output report</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
@@ -406,23 +407,23 @@ illustrate, let’s look at another example:</p>
 <p><img src="../man/images/example16d_p3.png" alt="Example D page 3"></p>
 <p><br></p>
 <p>We can see above that there is still space at the end of page 1, but
-it’s not enough for all of group B. To keep group B together, it is
+it’s not enough for all of region B. To keep region B together, it is
 therefore moved to page 2.</p>
-<p>After group B on page 2, the remaining space is not enough for all of
-group C. And we cannot move all of group C to page 3, because it is too
-big.</p>
-<p>As a result, group C will be split between pages 2 and 3. However,
-because we engaged group cohesion for both Group1 and Group2,
-<strong>reporter</strong> will try to keep Group2 on the same page if
-possible. Therefore, all of group “Flower C2” is moved to page 3.</p>
+<p>After region B moves to page 2, the remaining space is not enough for
+all of region C. And we cannot move all of region C to page 3, because
+it is too big.</p>
+<p>As a result, region C will be split between pages 2 and 3. However,
+because we engaged group cohesion for both Region and Sector,
+<strong>reporter</strong> will try to keep the sectors on the same page.
+Therefore, all of sector “Flower C2” is moved to page 3.</p>
 <div class="section level4">
 <h4 id="logic-of-group-cohesion">Logic of Group Cohesion<a class="anchor" aria-label="anchor" href="#logic-of-group-cohesion"></a>
 </h4>
 <p>The logic of group cohesion is very simple. If a group is to be
 split, the group will be moved to next page only if the current page is
-at least 80% full. Accordingly, Group B moves to the next page because
-Group A occupies at least 80% of the page. Similarly, Group C2 moves to
-the next page because the combined data from Group B and Group C1
+at least 80% full. Accordingly, Region B moves to the next page because
+Region A occupies at least 80% of the page. Similarly, Sector C2 moves
+to the next page because the combined data from Region B and Sector C1
 reaches the 80% threshold.</p>
 <p>When <code>group_cohesion = TRUE</code>, the default strength of
 group cohesion is 0.2, which means the required proportion is

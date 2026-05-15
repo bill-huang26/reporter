@@ -194,17 +194,18 @@ knitr::opts_chunk$set(
 #  
 #  # Create table
 #  tbl <- create_table(dat, borders = "outside") %>%
-#    define(group_1, group_cohesion = TRUE, label = "Group 1", blank_after = T) %>%
-#    define(group_2, group_cohesion = TRUE, label = "Group 2")
+#    define(group_1, group_cohesion = TRUE, label = "Region", blank_after = T,
+#           width = 1.2) %>%
+#    define(group_2, group_cohesion = TRUE, label = "Sector")
 #  
 #  # Create report
 #  rpt <- create_report(fp, output_type = "pdf", font = "Arial",
 #                       font_size = 10, orientation = "landscape") %>%
-#    titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+#    titles("Table 1.0", "Analysis of Iris Flowers") %>%
 #    set_margins(top = 1, bottom = 1) %>%
 #    add_content(tbl) %>%
-#    footnotes("My footnote 1", "My footnote 2", borders = "none",
-#              blank_row = "none")
+#    footnotes("Program: /test/example16b.R",
+#              "Output: /test/example16b.pdf")
 #  
 #  # Output report
 #  res <- write_report(rpt)

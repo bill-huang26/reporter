@@ -270,17 +270,18 @@ dat <- dat[, c("group_1", "group_2", "Sepal.Length",
 
 # Create table
 tbl <- create_table(dat, borders = "outside") %>%
-  define(group_1, group_cohesion = TRUE, label = "Group 1", blank_after = T) %>%
-  define(group_2, group_cohesion = TRUE, label = "Group 2")
+  define(group_1, group_cohesion = TRUE, label = "Region", blank_after = T, 
+         width = 1.2) %>%
+  define(group_2, group_cohesion = TRUE, label = "Sector")
 
 # Create report
 rpt <- create_report(fp, output_type = "pdf", font = "Arial",
                      font_size = 10, orientation = "landscape") %>%
-  titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
+  titles("Table 1.0", "Analysis of Iris Flowers") %>%
   set_margins(top = 1, bottom = 1) %>%
   add_content(tbl) %>%
-  footnotes("My footnote 1", "My footnote 2", borders = "none",
-            blank_row = "none")
+  footnotes("Program: /test/example16b.R", 
+            "Output: /test/example16b.pdf")
 
 # Output report
 res <- write_report(rpt)
@@ -300,24 +301,24 @@ res <- write_report(rpt)
 <br>
 
 We can see above that there is still space at the end of page 1, but it's not enough
-for all of group B. To keep group B together, it is therefore moved to 
+for all of region B. To keep region B together, it is therefore moved to 
 page 2.
 
-After group B moves to page 2, the remaining space is not enough for all of group C.
-And we cannot move all of group C to page 3, because it is too big. 
+After region B moves to page 2, the remaining space is not enough for all of region C.
+And we cannot move all of region C to page 3, because it is too big. 
 
-As a result, group C will be split between pages 2 and 3. However, because we
-engaged group cohesion for both Group1 and Group2,
-**reporter** will try to keep Group2 on the same page. Therefore, all
-of group "Flower C2" is moved to page 3.
+As a result, region C will be split between pages 2 and 3. However, because we
+engaged group cohesion for both Region and Sector,
+**reporter** will try to keep the sectors on the same page. Therefore, all
+of sector "Flower C2" is moved to page 3.
 
 #### Logic of Group Cohesion
 
 The logic of group cohesion is very simple. If a group is to be split, the 
 group will be moved to next page only if the current page is at least 80% full.
-Accordingly, Group B moves to the next page because Group A occupies at least 80% 
-of the page. Similarly, Group C2 moves to the next page because the combined data 
-from Group B and Group C1 reaches the 80% threshold.
+Accordingly, Region B moves to the next page because Region A occupies at least 80% 
+of the page. Similarly, Sector C2 moves to the next page because the combined data 
+from Region B and Sector C1 reaches the 80% threshold.
 
 When `group_cohesion = TRUE`, the default strength of group cohesion is 0.2, 
 which means the required proportion is `1 - 0.2 = 0.8`. Users can change the 
