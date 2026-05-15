@@ -9,3 +9,6 @@
 ^\.github$
 ^codecov\.yml$
 ^LICENSE\.md$
+^\.positai$
+^\.claude$
+^tests/testthat/data/ADLB\.csv$

@@ -6,11 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Example 16: Grouping • reporter</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -148,12 +149,16 @@
 
     
     
+<p>Data on reports is frequently grouped in some way. The
+<strong>reporter</strong> package offers several features to identify
+and manage these groups. Here are some of the highlights.</p>
 <div class="section level2">
 <h2 id="group-border">Group Border<a class="anchor" aria-label="anchor" href="#group-border"></a>
 </h2>
-<p>The <strong>reporter</strong> package can draw bottom lines to
-separate different groups by setting <code>group_border = TRUE</code> in
-<code><a href="../reference/define.html">define()</a></code>.</p>
+<p>The <strong>reporter</strong> package can draw border lines to
+separate different groups. To create the border line, set
+<code>group_border = TRUE</code> on the <code><a href="../reference/define.html">define()</a></code>
+function.</p>
 <p>Here is an example:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
@@ -165,7 +170,7 @@ separate different groups by setting <code>group_border = TRUE</code> in
 <span><span class="va">arm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"D"</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">subjid</span> <span class="op">&lt;-</span> <span class="fl">100</span><span class="op">:</span><span class="fl">109</span></span>
 <span><span class="va">name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Quintana, Gabriel"</span>, <span class="st">"Allison, Blas"</span>, <span class="st">"Minniear, Presley"</span>,</span>
-<span>          <span class="st">"al-Kazemi, Najwa \nand more and more"</span>, <span class="st">"Schaffer, Ashley"</span>, <span class="st">"Laner, Tahma"</span>,</span>
+<span>          <span class="st">"al-Kazemi, Najwa"</span>, <span class="st">"Schaffer, Ashley"</span>, <span class="st">"Laner, Tahma"</span>,</span>
 <span>          <span class="st">"Perry, Sean"</span>, <span class="st">"Crews, Deshawn Joseph"</span>, <span class="st">"Person, Ladon"</span>,</span>
 <span>          <span class="st">"Smith, Shaileigh"</span><span class="op">)</span></span>
 <span><span class="va">sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"M"</span>, <span class="st">"F"</span>, <span class="st">"F"</span>, <span class="st">"M"</span>, <span class="st">"M"</span>, <span class="st">"F"</span>, <span class="st">"M"</span>, <span class="st">"F"</span>, <span class="st">"F"</span>, <span class="st">"M"</span><span class="op">)</span></span>
@@ -183,32 +188,27 @@ separate different groups by setting <code>group_border = TRUE</code> in
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">age</span>, label <span class="op">=</span> <span class="st">"Age"</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">arm</span>, label <span class="op">=</span> <span class="st">"Arm"</span>,</span>
 <span>         dedupe <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>         group_border <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"This is the footnote"</span><span class="op">)</span></span>
+<span>         group_border <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
 <span></span>
 <span></span>
 <span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">tmp</span>, output_type <span class="op">=</span> <span class="st">"pdf"</span>, font <span class="op">=</span> <span class="st">"Arial"</span>,</span>
 <span>                     font_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"This is a table with group border"</span><span class="op">)</span>, align <span class="op">=</span> <span class="st">"center"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_content.html">add_content</a></span><span class="op">(</span><span class="va">tbl1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"This is the footnote 1"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/page_header.html">page_header</a></span><span class="op">(</span>left <span class="op">=</span> <span class="st">"Test header"</span>, right <span class="op">=</span> <span class="st">"Test header"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
-<p><img src="../man/images/example16a.png" alt="Styles example image A"></p>
+<p><img src="../man/images/example16a.png" alt="Example image A"></p>
 </div>
 <div class="section level2">
 <h2 id="break-label">Break Label<a class="anchor" aria-label="anchor" href="#break-label"></a>
 </h2>
-<p>For the outputs with hierarchy levels such as AE tables. Taking SOC
-as an example, when SOC continues onto the next page, we might want to
-display the SOC again with suffix wording such as <em>“Continued”</em>.
-With <code>break_label = "Continued"</code> in <code><a href="../reference/define.html">define()</a></code>,
-the <strong>reporter</strong> package will automatically generate the
-repeated SOC with “Continued” at the top of next page.</p>
-<p>Here is an example:</p>
+<p>For some types of reports, it is desirable to have a label that
+indicates when a group has been broken across pages. This feature is
+supported with the “break_label” parameter on the <code><a href="../reference/define.html">define()</a></code>
+function. In the example below, the “break_label” is assigned a value of
+“(Continued)”:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
 <span></span>
@@ -216,22 +216,20 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span></span>
 <span><span class="co"># Prepare data</span></span>
 <span><span class="va">adae</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Number of subject with adverse events"</span>, <span class="fl">66</span><span class="op">)</span>,</span>
+<span>  total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Number of subject with adverse events"</span>, <span class="fl">53</span><span class="op">)</span>,</span>
 <span>  AESOC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, </span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Gastrointestinal disorders"</span>, <span class="fl">13</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"General disorders and administration site conditions"</span>, <span class="fl">9</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Hepatobiliary disorders"</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Infections and infestations"</span>, <span class="fl">25</span><span class="op">)</span>,</span>
 <span>            <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Injury, poisoning and procedural complications"</span>, <span class="fl">13</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  AEDECOD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>,</span>
-<span>              <span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"CHEILITIS"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"DIARRHOEA"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"STOMACH DISCOMFORT"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              <span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"APPLICATION SITE ERYTHEMA"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"INFLUENZA LIKE ILLNESS"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              <span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"GALLBLADDER DISORDER"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              <span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"BRONCHITIS"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"NAIL INFECTION"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"PARONYCHIA"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>                  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RASH PUSTULAR"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RESPIRATORY TRACT INFECTION"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
-<span>                  <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RHINITIS"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RASH PUSTULAR"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RESPIRATORY TRACT INFECTION"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>              <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"RHINITIS"</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>              <span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"FALL"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"HEAT CRAMPS"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"MUSCLE INJURY"</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span>              <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">adae</span><span class="op">$</span><span class="va">aedecod_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">adae</span><span class="op">)</span><span class="op">)</span></span>
@@ -261,14 +259,13 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span></span>
 <span><span class="co"># Output</span></span>
 <span><span class="va">custom_n_format</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span>
-<span>      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"\n(N = "</span>,<span class="va">x</span>,<span class="st">")\nn(%)"</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span></span>
-<span>    </span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"\n(N = "</span>,<span class="va">x</span>,<span class="st">")\nn(%)"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
 <span><span class="va">current_date</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">" "</span>,<span class="st">""</span>,<span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>,<span class="st">"%d %b %Y"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">current_time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span>,<span class="fl">12</span>,<span class="fl">19</span><span class="op">)</span></span>
 <span><span class="va">output_name</span> <span class="op">&lt;-</span> <span class="st">"example16c.pdf"</span></span>
 <span><span class="va">program_path</span> <span class="op">&lt;-</span> <span class="st">"/dummy/tables/t-teae-soc-pt-gr-saf.R"</span></span>
-<span><span class="va">last_footnote</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Output: "</span>,<span class="va">output_name</span>,<span class="st">" Source: adae"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">total_width</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
 <span><span class="va">trt_width</span> <span class="op">&lt;-</span> <span class="fl">1.04</span></span>
@@ -285,12 +282,12 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span>       label <span class="op">=</span> <span class="st">"System Organ Class\n  Preferred Term\n    Grade"</span>, </span>
 <span>       width <span class="op">=</span> <span class="va">item_width</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AESOC</span>, break_label <span class="op">=</span> <span class="st">"(Continued)"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AEDECOD</span>, indent <span class="op">=</span> <span class="fl">0.16</span>, break_label <span class="op">=</span> <span class="st">"(Cont.)"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AEDECOD</span>, indent <span class="op">=</span> <span class="fl">0.16</span>, break_label <span class="op">=</span> <span class="st">"(Continued)"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AESEV</span>, indent <span class="op">=</span> <span class="fl">0.32</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt1</span>, label <span class="op">=</span> <span class="st">"Treatment A"</span>, n<span class="op">=</span><span class="fl">11</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt2</span>, label <span class="op">=</span> <span class="st">"Treatment B"</span>, n<span class="op">=</span><span class="fl">7</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt3</span>, label <span class="op">=</span> <span class="st">"Treatment C"</span>, n<span class="op">=</span><span class="fl">15</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span></span>
+<span>  </span>
 <span>  <span class="co"># ----- Footnote setting -----#</span></span>
 <span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Page [pg] of [tpg]"</span>, align <span class="op">=</span> <span class="st">"right"</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, valign <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Safety Analysis Set includes all subjects who are received at least one dose of study drug."</span>,</span>
@@ -299,18 +296,13 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span>            align <span class="op">=</span> <span class="st">"left"</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, valign <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Coded using MedDRA version 22.1."</span>,</span>
 <span>            align <span class="op">=</span> <span class="st">"left"</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, valign <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Severity of adverse event will be graded using CTCAE version 4.0 criteria."</span>,</span>
-<span>            align <span class="op">=</span> <span class="st">"left"</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, valign <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"Reported Verbatim Term are displayed for Uncoded AEs."</span>,</span>
-<span>            align <span class="op">=</span> <span class="st">"left"</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, valign <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Program: "</span>, <span class="va">program_path</span><span class="op">)</span>, italics <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="va">last_footnote</span>, blank_row <span class="op">=</span> <span class="st">"none"</span>, italics <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span> </span>
+<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Program: "</span>, <span class="va">program_path</span><span class="op">)</span>, italics <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">sty</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_style.html">create_style</a></span><span class="op">(</span>font_name <span class="op">=</span> <span class="st">"Arial"</span>,</span>
 <span>                    font_size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, </span>
-<span>                     orientation <span class="op">=</span> <span class="st">"portrait"</span>, </span>
+<span>                     orientation <span class="op">=</span> <span class="st">"landscape"</span>, </span>
 <span>                     output_type <span class="op">=</span> <span class="st">"PDF"</span><span class="op">)</span>  <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_style.html">add_style</a></span><span class="op">(</span>style <span class="op">=</span> <span class="va">sty</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">0.75</span>, right <span class="op">=</span> <span class="fl">1</span>, left <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -321,50 +313,53 @@ repeated SOC with “Continued” at the top of next page.</p>
 <span>         <span class="st">"Preferred Term and Grade"</span>,</span>
 <span>         <span class="st">"(Safety Analysis Set)"</span>,</span>
 <span>         bold <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>         font_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"All the data is from dummy database."</span><span class="op">)</span></span>
+<span>         font_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="co"># Write the report</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
-<p>Page 1:</p>
-<p><img src="../man/images/example16b_p1.png" alt="Styles example image A"></p>
-<p><br> Page 2:</p>
-<p><img src="../man/images/example16b_p2.png" alt="Styles example image A"></p>
-<p><br> SOC <em>“Infections and infestations”</em> continues onto the
-next page, so it is repeated at the top of page 2 with suffix
-<em>“(Continued)”</em>.</p>
-<p><br> Page 3:<br><br> Both SOC <em>“Injury, poisoning and procedural
-complications”</em> and preferred term <em>“MUSCLE INJURY”</em> continue
-onto page 3, so they’re repeated at the top with different suffix
-words.</p>
-<p><br><br><img src="../man/images/example16b_p3.png" alt="Styles example image A"></p>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Uncomment to view</span></span>
+<span><span class="co"># file.show(res$path)</span></span></code></pre></div>
+<p><img src="../man/images/example16b_p1.png" alt="Example B page 1"></p>
+<p><br></p>
+<p><img src="../man/images/example16b_p2.png" alt="Example B page 2"></p>
+<p><br><img src="../man/images/example16b_p3.png" alt="Example B page 3"></p>
 </div>
 <div class="section level2">
 <h2 id="group-cohesion">Group Cohesion<a class="anchor" aria-label="anchor" href="#group-cohesion"></a>
 </h2>
-<p>Continuing from the previous example. If you want to avoid splitting
-the same group across multiple pages. You can use
-<code>group_cohesion = TRUE</code> in <code><a href="../reference/define.html">define()</a></code> for AESOC
-and AEDECOD such like,<br><code>define(AESOC, break_label = "(Continued)", group_cohesion = TRUE)</code><br><code>define(AEDECOD, indent = 0.16, break_label = "(Cont.)" , group_cohesion = TRUE)</code><br></p>
+<p>You many also want to avoid splitting groups across pages altogether.
+To keep groups together on the same page, you can use the
+“group_cohesion” parameter on the <code><a href="../reference/define.html">define()</a></code> function.</p>
+<p>To illustrate, we will make a small modification to the code above to
+turn on group cohesion:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AESOC</span>, break_label <span class="op">=</span> <span class="st">"(Continued)"</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AEDECOD</span>, indent <span class="op">=</span> <span class="fl">0.16</span>, break_label <span class="op">=</span> <span class="st">"(Cont.)"</span> , group_cohesion <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>then the result will be:</p>
-<p>Page 1:</p>
-<p><img src="../man/images/example16d_p1.png" alt="Styles example image A"></p>
-<p><br> Page 2:</p>
-<p><img src="../man/images/example16d_p2.png" alt="Styles example image A"></p>
-<p><br> We can see that the SOC <em>“Infections and infestations”</em>
-is not split because the entire group is moved to page 2. That’s how
-<code>group_cohesion</code> works to avoid splitting the same group
-across multiple pages.</p>
-<p><br><br> Let’s see another example to learn more about
-<code>group_cohesion</code>:</p>
+<span><span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">AEDECOD</span>, indent <span class="op">=</span> <span class="fl">0.16</span>, break_label <span class="op">=</span> <span class="st">"(Continued)"</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Now the result is as follows:</p>
+<p><img src="../man/images/example16c_p1.png" alt="Example C page 1"></p>
+<p><br></p>
+<p><img src="../man/images/example16c_p2.png" alt="Example C page 2"></p>
+<p><br></p>
+<p><img src="../man/images/example16c_p3.png" alt="Example C page 3"></p>
+<p><br></p>
+<p>With the above modification, the group <em>“Infections and
+infestations”</em> is still split because it is a large group, and there
+is no way to avoid splitting it across multiple pages. However, the
+other breaks have all been avoided by moving groups to the next page. In
+this way, the report looks nicer and becomes more readable.</p>
+</div>
+<div class="section level2">
+<h2 id="multiple-group-cohesion">Multiple Group Cohesion<a class="anchor" aria-label="anchor" href="#multiple-group-cohesion"></a>
+</h2>
+<p>The group cohesion feature also works with multiple columns. To
+illustrate, let’s look at another example:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"example16b.pdf"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Create data</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">91</span>,<span class="op">]</span></span>
 <span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">group_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -389,10 +384,12 @@ across multiple pages.</p>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group_1"</span>, <span class="st">"group_2"</span>, <span class="st">"Sepal.Length"</span>, </span>
 <span>               <span class="st">"Sepal.Width"</span>, <span class="st">"Petal.Length"</span>,<span class="st">"Petal.Width"</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
+<span><span class="co"># Create table</span></span>
 <span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_table.html">create_table</a></span><span class="op">(</span><span class="va">dat</span>, borders <span class="op">=</span> <span class="st">"outside"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_1</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 1"</span>, blank_after <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group_2</span>, group_cohesion <span class="op">=</span> <span class="cn">TRUE</span>, label <span class="op">=</span> <span class="st">"Group 2"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Create report</span></span>
 <span><span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, output_type <span class="op">=</span> <span class="st">"pdf"</span>, font <span class="op">=</span> <span class="st">"Arial"</span>,</span>
 <span>                     font_size <span class="op">=</span> <span class="fl">10</span>, orientation <span class="op">=</span> <span class="st">"landscape"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"Table 1.0"</span>, <span class="st">"My Nice Report with Group Cohesion"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -401,42 +398,41 @@ across multiple pages.</p>
 <span>  <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"My footnote 1"</span>, <span class="st">"My footnote 2"</span>, borders <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>            blank_row <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Output report</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span></code></pre></div>
-<p>Page 1:
-<img src="../man/images/example16c_p1.png" alt="Styles example image A"></p>
-<p><br><br> Page 2:
-<img src="../man/images/example16c_p2.png" alt="Styles example image A"></p>
-<p><br><br><br> We can see that there is still space in the end of
-page 1, but it’s not enough for the entire group B. To keep group B in
-the same page, it is moved to the page 2.</p>
-<p><br><br> Page 3:
-<img src="../man/images/example16c_p3.png" alt="Styles example image A"></p>
-<p><br><br><br> After group B, the remaining space is not enough for
-entire group C, and we cannot move the entire group C to page 3 or the
-remaining space would be too much in page 2. As a result, group C will
-be split from page 2 to page 3. However, because we set
-<code>group_cohesion = TRUE</code> for both Group1 and Group2, when
-Group1 is split, <strong>reporter</strong> will still keep Group2 on the
-same page as much as possible. Therefore, we can see that the entire
-“Flower C2” is moved to page 3 because the remaining space after “Flower
-C1” is not enough for “Flower C2”.</p>
+<p><img src="../man/images/example16d_p1.png" alt="Example D page 1"></p>
+<p><br><img src="../man/images/example16d_p2.png" alt="Example D page 2"></p>
+<p><br></p>
+<p><img src="../man/images/example16d_p3.png" alt="Example D page 3"></p>
+<p><br></p>
+<p>We can see above that there is still space at the end of page 1, but
+it’s not enough for all of group B. To keep group B together, it is
+therefore moved to page 2.</p>
+<p>After group B on page 2, the remaining space is not enough for all of
+group C. And we cannot move all of group C to page 3, because it is too
+big.</p>
+<p>As a result, group C will be split between pages 2 and 3. However,
+because we engaged group cohesion for both Group1 and Group2,
+<strong>reporter</strong> will try to keep Group2 on the same page if
+possible. Therefore, all of group “Flower C2” is moved to page 3.</p>
 <div class="section level4">
 <h4 id="logic-of-group-cohesion">Logic of Group Cohesion<a class="anchor" aria-label="anchor" href="#logic-of-group-cohesion"></a>
 </h4>
-<p>The logic of group cohesion is very simple. If a group is to split,
-the entire group will be moved to next page only if occupies at least
-80% of the current page. Accordingly, Group B moves to the next page
-because Group A occupies at least 80% of the page. Similarly, Group C2
-moves to the next page because the combined data from Group B and Group
-C1 reaches the 80% threshold. When <code>group_cohesion = TRUE</code>,
-the default strength of group cohesion is 0.2, which means the required
-proportion is <code>1 - 0.2 = 0.8</code>. Users can change the required
-proportion by assigning more strength such as
-<code>group_cohesion = 0.6</code>, which means the requirement of
-proportion is 0.4. Once the previous group has reached 40% of page, the
-next group can be moved to next page if the remaining space is not
-enough. That’s say, the more strength of group cohesion, the lower the
-required proportion, and the less likely the group is to split.</p>
+<p>The logic of group cohesion is very simple. If a group is to be
+split, the group will be moved to next page only if the current page is
+at least 80% full. Accordingly, Group B moves to the next page because
+Group A occupies at least 80% of the page. Similarly, Group C2 moves to
+the next page because the combined data from Group B and Group C1
+reaches the 80% threshold.</p>
+<p>When <code>group_cohesion = TRUE</code>, the default strength of
+group cohesion is 0.2, which means the required proportion is
+<code>1 - 0.2 = 0.8</code>. Users can change the required proportion by
+assigning more strength, such as <code>group_cohesion = 0.6</code>,
+which means the requirement of proportion is 0.4. Once the previous
+group has reached 40% of page, the next group can be moved to a new page
+if the remaining space is not enough. That is to say, the stronger the
+group cohesion, the lower the required proportion, and the less likely
+the group is to split.</p>
 </div>
 </div>
   </div>
@@ -456,7 +452,7 @@ required proportion, and the less likely the group is to split.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>

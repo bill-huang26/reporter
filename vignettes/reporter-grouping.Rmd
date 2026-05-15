@@ -13,14 +13,17 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+Data on reports is frequently grouped in some way. The **reporter** package offers 
+several features to identify and manage these groups.  Here are some of the 
+highlights.
 
 ## Group Border
 
-The **reporter** package can draw bottom lines to separate different groups by
-setting `group_border = TRUE` in `define()`.
+The **reporter** package can draw border lines to separate different groups.
+To create the border line, set `group_border = TRUE` on the `define()` function.
 
 Here is an example:
-```{r eval=FALSE, echo=TRUE} 
+```{r eval=FALSE, echo=TRUE}
 library(reporter)
 
 # Create temp file name
@@ -30,7 +33,7 @@ tmp <- file.path(tempdir(), "example16a.pdf")
 arm <- c(rep("A", 3), rep("B", 2), rep("C", 3), rep("D", 2))
 subjid <- 100:109
 name <- c("Quintana, Gabriel", "Allison, Blas", "Minniear, Presley",
-          "al-Kazemi, Najwa \nand more and more", "Schaffer, Ashley", "Laner, Tahma",
+          "al-Kazemi, Najwa", "Schaffer, Ashley", "Laner, Tahma",
           "Perry, Sean", "Crews, Deshawn Joseph", "Person, Ladon",
           "Smith, Shaileigh")
 sex <- c("M", "F", "F", "M", "M", "F", "M", "F", "F", "M")
@@ -48,32 +51,30 @@ tbl1 <- create_table(df, first_row_blank = FALSE, borders = "outside") %>%
   define(age, label = "Age", n = 10) %>%
   define(arm, label = "Arm",
          dedupe = TRUE,
-         group_border = TRUE) %>%
-  footnotes("This is the footnote")
+         group_border = TRUE) 
 
 
 rpt <- create_report(tmp, output_type = "pdf", font = "Arial",
                      font_size = 10) %>%
   titles(c("Table 1.0", "This is a table with group border"), align = "center") %>%
   add_content(tbl1) %>%
-  footnotes(c("This is the footnote 1")) %>%
-  page_header(left = "Test header", right = "Test header") %>%
   set_margins(top = 1, bottom = 1)
 
 
 res <- write_report(rpt)
+
 ```
-<img src="../man/images/example16a.png" alt="Styles example image A"/>
+
+<img src="../man/images/example16a.png" alt="Example image A"/>
+
 
 ## Break Label
 
-For the outputs with hierarchy levels such as AE tables. Taking SOC as an example,
-when SOC continues onto the next page, we might want to display the SOC again 
-with suffix wording such as *"Continued"*. With `break_label = "Continued"` in 
-`define()`, the **reporter** package will automatically generate the repeated SOC
-with "Continued" at the top of next page.
-
-Here is an example:
+For some types of reports,
+it is desirable to have a label that indicates when a group has been broken across
+pages. This feature is supported with the "break_label" parameter
+on the `define()` function.  In the example below, the "break_label" is assigned
+a value of "(Continued)":
 
 ```{r eval=FALSE, echo=TRUE} 
 library(reporter)
@@ -82,22 +83,20 @@ fp <- file.path(tempdir(), "example16b.pdf")
 
 # Prepare data
 adae <- data.frame(
-  total = rep("Number of subject with adverse events", 66),
+  total = rep("Number of subject with adverse events", 53),
   AESOC = c(NA, 
-            rep("Gastrointestinal disorders", 13),
             rep("General disorders and administration site conditions", 9),
             rep("Hepatobiliary disorders", 5),
             rep("Infections and infestations", 25),
             rep("Injury, poisoning and procedural complications", 13)),
   AEDECOD = c(NA,
-              NA, rep("CHEILITIS", 4), rep("DIARRHOEA", 4), rep("STOMACH DISCOMFORT", 4),
               NA, rep("APPLICATION SITE ERYTHEMA", 4), rep("INFLUENZA LIKE ILLNESS", 4),
               NA, rep("GALLBLADDER DISORDER", 4),
               NA, rep("BRONCHITIS", 4), rep("NAIL INFECTION", 4), rep("PARONYCHIA", 4),
-                  rep("RASH PUSTULAR", 4), rep("RESPIRATORY TRACT INFECTION", 4),
-                  rep("RHINITIS", 4),
+              rep("RASH PUSTULAR", 4), rep("RESPIRATORY TRACT INFECTION", 4),
+              rep("RHINITIS", 4),
               NA, rep("FALL", 4), rep("HEAT CRAMPS", 4), rep("MUSCLE INJURY", 4)
-              )
+  )
 )
 
 adae$aedecod_seq <- rep(NA, nrow(adae))
@@ -127,14 +126,13 @@ adae <- adae[, setdiff(names(adae), c("aedecod_seq", "aedecod_id"))]
 
 # Output
 custom_n_format <- function(x){
-      return(paste0("\n(N = ",x,")\nn(%)"))
-    }
-    
+  return(paste0("\n(N = ",x,")\nn(%)"))
+}
+
 current_date <- gsub(" ","",toupper(format(Sys.Date(),"%d %b %Y")))
 current_time <- substr(Sys.time(),12,19)
 output_name <- "example16c.pdf"
 program_path <- "/dummy/tables/t-teae-soc-pt-gr-saf.R"
-last_footnote <- paste0("Output: ",output_name," Source: adae")
 
 total_width <- 6
 trt_width <- 1.04
@@ -151,12 +149,12 @@ tbl <- create_table(adae,
        label = "System Organ Class\n  Preferred Term\n    Grade", 
        width = item_width) %>%
   define(AESOC, break_label = "(Continued)") %>%
-  define(AEDECOD, indent = 0.16, break_label = "(Cont.)") %>%
+  define(AEDECOD, indent = 0.16, break_label = "(Continued)") %>%
   define(AESEV, indent = 0.32) %>%
   define(trt1, label = "Treatment A", n=11) %>%
   define(trt2, label = "Treatment B", n=7) %>%
   define(trt3, label = "Treatment C", n=15) %>%
-
+  
   # ----- Footnote setting -----#
   footnotes("Page [pg] of [tpg]", align = "right", blank_row = "none", valign = "top") %>%
   footnotes("Safety Analysis Set includes all subjects who are received at least one dose of study drug.",
@@ -165,18 +163,13 @@ tbl <- create_table(adae,
             align = "left", blank_row = "none", valign = "top") %>%
   footnotes("Coded using MedDRA version 22.1.",
             align = "left", blank_row = "none", valign = "top") %>%
-  footnotes("Severity of adverse event will be graded using CTCAE version 4.0 criteria.",
-            align = "left", blank_row = "none", valign = "top") %>%
-  footnotes("Reported Verbatim Term are displayed for Uncoded AEs.",
-            align = "left", blank_row = "none", valign = "top") %>%
-  footnotes(paste0("Program: ", program_path), italics = TRUE) %>%
-  footnotes(last_footnote, blank_row = "none", italics = TRUE ) 
+  footnotes(paste0("Program: ", program_path), italics = TRUE) 
 
 sty <- create_style(font_name = "Arial",
                     font_size = 9)
 
 rpt <- create_report(fp, 
-                     orientation = "portrait", 
+                     orientation = "landscape", 
                      output_type = "PDF")  %>%
   add_style(style = sty) %>%
   set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
@@ -187,70 +180,70 @@ rpt <- create_report(fp,
          "Preferred Term and Grade",
          "(Safety Analysis Set)",
          bold = T,
-         font_size = 11) %>%
-  footnotes("All the data is from dummy database.")
+         font_size = 11) 
 
 # Write the report
 res <- write_report(rpt)
+
+# Uncomment to view
+# file.show(res$path)
+
 ```
 
-Page 1:
 
-<img src="../man/images/example16b_p1.png" alt="Styles example image A"/>
-
-<br>
-Page 2:
-
-<img src="../man/images/example16b_p2.png" alt="Styles example image A"/>
+<img src="../man/images/example16b_p1.png" alt="Example B page 1"/>
 
 <br>
-SOC *"Infections and infestations"* continues onto the next page, so it is repeated 
-at the top of page 2 with suffix *"(Continued)"*.
+
+
+<img src="../man/images/example16b_p2.png" alt="Example B page 2"/>
 
 <br>
-Page 3:<br>
-<br>
-Both SOC *"Injury, poisoning and procedural complications"* and preferred term
-*"MUSCLE INJURY"* continue onto page 3, so they're repeated at the top with different
-suffix words.
-
-<br>
-<br>
-<img src="../man/images/example16b_p3.png" alt="Styles example image A"/>
+<img src="../man/images/example16b_p3.png" alt="Example B page 3"/>
 
 ## Group Cohesion
 
-Continuing from the previous example. If you want to avoid splitting the same 
-group across multiple pages. You can use `group_cohesion = TRUE` in `define()` 
-for AESOC and AEDECOD such like:<br> 
+You many also want to avoid splitting groups 
+across pages altogether. To keep groups together on the same page, 
+you can use the "group_cohesion" parameter on the `define()` function. 
+
+To illustrate, we will make a small modification to the code above to turn on
+group cohesion:
 ```{r eval=FALSE, echo=TRUE} 
 define(AESOC, break_label = "(Continued)", group_cohesion = TRUE)
-define(AEDECOD, indent = 0.16, break_label = "(Cont.)" , group_cohesion = TRUE)
+define(AEDECOD, indent = 0.16, break_label = "(Continued)", group_cohesion = TRUE)
 ```
-Then the result will be:
+Now the result is as follows:
 
-Page 1:
-
-<img src="../man/images/example16d_p1.png" alt="Styles example image A"/>
+<img src="../man/images/example16c_p1.png" alt="Example C page 1"/>
 
 <br>
-Page 2:
 
-<img src="../man/images/example16d_p2.png" alt="Styles example image A"/>
-
-<br>
-We can see that the SOC *"Infections and infestations"* is not split because the
-entire group is moved to page 2. That's how `group_cohesion` works to avoid 
-splitting the same group across multiple pages. 
+<img src="../man/images/example16c_p2.png" alt="Example C page 2"/>
 
 <br>
-Let's see another example to learn more about `group_cohesion`:
+
+<img src="../man/images/example16c_p3.png" alt="Example C page 3"/>
+
+<br>
+
+With the above modification, the group *"Infections and infestations"* is still split
+because it is a large group, and there is no way to avoid splitting it across
+multiple pages.  However, the other breaks have all been avoided by moving 
+groups to the next page.  In this way, the report looks nicer and 
+becomes more readable.
+
+## Multiple Group Cohesion
+
+The group cohesion feature also works with multiple columns.  To illustrate, 
+let's look at another example: 
 
 ```{r eval=FALSE, echo=TRUE} 
 library(reporter)
 
 fp <- file.path(tempdir(), "example16b.pdf")
 
+# Create data
 dat <- iris[1:91,]
 
 dat$group_1 <- c(
@@ -275,10 +268,12 @@ dat$group_2 <- c(
 dat <- dat[, c("group_1", "group_2", "Sepal.Length", 
                "Sepal.Width", "Petal.Length","Petal.Width")]
 
+# Create table
 tbl <- create_table(dat, borders = "outside") %>%
   define(group_1, group_cohesion = TRUE, label = "Group 1", blank_after = T) %>%
   define(group_2, group_cohesion = TRUE, label = "Group 2")
 
+# Create report
 rpt <- create_report(fp, output_type = "pdf", font = "Arial",
                      font_size = 10, orientation = "landscape") %>%
   titles("Table 1.0", "My Nice Report with Group Cohesion") %>%
@@ -287,50 +282,47 @@ rpt <- create_report(fp, output_type = "pdf", font = "Arial",
   footnotes("My footnote 1", "My footnote 2", borders = "none",
             blank_row = "none")
 
+# Output report
 res <- write_report(rpt)
+
 ```
 
-Page 1:
-<img src="../man/images/example16c_p1.png" alt="Styles example image A"/>
+<img src="../man/images/example16d_p1.png" alt="Example D page 1"/>
 
 <br>
-<br>
-Page 2:
-<img src="../man/images/example16c_p2.png" alt="Styles example image A"/>
+<img src="../man/images/example16d_p2.png" alt="Example D page 2"/>
+
 
 <br>
+
+<img src="../man/images/example16d_p3.png" alt="Example D page 3"/>
+
 <br>
-<br>
-We can see that there is still space in the end of page 1, but it's not enough
-for the entire group B. To keep group B in the same page, it is moved to the
+
+We can see above that there is still space at the end of page 1, but it's not enough
+for all of group B. To keep group B together, it is therefore moved to 
 page 2.
 
-<br>
-<br>
-Page 3:
-<img src="../man/images/example16c_p3.png" alt="Styles example image A"/>
+After group B moves to page 2, the remaining space is not enough for all of group C.
+And we cannot move all of group C to page 3, because it is too big. 
 
-<br>
-<br>
-<br>
-After group B, the remaining space is not enough for entire group C, and we cannot
-move the entire group C to page 3 or the remaining space would be too much in page 2.
-As a result, group C will be split from page 2 to page 3. However, because we set
-`group_cohesion = TRUE` for both Group1 and Group2, when Group1 is split,
-**reporter** will still keep Group2 on the same page as much as possible. Therefore, we
-can see that the entire "Flower C2" is moved to page 3 because the remaining space
-after "Flower C1" is not enough for "Flower C2".
+As a result, group C will be split between pages 2 and 3. However, because we
+engaged group cohesion for both Group1 and Group2,
+**reporter** will try to keep Group2 on the same page. Therefore, all
+of group "Flower C2" is moved to page 3.
 
 #### Logic of Group Cohesion
-The logic of group cohesion is very simple. If a group is to split, the entire
-group will be moved to next page only if occupies at least 80% of the current page.
+
+The logic of group cohesion is very simple. If a group is to be split, the 
+group will be moved to next page only if the current page is at least 80% full.
 Accordingly, Group B moves to the next page because Group A occupies at least 80% 
 of the page. Similarly, Group C2 moves to the next page because the combined data 
 from Group B and Group C1 reaches the 80% threshold.
+
 When `group_cohesion = TRUE`, the default strength of group cohesion is 0.2, 
 which means the required proportion is `1 - 0.2 = 0.8`. Users can change the 
-required proportion by assigning more strength such as `group_cohesion = 0.6`, 
+required proportion by assigning more strength, such as `group_cohesion = 0.6`, 
 which means the requirement of proportion is 0.4. Once the previous group has reached 
-40% of page, the next group can be moved to next page if the remaining space is not enough.
-That's say, the more strength of group cohesion, the lower the required proportion,
+40% of page, the next group can be moved to a new page if the remaining space is not enough.
+That is to say, the stronger the group cohesion, the lower the required proportion,
 and the less likely the group is to split.

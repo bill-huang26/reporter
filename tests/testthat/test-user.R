@@ -373,6 +373,10 @@ test_that("user3: listings works.", {
     expect_equal(file.exists(pdfpth), TRUE)
     
     
+    docxpth <- file.path(base_path, "user/user3.docx")
+    write_report(rpt, docxpth, output_type = "DOCX")
+    expect_equal(file.exists(docxpth), TRUE)
+    
 })
 
 test_that("user4: Adverse Events table works.", {
