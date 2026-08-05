@@ -175,6 +175,16 @@ As seen above, all the HTML code insertion worked as expected:
 * Footnotes are formatted with italic, superscript, and smaller font size.
 * Footers are formatted with subscript.
 
+<br>
+<br>
+<br>
+Users are responsible for ensuring the accuracy of code insertions. For example, 
+certain RTF styles must be explicitly closed after being opened; otherwise, 
+subsequent outputs may be affected. Additionally, this package does not account
+for overflows caused by line increases from inserting indentation code. 
+If code indentation is required, please prioritize using the `indent` parameter 
+within the `define()` function provided by this package.
+
 [top](#top)
 
 Next: [Example 18: Report Options](reporter-report_options.html)

@@ -912,13 +912,15 @@ get_blank_indicator <- function(pg_num, tot_pg, content_blanks,
   if (is.null(names(content_offset[["upper"]]))) {
     content_offset_up <- content_offset[["upper"]]
   } else {
-    content_offset_up <- content_offset[["upper"]][[pgby]]
+    idx <- names(content_offset[["upper"]]) %in% pgby
+    content_offset_up <- as.numeric(content_offset[["upper"]][idx])
   }
   
   if (is.null(names(content_offset[["lower"]]))) {
     content_offset_low <- content_offset[["lower"]]
   } else {
-    content_offset_low <- content_offset[["lower"]][[pgby]]
+    idx <- names(content_offset[["lower"]]) %in% pgby
+    content_offset_low <- as.numeric( content_offset[["lower"]][idx])
   }
   
   if (pg_num == 1 & pg_num == tot_pg & content_blanks == "both")

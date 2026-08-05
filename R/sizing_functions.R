@@ -641,6 +641,10 @@ get_col_widths_variable <- function(dat, ts, labels, font,
       
       # Remove all RTF code for accurate widths
       if (allow_rtf_code) {
+        # Replace "\\line" with "\n" to make sure width calculation is correct
+        line_regex <- "\\\\line"
+        dat[[nm]] <- gsub(line_regex, "\n", dat[[nm]])
+        
         # includes RTF code containing numbers, letters, and the following space
         rtf_control_regex <- "\\\\[a-z]+-?[0-9]* ?"
         # includes RTF special control like \\*
@@ -655,6 +659,10 @@ get_col_widths_variable <- function(dat, ts, labels, font,
       
       # Remove all html code for accurate widths
       if (allow_html_code) {
+        # Replace "<br>" with "\n" to make sure width calculation is correct
+        line_regex <- "<br>"
+        dat[[nm]] <- gsub(line_regex, "\n", dat[[nm]])
+        
         # includes html code
         html_control_regex <- "(?i)<\\/?([a-z]+)[^>]*>|&[a-z0-9#]+;"
         
@@ -1292,7 +1300,7 @@ get_splits_text <- function(x, widths, page_size, lpg_rows,
   # Somewhat unsure of this.
   if (stub_dedupe(ts$stub, defs)) {
     sdef <- define_c("stub", dedupe = TRUE)
-    ret <- dedupe_pages(ret, list(sdef))
+    ret <- dedupe_pages(ret, list("stub" = sdef))
   }
 
   
@@ -1399,9 +1407,12 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
   for (i in seq_len(nrow(x))){
     
     if (using_pgby_up & !using_pgby_low) {
-      ttfl <- content_offsets[["lower"]] + content_offsets[["upper"]][[x$..page_by[i]]]
+      pgby_up_idx <- names(content_offsets[["upper"]]) %in% x$..page_by[i]
+      ttfl <- content_offsets[["lower"]] + as.numeric(content_offsets[["upper"]][pgby_up_idx])
     } else if (using_pgby_up & using_pgby_low) {
-      ttfl <- content_offsets[["lower"]][[x$..page_by[i]]] + content_offsets[["upper"]][[x$..page_by[i]]]
+      pgby_up_idx <- names(content_offsets[["upper"]]) %in% x$..page_by[i]
+      pgby_low_idx <- names(content_offsets[["lower"]]) %in% x$..page_by[i]
+      ttfl <- as.numeric(content_offsets[["lower"]][pgby_low_idx]) + as.numeric(content_offsets[["upper"]][pgby_up_idx])
     }
     
     if (count_row_var) {
@@ -1434,14 +1445,21 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
     
     # If last page is not equal to current page, and neither is NA,
     # force a page break
-    if (!is.na(lastPage) & !is.na(currentPage) & 
-        trimws(lastPage) != "NA" & trimws(currentPage) != "NA" & 
-        trimws(lastPage) != "" & trimws(currentPage) != "" & 
-        currentPage != lastPage) {
-      userForce <- TRUE
-
-    } else
-      userForce <- FALSE
+    # if ( !is.na(lastPage) & !is.na(currentPage) &
+    #     trimws(lastPage) != "NA" & trimws(currentPage) != "NA" &
+    #     trimws(lastPage) != "" & trimws(currentPage) != "" &
+    #     currentPage != lastPage) {
+    #   userForce <- TRUE
+    # 
+    # } else
+    #   userForce <- FALSE
+    
+    # Need to check the inserted blank lines, multiple tables
+    page_equal <- (is.na(lastPage) == is.na(currentPage)) && 
+      (is.nan(lastPage) == is.nan(currentPage)) && 
+      (is.na(lastPage) || (lastPage == currentPage))
+    
+    userForce <- !page_equal
     
     # After comparison, set last page value
     lastPage <- currentPage

@@ -2338,6 +2338,8 @@ get_page_by_pdf <- function(pgby, width, value, rs, talgn, ystart = 0,
         sep <- ""
       }
       
+      # Don't display "NA" when value is NA to differentiate real character "NA"
+      value <- ifelse(is.na(value),"",value)
       vl <- paste0( pgby$label, sep, value)
       
       tmp <- split_string_text(vl, width, rs$units)

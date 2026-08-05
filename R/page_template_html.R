@@ -1505,6 +1505,8 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
         sep <- ""
       }
       
+      # Don't display "NA" when value is NA to differentiate real character "NA"
+      value <- ifelse(is.na(value),"",value)
       tmp <- split_string_html(paste0(pgby$label, sep, value), width, rs$units,
                                insert_line_break = rs$line_break,
                                allow_html_code = rs$allow_code)

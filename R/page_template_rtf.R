@@ -1633,6 +1633,8 @@ get_page_by_rtf <- function(pgby, width, value, rs, talgn, pgby_cnt = NULL) {
         sep <- ""
       }
       
+      # Don't display "NA" when value is NA to differentiate real character "NA"
+      value <- ifelse(is.na(value),"",value)
       tmp <- split_string_rtf(paste0(pgby$label, sep, value), width, rs$units, 
                               allow_rtf_code = rs$allow_code,
                               insert_line_break = rs$line_break)

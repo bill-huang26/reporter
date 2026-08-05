@@ -525,6 +525,18 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
   
   if (!is.na(strng) & as.character(strng) != "") {
     
+    if (allow_rtf_code) {
+      # Replace "\\line" with "\n" to make sure manual line break is counted
+      line_regex <- "\\\\line"
+      strng <- gsub(line_regex, "\n", as.character(strng))
+    }
+    
+    if (allow_html_code) {
+      # Replace "<br>" with "\n" to make sure manual line break is counted
+      line_regex <- "<br>"
+      strng <- gsub(line_regex, "\n", as.character(strng))
+    }
+    
     splits <- unlist(stri_split_fixed(as.character(strng), "\n"))
     
     for (split in splits) {
@@ -1238,41 +1250,63 @@ push_down <- function(x) {
 dedupe_pages <- function(pgs, defs) {
   
   ret <- list()
-
   for (dat in pgs) {
+    out_dat <- dat
     nms <- names(dat)
     for (def in defs) {
-      if (def$dedupe) {
+
+      # Process different input variables for dedupe
+      dedupe <- FALSE
+      if (isTRUE(def$dedupe)) {
+        dedupe_vars <- def$var_c
+        dedupe <- TRUE
+      } else if (is.character(def$dedupe)) {
+        dedupe_vars <- def$dedupe
+        dedupe <- TRUE
+      }
+
+      if (dedupe) {
+        # Process for non-visible variables for dedupe
+        for (d in dedupe_vars) {
+          if (defs[[d]]$visible == FALSE) {
+            new_d <- paste0("..x.", d)
+            dedupe_vars[dedupe_vars == d] <- new_d
+          }
+        }
         
-        if(def$var_c %in% nms) {
-        
+        if(any(dedupe_vars %in% nms)) {
+
           # Convert to character if necessary
-          if (all(dat[[def$var_c]] != "character"))
+          if (class(dat[[def$var_c]]) != "character"){
             dat[[def$var_c]] <- as.character(dat[[def$var_c]])
-          
+          }
+
           # Fill with blanks as appropriate
-          w <- min(nchar(dat[[def$var_c]])) # Take min to exclude label row
+          w <- min(nchar(dat[[def$var_c]][!is.na(dat[[def$var_c]])])) # Take min to exclude label row
           v <- paste0(rep(" ", times = w), collapse = "")
-          
-          if (length(dat[[def$var_c]]) > 1) {
-      
-            if ("..blank" %in% names(dat)) {
-              non_blank_idx <- dat[["..blank"]] == ""
-              dat[[def$var_c]][non_blank_idx] <- ifelse(changed(dat[[def$var_c]][non_blank_idx]),
-                                                        dat[[def$var_c]][non_blank_idx], v)
-            } else {
-              dat[[def$var_c]] <- ifelse(changed(dat[[def$var_c]]),
-                                         dat[[def$var_c]], v)
-              
+
+          # Generate the index for deduping
+          dedupe_idx <- rep(FALSE, nrow(dat))
+          for (dedupe_var in dedupe_vars) {
+            if (dedupe_var %in% nms) {
+              dedupe_col <- dat[[dedupe_var]]
+
+              if ("..blank" %in% names(dat)) {
+                blank_idx <- dat[["..blank"]] != ""
+                dedupe_idx <- dedupe_idx | changed(dedupe_col)
+                dedupe_idx[blank_idx] <- TRUE # Not replacing for blank row
+              } else {
+                dedupe_idx <- dedupe_idx | changed(dedupe_col)
+              }
             }
           }
-          
-          # dat[[def$var_c]] <- ifelse(!duplicated(dat[[def$var_c]]), 
-          #                            dat[[def$var_c]], v) 
+
+          # Use the deduping index to dedupe
+          out_dat[[def$var_c]] <- ifelse(dedupe_idx, dat[[def$var_c]], v)
         }
       }
     }
-    ret[[length(ret) + 1]] <- dat
+    ret[[length(ret) + 1]] <- out_dat
   }
   
   return(ret)

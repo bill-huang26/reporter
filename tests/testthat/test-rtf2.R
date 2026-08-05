@@ -4712,6 +4712,53 @@ test_that("rtf2-127: More RTF codes work as expected", {
   }
 })
 
+test_that("rtf2-127b: More RTF codes with \\line code work as expected", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "rtf2/test127b.rtf")
+    
+    df <- read.table(header = TRUE, text = '
+       var label A B
+       "ampg" "\\li360 N" "19" "13"
+       "ampg" "\\li360 Mean" "18.8" "22.0 (4.9)"
+       "ampg" "\\li360 Median" "16.4{\\sub mm}" "21.4{\\super 2}"
+       "ampg" "\\li360 {\\cf12 Q1 - Q3}" "15.1 - 21.2" "19.2 - 22.8"
+       "ampg" "\\li360 Range" "{\\cf2 10.4 - 33.9}" "14.7 - 32.4"
+       "cyl" "\\li360 8\\line Cylinder" "\\ul 10 ( 52.6%) \\ul0" "4 ( 30.8%)"
+       "cyl" "\\li360 6\\line {\\cf11 Cylinder and more. \\line When \\line this very long string the body footnote can flow to the next page}" "4 ( 21.1%)" "3 ( 23.1%)"
+       "cyl" "\\li0 Sometime this is needed\\line{ }Cylinder" "\\ul\\line 5 ( 26.3%) \\ul0" "\\line 6 ( 46.2%)"')
+    
+    # Create table
+    tbl <- create_table(df, first_row_blank = TRUE, borders=c("top", "bottom")) |>
+      stub(c("var", "label"), width = .8) |> # vary the width here to see unpredictable result. width=2.8 looks ok. when 0.8 page footnote overlfow
+      define(var, blank_after = TRUE, label_row = TRUE,
+             format = c(ampg = "\\i Here is a italic label \\i0.",
+                        cyl = "\\ul Under line label \\ul0")) |>
+      define(A, label = "\\shad {{\\cf6 Group A}} {common::supsc('2')}\\shad0", align = "center", n = 19) |>
+      define(B, label = "\\outl Group B \\outl0", align = "center", n = 13) |>
+      footnotes("\\i\\fs14 * Italic Small Table Footnote{common::supsc('2')} \\fs18")
+    
+    # Create report and add content
+    rpt <- create_report(fp, orientation = "portrait", output_type = "RTF",
+                         font = "Times") |>
+      report_options(allow_code = TRUE, title_block = "paragraph", line_break = FALSE) |>
+      
+      page_header(left = "\\strike Strikethrough header \\strike0", right = "Study: Cars") |>
+      titles("{{\\b\\i\\highlight7\\cf2 This is yellow italic highlight}}",
+             "\\fs0\\fs28 {{\\cf2 This is a blue big title{{\\super{{a}}}}}} \\fs18") |>
+      add_content(tbl) |>
+      footnotes("\\i\\fs14\\cf6 * Italic Small \\line\\li207\\fi-207 Report Footnote {{\\ul\\super{common::symbol('alpha')}}} OK \\fs18") |>
+      page_footer(left = "Left",
+                  center = "Confidential",
+                  right = "Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
 test_that("rtf2-128: Line break can be turned off by report_options as expected.", {
   
   if (dev) {
@@ -5007,6 +5054,117 @@ test_that("rtf2-134: line_count can be set in report_options as expected.", {
   }
 })
 
+test_that("rtf2-135: Empty page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test135.rtf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- ""
+    dat$cyl[2] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "rtf", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Empty and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-136: Numeric page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test136.rtf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "rtf", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Numeric and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-137: Multiple dedupe works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test137.rtf")
+    
+    # Setup
+    subjid <- c(100,100,101,101,101,102,103,103,104,104)
+    param <- c(rep("Hemoglobin", 3), rep("Triglycerides", 4), rep("Platelets", 3))
+    result <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+    Lab <- c(NA, NA, "central", "central", "central", NA, "local", "local", NA, NA)
+    arm <- c(rep("A", 5), rep("B", 5))
+    
+    df <- data.frame(subjid, arm, param, Lab, result)
+    
+    tbl1 <- create_table(df, first_row_blank = FALSE) %>%
+      define(subjid, label = "Subject", align = "left", dedupe = TRUE) %>%
+      define(param, label = "Lab Test", dedupe = c("subjid", "param")) %>%
+      define(result, label = "Result") %>%
+      define(Lab, visible = FALSE) %>%
+      define(arm, label = "Arm",
+             blank_after = TRUE,
+             dedupe = c("Lab", "arm"),
+             align = "right") 
+    
+    rpt <- create_report(fp, output_type = "RTF", font = fnt, font_size = fsz) %>%
+      page_header(left = "Company", right = c("Study ABC", "Status: Closed")) %>%
+      titles("Table 1.0", "Multiple Dedupe of subjid, arm, and lab test",
+             "Lab is non-visible for arm's dedupe", align = "center") %>%
+      footnotes("Program Name: table1_0.R") %>%
+      page_footer(left = "Time", center = "Confidential",
+                  right = "Page [pg] of [tpg]") %>%
+      add_content(tbl1)
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # User Tests --------------------------------------------------------------
 
 test_that("user1: demo table works.", {

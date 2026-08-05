@@ -4401,6 +4401,117 @@ test_that("pdf2-117: line_count can be set in report_options as expected.", {
   }
 })
 
+test_that("pdf2-118: Empty page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test118.pdf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- ""
+    dat$cyl[2] <- NA
+        
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "PDF", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "MTCARS Data Listing with Page By") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-119: Numeric page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test119.pdf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "PDF", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "MTCARS Data Listing with Page By") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-120: Multiple dedupe works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test120.pdf")
+    
+    # Setup
+    subjid <- c(100,100,101,101,101,102,103,103,104,104)
+    param <- c(rep("Hemoglobin", 3), rep("Triglycerides", 4), rep("Platelets", 3))
+    result <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+    Lab <- c(NA, NA, "central", "central", "central", NA, "local", "local", NA, NA)
+    arm <- c(rep("A", 5), rep("B", 5))
+    
+    df <- data.frame(subjid, arm, param, Lab, result)
+    
+    tbl1 <- create_table(df, first_row_blank = FALSE) %>%
+      define(subjid, label = "Subject", align = "left", dedupe = TRUE) %>%
+      define(param, label = "Lab Test", dedupe = c("subjid", "param")) %>%
+      define(result, label = "Result") %>%
+      define(Lab, visible = FALSE) %>%
+      define(arm, label = "Arm",
+             blank_after = TRUE,
+             dedupe = c("Lab", "arm"),
+             align = "right") 
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt, font_size = fsz) %>%
+      page_header(left = "Company", right = c("Study ABC", "Status: Closed")) %>%
+      titles("Table 1.0", "Multiple Dedupe of subjid, arm, and lab test",
+             "Lab is non-visible for arm's dedupe", align = "center") %>%
+      footnotes("Program Name: table1_0.R") %>%
+      page_footer(left = "Time", center = "Confidential",
+                  right = "Page [pg] of [tpg]") %>%
+      add_content(tbl1)
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # # User Tests --------------------------------------------------------------
 
 # Lots of special characters not working

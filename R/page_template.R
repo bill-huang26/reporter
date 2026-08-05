@@ -468,7 +468,8 @@ get_page_by <- function(pgby, width, value, pgby_cnt = NULL) {
     if (pgby$blank_row %in% c("above", "both"))
       ret[length(ret) + 1] <- ""
   
-
+    # Don't display "NA" when value is NA to differentiate real character "NA"
+    value <- ifelse(is.na(value),"",value)
     pb <- paste0(pgby$label, value)
     
     lns <- unlist(stri_split_fixed(pb, "\n"))
