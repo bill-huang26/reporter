@@ -66,8 +66,12 @@ get_rtf_document <- function(rs) {
   conv <- rs$twip_conversion
   
   fnt <- rs$font
-  if (tolower(rs$font) == "times")
+  if (tolower(rs$font) == "times") {
     fnt <- "Times New Roman"
+  } else if (tolower(rs$font) == "courier") {
+    fnt <- "Courier New"
+  }
+    
   
   # Prepare header
   ret[length(ret) + 1] <- paste0("{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 ", fnt , ";}}")

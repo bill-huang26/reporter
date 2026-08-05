@@ -1929,3 +1929,34 @@ test_that("rtf56: Numeric page_by works as expected.", {
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("rtf57: Courier is displayed as Courier New as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf/test57.rtf")
+    
+    txt <- create_text(cnt, width = 6, borders = "outside", align = "right") %>%
+      titles("Text 1.0", "My Nice Text", borders = "none", font_size = 12) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none")
+    
+    rpt <- create_report(fp, output_type = "RTF", font = "fixed") %>%
+      report_options(title_block = "paragraph") %>%
+      titles("Text 1.0", "My Nice Text", font_size = 14) %>%
+      titles("Title in Header", header = TRUE) %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", "Right") %>%
+      add_content(txt, align = "right") %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    # There is no visual difference between Courier and Courier New
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # Check if there is Courier New
+    rtf <- readLines(fp, warn = FALSE)
+    expect_equal(rtf[1],
+                 "{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Courier New;}}")
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})

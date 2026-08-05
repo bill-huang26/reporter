@@ -87,8 +87,12 @@ get_html_document <- function(rs) {
   conv <- rs$twip_conversion
   
   fnt <- rs$font
-  if (tolower(rs$font) == "times")
+  if (tolower(rs$font) == "times") {
     fnt <- "Times New Roman"
+  } else if (tolower(rs$font) == "courier") {
+    fnt <- "Courier New"
+  }
+    
   
   u <- rs$units
   if (rs$units == "inches")
