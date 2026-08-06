@@ -879,6 +879,10 @@ set_margins <- function(x, top=NULL, bottom=NULL,
 #' structure is useful on some editors which do not render the table title 
 #' block appropriately.  Note that if the "paragraph" setting is applied,
 #' some features of the \code{\link{titles}} function may not work as expected.
+#' @param line_height The line height for the report. The unit is the same as the
+#' `units` in \code{\link{create_report}}. By default, the line height is estimated
+#' by the font and the font size for different file formats. Please note that 
+#' extreme line heights can cause overflow or even render the output unreadable.
 #' @return The report_spec with option settings.
 #' @family report
 #' @examples
@@ -908,7 +912,8 @@ set_margins <- function(x, top=NULL, bottom=NULL,
 #' @export
 report_options <- function(x, allow_code = FALSE, line_break = TRUE,
                            line_count = NULL, page_wrap = TRUE, 
-                           auto_page = TRUE, title_block = "table"){
+                           auto_page = TRUE, title_block = "table",
+                           line_height = NULL){
   if (!"report_spec" %in% class(x)) {
     stop("Input object must be of class 'report_spec'.") 
   }
@@ -934,6 +939,15 @@ report_options <- function(x, allow_code = FALSE, line_break = TRUE,
     if (line_count <= 0)
       stop("line_count must be greater than zero.")
   }
+  if (!is.null(line_height)) {
+    if (!is.numeric(line_height)) {
+      stop("`line_height` should be a numeric value.")
+    } else {
+      if (line_height <= 0) {
+        stop("`line_height` should be greater than 0.")
+      }
+    }
+  }
   
   if (!is.null(x$output_type)) {
     if (toupper(x$output_type) != "RTF" & toupper(x$output_type) != "HTML") {
@@ -950,6 +964,7 @@ report_options <- function(x, allow_code = FALSE, line_break = TRUE,
   x$page_wrap <- page_wrap
   x$title_block <- title_block
   x$user_line_count <- line_count
+  x$user_line_height <- line_height
   
   return(x)
 }

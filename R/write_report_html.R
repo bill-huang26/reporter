@@ -569,8 +569,14 @@ page_setup_html <- function(rs) {
     gtr <- ccm(gtr)
   }
   
-  rs$row_height <- rh
-  rs$line_height <- rh
+  # Apply user's line height if it exists
+  if (!is.null(rs$user_line_height)) {
+    rs$row_height <- rs$user_line_height
+    rs$line_height <- rs$user_line_height
+  } else {
+    rs$row_height <- rh
+    rs$line_height <- lh
+  }
   rs$char_width <- cw
   
   # Content size is the page size minus margins, in units of measure
@@ -587,7 +593,7 @@ page_setup_html <- function(rs) {
                                units_html(rs$units), ";", "\"></div>")
 
   if (is.null(rs$user_line_count)) {
-    rs$line_count <- round(rs$content_size[[1]] / rh) 
+    rs$line_count <- round(rs$content_size[[1]] / rs$row_height) 
   } else
     rs$line_count <- rs$user_line_count
 

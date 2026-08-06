@@ -628,6 +628,15 @@ page_setup_docx <- function(rs) {
     conv <- 566.9291
   }
   
+  # Apply user's line height if it exists
+  if (!is.null(rs$user_line_height)) {
+    rs$row_height <- rs$user_line_height
+    rs$line_height <- rs$user_line_height
+  } else {
+    rs$row_height <- rh
+    rs$line_height <- lh
+  }
+  
   # A zero height paragraph to break between tables.
   # Otherwise, Word will treat as one table and the column
   # widths will be messed up.
@@ -639,7 +648,7 @@ page_setup_docx <- function(rs) {
               			</w:pPr></w:p>\n'
   
   rs$blank_row <- paste0('<w:p><w:pPr>
-              				<w:spacing w:after="8" w:line="', round(rh * conv) + radj,
+              				<w:spacing w:after="8" w:line="', round(rs$row_height * conv) + radj,
               				'" w:lineRule="auto"/>
               				<w:contextualSpacing/>
               				<w:rPr>
@@ -650,7 +659,7 @@ page_setup_docx <- function(rs) {
   # This is for adding extra blanks after the table, left more buffer to prevent from
   # unexpected page break
   rs$blank_row_below <- paste0('<w:p><w:pPr>
-              				<w:spacing w:after="8" w:line="', round(rh * conv) + radj - 3,
+              				<w:spacing w:after="8" w:line="', round(rs$row_height * conv) + radj - 3,
                          '" w:lineRule="auto"/>
               				<w:contextualSpacing/>
               				<w:rPr>
@@ -669,9 +678,6 @@ page_setup_docx <- function(rs) {
   rs$relIndex <- 9
   
   rs$twip_conversion <- conv
-  
-  rs$row_height <- rh
-  rs$line_height <- rh
   rs$char_width <- cw
   rs$base_indent <- 130
   
@@ -730,7 +736,7 @@ page_setup_docx <- function(rs) {
   
 
   if (is.null(rs$user_line_count)) {
-    rs$line_count <- round(rs$content_size[[1]] / rh) 
+    rs$line_count <- round(rs$content_size[[1]] / rs$row_height) 
   } else
     rs$line_count <- rs$user_line_count
 

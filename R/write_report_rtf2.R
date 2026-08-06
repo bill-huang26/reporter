@@ -516,8 +516,15 @@ page_setup_rtf <- function(rs) {
   }
   
   rs$twip_conversion <- conv
-  rs$row_height <- rh
-  rs$line_height <- lh
+  
+  if (!is.null(rs$user_line_height)) {
+    rs$row_height <- round(rs$user_line_height * conv)
+    rs$line_height <- round(rs$user_line_height * conv)
+  } else {
+    rs$row_height <- rh
+    rs$line_height <- lh
+  }
+
   rs$char_width <- cw
   rs$line_size <- rs$content_size[["width"]]
   rs$cell_padding <- cp
@@ -548,7 +555,7 @@ page_setup_rtf <- function(rs) {
   if (is.null(rs$user_line_count)) {
     # There is one row above the page footer that is not printable.
     # Therefore adjust by 1.
-    rs$line_count <- floor(rs$content_size[[1]] * conv / rh) - 1
+    rs$line_count <- floor(rs$content_size[[1]] * conv / rs$row_height) - 1
   } else 
     rs$line_count <- rs$user_line_count
   
@@ -569,7 +576,8 @@ page_setup_rtf <- function(rs) {
   # Small adjustment by one line height
   # This gets used to determine lines on a page.
   rs$body_size <- 
-    c(height = floor((rs$content_size[[1]] * conv) - pt$page_header$twips - pt$page_footer$twips - lh), 
+    c(height = floor((rs$content_size[[1]] * conv) - pt$page_header$twips - 
+                       pt$page_footer$twips - rs$line_height), 
       width = floor(rs$content_size[[2]] * conv))
   
   if (debug) {

@@ -3584,6 +3584,37 @@ test_that("docx-94: Multiple dedupe works as expected.", {
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("docx-95: Customized line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test95.docx")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") 
+    
+    rpt <- create_report(fp, output_type = "docx", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      report_options(line_height = 0.17) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    # Line Height from 0.178 to 0.17 inches. Lines from 24 to 25.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # User Tests --------------------------------------------------------------
 
 
