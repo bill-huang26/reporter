@@ -395,7 +395,8 @@ create_stub <- function(dat, ts) {
 #' @import stringi
 #' @noRd
 get_col_widths <- function(dat, ts, labels, char_width, uom, 
-                           merge_label_row = TRUE) {
+                           merge_label_row = TRUE,
+                           content_width = NULL) {
 
   defs <- ts$col_defs
   if (uom == "cm") {
@@ -483,16 +484,23 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
   defnms <- c()
   # Let user definitions override everything
   for (def in defs) {
-    
-    if (def$var_c %in% names(dat) & !is.null(def$width) && def$width > 0) {
-      if (def$width >= mwidths[[def$var_c]])
-        ret[[def$var_c]] <- def$width
-      else 
-        ret[[def$var_c]] <- mwidths[[def$var_c]] + char_width
+    if (!is.null(def$width)) {
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+        fraction <- as.numeric(sub("%", "", def$width)) / 100
+        user_width <- round(content_width * fraction, 2)
+      } else {
+        user_width <- def$width
+      }
       
-      defnms[length(defnms) + 1] <- def$var_c
+      if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
+        if (user_width >= mwidths[[def$var_c]])
+          ret[[def$var_c]] <- user_width
+        else 
+          ret[[def$var_c]] <- mwidths[[def$var_c]] + char_width
+        
+        defnms[length(defnms) + 1] <- def$var_c
+      }
     }
-    
   }
   
   # Deal with stub
@@ -602,7 +610,8 @@ get_col_widths_variable <- function(dat, ts, labels, font,
                                font_size, uom, gutter_width,
                                merge_label_row = TRUE,
                                allow_rtf_code = FALSE,
-                               allow_html_code = FALSE) {
+                               allow_html_code = FALSE,
+                               content_width = NULL) {
   
   dat_orig <- dat
   defs <- ts$col_defs
@@ -771,17 +780,26 @@ get_col_widths_variable <- function(dat, ts, labels, font,
   # Let user definitions override everything
   for (def in defs) {
     
-    if (def$var_c %in% names(dat) & !is.null(def$width) && def$width > 0) {
-      if (def$width >= mwidths[[def$var_c]]) {
-        ret[[def$var_c]] <- def$width
-      }
-      else {
-        ret[[def$var_c]] <- mwidths[[def$var_c]] + gutter_width
+    # Process the percentage width
+    if (!is.null(def$width)) {
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+        fraction <- as.numeric(sub("%", "", def$width)) / 100
+        user_width <- round(content_width * fraction, 2)
+      } else {
+        user_width <- def$width
       }
       
-      defnms[length(defnms) + 1] <- def$var_c
+      if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
+        if (user_width >= mwidths[[def$var_c]]) {
+          ret[[def$var_c]] <- user_width
+        }
+        else {
+          ret[[def$var_c]] <- mwidths[[def$var_c]] + gutter_width
+        }
+        
+        defnms[length(defnms) + 1] <- def$var_c
+      }
     }
-    
   }
   
   # Deal with stub

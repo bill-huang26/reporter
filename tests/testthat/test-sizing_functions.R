@@ -340,7 +340,7 @@ test_that("get_page_wraps works as expected.", {
 })
 
 
-test_that("get_col_widths_rtf works as expected.", {
+test_that("get_col_widths_variable works as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -365,7 +365,7 @@ test_that("get_col_widths_rtf works as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with indentation as expected.", {
+test_that("get_col_widths_variable works with indentation as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -390,7 +390,7 @@ test_that("get_col_widths_rtf works with indentation as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with stub as expected.", {
+test_that("get_col_widths_variable works with stub as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -415,7 +415,7 @@ test_that("get_col_widths_rtf works with stub as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with stub and indentation as expected.", {
+test_that("get_col_widths_variable works with stub and indentation as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -506,6 +506,24 @@ test_that("get_col_widths_variable works with allow_html_code as expected.", {
   
   expect_equal(as.numeric(which(res_old == res_new)), c(5, 11:18))
   expect_equal(as.numeric(which(res_old > res_new)), c(1:4, 6:10, 19, 20))
+})
+ 
+test_that("get_col_widths_variable works with percentage width as expected.", {
+
+  df <- mtcars
+  
+  tbl <- create_table(df) %>% 
+    define(mpg, label = "Miles Per Gallon") %>% 
+    define(cyl, width = 1.5) %>% 
+    define(disp, width = "20%") 
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths_variable(df, tbl, lbls, "Arial", 12, "inches", .2,
+                                 content_width = 8)
+  res
+  
+  expect_equal(res[["disp"]] == 1.6, TRUE)
 })
 
 test_that("stub_dedupe works as expected", {

@@ -4543,6 +4543,35 @@ test_that("pdf2-121: Customized line height works as expected.", {
     expect_equal(TRUE, TRUE)
   }
 })
+
+test_that("pdf2-122: Percentage column widths work as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test122.pdf")
+    
+    dat <- iris
+    
+    
+    tbl <- create_table(dat, borders = "none") %>%
+      titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+      define(Sepal.Length, label = "Sepal Length", width = "33.33333%", align = "center") %>%
+      define(Sepal.Width, label = "Sepal Width", width = 1, align = "centre") %>%
+      define(Species, blank_after = TRUE)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = 12, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1")) %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+      footnotes("My footnote 1", "My footnote 2")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
 # # User Tests --------------------------------------------------------------
 
 # Lots of special characters not working

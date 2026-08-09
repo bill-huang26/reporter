@@ -216,7 +216,8 @@ create_table_pages_rtf <- function(rs, cntnt, lpg_rows) {
   widths_uom <- get_col_widths_variable(fdat, ts, labels, 
                                         rs$font, rs$font_size, rs$units, 
                                         rs$gutter_width,
-                                        allow_rtf_code = rs$allow_code) 
+                                        allow_rtf_code = rs$allow_code,
+                                        content_width = rs$content_size[["width"]]) 
   
   # print("Widths UOM")
   # print(widths_uom)

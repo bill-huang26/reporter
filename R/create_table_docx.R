@@ -215,7 +215,8 @@ create_table_pages_docx <- function(rs, cntnt, lpg_rows) {
   # Get column widths
   widths_uom <- get_col_widths_variable(fdat, ts, labels, 
                                         rs$font, rs$font_size, rs$units, 
-                                        rs$gutter_width) 
+                                        rs$gutter_width,
+                                        content_width = rs$content_size[["width"]]) 
   # print("Widths UOM")
   # print(widths_uom)
   
