@@ -676,8 +676,14 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
     }
   }
   
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   # Table Header
-  ret[1] <- "<tr>\n"
+  ret[1] <- paste0("<tr ",lh_code ,">\n")
   cols[1] <- "<colgroup>\n"
   
 
@@ -769,7 +775,7 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       
       }
 
-      ret[1] <- paste0(ret[1], "<tr><td class=\"tc ts\"", 
+      ret[1] <- paste0(ret[1], paste0("<tr ",lh_code ,">") ,"<td class=\"tc ts\"", 
                        "\" style=\"", b1, "\">&nbsp;</td>",
                        "<td class=\"tc\" colspan=\"", length(sz) - 1, 
                        "\" style=\"", b2, "\">&nbsp;</td></tr>")
@@ -785,10 +791,10 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       }
   
       if (b == "") {
-        ret[1] <- paste0(ret[1], "<tr><td class=\"tc\" colspan=\"", length(sz), 
+        ret[1] <- paste0(ret[1], paste0("<tr ",lh_code ,">"), "<td class=\"tc\" colspan=\"", length(sz), 
                        "\">&nbsp;</td></tr>")
       } else {
-        ret[1] <- paste0(ret[1], "<tr><td class=\"tc\" colspan=\"", length(sz), 
+        ret[1] <- paste0(ret[1], paste0("<tr ",lh_code ,">") ,"<td class=\"tc\" colspan=\"", length(sz), 
                          "\" style=\"", b, "\">&nbsp;</td></tr>")
       }
     }
@@ -853,6 +859,13 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
   brdrs <- ts$borders
   
   brdrcolor <- get_style(rs, "border_color")
+  
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (brdrcolor == "")
     brdrcolor <- "black"
   
@@ -887,7 +900,7 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
     cnt[length(cnt) + 1] <- 1 
     
     # Start row
-    r <-  "<tr>\n"
+    r <-  paste0("<tr ", lh_code, ">\n")
     
     # Open device context
     pdf(NULL)
@@ -1148,14 +1161,20 @@ get_table_body_html <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     }
   }
   
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   # Table Body
   for(i in seq_len(nrow(t))) {
     
     
     if (i == 1)
-      ret[i] <- "<tbody>\n<tr>"
+      ret[i] <- paste0("<tbody>\n<tr ", lh_code, ">")
     else
-      ret[i] <- "<tr>"
+      ret[i] <- paste0("<tr ", lh_code, ">")
     
     mxrw <- 1
     
@@ -1358,3 +1377,15 @@ encodeHTML <- function(strng, nbsp = TRUE, allow_html_code = FALSE) {
   return(ret)
 }
 
+#' @description get customized row height code
+#' @noRd
+get_line_height_html <- function(rs) {
+  unit <- "cm"
+  if (rs$units == "inches") {
+    unit <- "in"
+  }
+  
+  ret <- paste0("style = \"line-height: ", rs$row_height, unit,"; overflow: hidden;\"")
+  
+  return(ret)
+}

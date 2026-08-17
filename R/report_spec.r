@@ -881,8 +881,8 @@ set_margins <- function(x, top=NULL, bottom=NULL,
 #' some features of the \code{\link{titles}} function may not work as expected.
 #' @param line_height The line height for the report. The unit is the same as the
 #' `units` in \code{\link{create_report}}. By default, the line height is estimated
-#' by the font and the font size for different file formats. Please note that 
-#' extreme line heights can cause overflow or even render the output unreadable.
+#' by the font and the font size for different file formats. This parameter allows
+#' you to adjust the line height of the report.
 #' @return The report_spec with option settings.
 #' @family report
 #' @examples
@@ -2721,9 +2721,22 @@ print.report_spec <- function(x, ..., verbose = FALSE){
     cat(paste0("- margins: top ", x$margin_top, " bottom ", 
                x$margin_bottom, " left ", x$margin_left, 
                " right ", x$margin_right, "\n"))
-    if (!is.null(x$line_size)) 
-      cat(paste0("- line size/count: ", x$line_size, "/", x$line_count, "\n"))
-    
+    if (!is.null(x$line_size)) {
+      cat(paste0("- lines per page: ", x$line_count, "\n"))
+      cat(paste0("- content width: ", x$content_size[["width"]], "\n"))
+      cat(paste0("- content height: ", x$content_size[["height"]], "\n"))
+      
+      if (!is.null(x$line_height)) {
+        if (toupper(x$output_type == "RTF")) {
+          cat(paste0("- line height: ", round(x$line_height/x$twip_conversion, 2), "\n"))
+        } else if (toupper(x$output_type == "PDF")) {
+          cat(paste0("- line height: ", round(x$line_height/x$point_conversion, 2), "\n"))
+        } else {
+          cat(paste0("- line height: ", x$line_height, "\n"))
+        }
+      }
+    }
+      
     # if (!is.null(x$column_widths)) {
     #   cat("- column widths: \n")
     #   cat(x$column_widths)

@@ -157,11 +157,20 @@ get_page_header_rtf <- function(rs) {
       par(family = get_font_family(rs$font), ps = rs$font_size)
       
       max_twips <- 0
+      
+      if (!is.null(rs$user_line_height)) {
+        # Use minus sign to fix the line height, or Word would still adjust row height
+        # with the font size
+        trrh <- "\\trrh-"
+      } else {
+        trrh <- "\\trrh"
+      }
+      
       for (i in seq(1, maxh)) {
         # ret <- paste0(ret, "\\trowd\\trgaph0\\trrh", lh, 
         #               "\\cellx", c1, "\\cellx", c2, "\\cellx", c3)
         
-        ret <- paste0(ret, "\\trowd\\trgaph0\\trrh", lh)
+        ret <- paste0(ret, "\\trowd\\trgaph0", trrh, lh)
         for (j in 1:length(width)){
           if (width[j] > 0) {
             ret <- paste0(ret, "\\cellx", c_lst[j])
@@ -413,11 +422,20 @@ get_page_footer_rtf <- function(rs) {
       par(family = get_font_family(rs$font), ps = rs$font_size)
       
       max_twips <- 0
+      
+      if (!is.null(rs$user_line_height)) {
+        # Use minus sign to fix the line height, or Word would still adjust row height
+        # with the font size
+        trrh <- "\\trrh-"
+      } else {
+        trrh <- "\\trrh"
+      }
+      
       for (i in seq(1, maxf)) {
         
         # ret <- paste0(ret, "\\trowd\\trgaph0\\cellx", c1, 
         #               "\\cellx", c2 , "\\cellx", c3)
-        ret <- paste0(ret, "\\trowd\\trgaph0")
+        ret <- paste0(ret, "\\trowd\\trgaph0", trrh, lh)
         for (j in 1:length(width)){
           if (width[j] > 0) {
             ret <- paste0(ret, "\\cellx", c_lst[j])
@@ -613,12 +631,23 @@ get_titles_rtf <- function(ttllst, content_width, rs, talgn = "center") {
       # Open device context
       pdf(NULL)
       
+      # Row height is not set originally. Keep it as it is.
+      trrh <- ""
+      
       # Set point size (ps) for strwidth to calculate string width
       if (!is.null(ttls$font_size)) {
         ttlfs <- ttls$font_size
       } else {
         ttlfs <- rs$font_size
       }
+      
+      # If the size is the same as content, use the assigned line height.
+      if (ttlfs == rs$font_size) {
+        # Use minus sign to fix the line height, or Word would still adjust row height
+        # with the font size
+        trrh <- paste0("\\trrh-", rs$row_height)
+      } 
+      
       par(family = get_font_family(rs$font), ps = ttlfs)
       
       
@@ -630,7 +659,7 @@ get_titles_rtf <- function(ttllst, content_width, rs, talgn = "center") {
         
         tb <- get_cell_borders(1, 1, length(ttls$titles) + alcnt, 1, ttls$borders)
         
-        al <- paste0("\\trowd\\trgaph0", ta, tb, "\\cellx", w, 
+        al <- paste0("\\trowd\\trgaph0", ta, trrh, tb, "\\cellx", w, 
                      algn, "\\cell\\row\n")
         cnt <- cnt + 1 
         
@@ -645,9 +674,9 @@ get_titles_rtf <- function(ttllst, content_width, rs, talgn = "center") {
                                length(ttls$titles) + alcnt + blcnt, 
                                1, ttls$borders)
         
-        sm <- get_spacing_multiplier(rs$font_size)
+        sm <- get_spacing_multiplier(rs$font_size, rs)
         
-        bl <- paste0("\\trowd\\trgaph0", ta, tb, "\\cellx", w, 
+        bl <- paste0("\\trowd\\trgaph0", ta, trrh, tb, "\\cellx", w, 
                      algn, sm, "\\cell\\row\n")
         cnt <- cnt + 1
       }
@@ -661,8 +690,13 @@ get_titles_rtf <- function(ttllst, content_width, rs, talgn = "center") {
       # Get font size
       if (!is.null(ttls$font_size)) {
         
-        fz <- paste0("\\fs", ttls$font_size * 2, 
-                     get_spacing_multiplier(ttls$font_size)) 
+        if (ttls$font_size == rs$font_size) {
+          fz <- paste0("\\fs", ttls$font_size * 2, 
+                       get_spacing_multiplier(ttls$font_size, rs)) 
+        } else {
+          fz <- paste0("\\fs", ttls$font_size * 2, 
+                       get_spacing_multiplier(ttls$font_size)) 
+        }
         fs <- paste0("\\fs", rs$font_size * 2)
       }
       
@@ -681,7 +715,7 @@ get_titles_rtf <- function(ttllst, content_width, rs, talgn = "center") {
         rw <- ceiling(i / cols)
 
         # Start row
-        ret <- append(ret, paste0("\\trowd\\trgaph0", ta))
+        ret <- append(ret, paste0("\\trowd\\trgaph0", ta, trrh))
         
         for (j in seq_len(cols)) {
           
@@ -847,7 +881,7 @@ get_titles_par_rtf <- function(ttllst, content_width, rs) {
       # Get blank row below
       if (any(ttls$blank_row %in% c("below", "both"))) {
         blcnt <- 1
-        sm <- get_spacing_multiplier(rs$font_size)
+        sm <- get_spacing_multiplier(rs$font_size, rs)
         bl <- paste0(sm, "\\par")
         cnt <- cnt + 1
       }
@@ -861,8 +895,14 @@ get_titles_par_rtf <- function(ttllst, content_width, rs) {
       fs <- ""
       # Get font size
       if (!is.null(ttls$font_size)) {
-        fz <- paste0("\\fs", ttls$font_size * 2, 
-                     get_spacing_multiplier(ttls$font_size)) 
+        if (ttls$font_size == rs$font_size) {
+          fz <- paste0("\\fs", ttls$font_size * 2, 
+                       get_spacing_multiplier(ttls$font_size, rs)) 
+        } else {
+          fz <- paste0("\\fs", ttls$font_size * 2, 
+                       get_spacing_multiplier(ttls$font_size))
+        }
+        
         fs <- paste0("\\fs", rs$font_size * 2)
       }
       
@@ -1113,12 +1153,23 @@ get_footnotes_rtf <- function(ftnlst, content_width, rs, talgn = "center") {
       
       pdf(NULL)
       
+      # Row height is not set originally. Keep it as it is.
+      trrh <- ""
+      
       # Set point size (ps) for strwidth to calculate string width
       if (!is.null(ftnts$font_size)) {
         ftntfs <- ftnts$font_size
       } else {
         ftntfs <- rs$font_size
       }
+      
+      # If the size is the same as content, use the assigned line height.
+      if (ftntfs == rs$font_size) {
+        # Use minus sign to fix the line height, or Word would still adjust row height
+        # with the font size
+        trrh <- paste0("\\trrh-", rs$row_height)
+      }
+      
       par(family = get_font_family(rs$font), ps = ftntfs)
       
       al <- ""
@@ -1130,7 +1181,7 @@ get_footnotes_rtf <- function(ftnlst, content_width, rs, talgn = "center") {
         tb <- get_cell_borders(1, 1, length(ftnts$footnotes) + alcnt, 
                                1, ftnts$borders)
         
-        al <- paste0("\\trowd\\trgaph0", ta, tb, "\\cellx", w, 
+        al <- paste0("\\trowd\\trgaph0", ta, trrh, tb, "\\cellx", w, 
                      algn, "\\cell\\row\n")
         cnt <- cnt + 1 
         
@@ -1146,7 +1197,7 @@ get_footnotes_rtf <- function(ftnlst, content_width, rs, talgn = "center") {
                                length(ftnts$footnotes) + alcnt + blcnt, 
                                1, ftnts$borders)
         
-        bl <- paste0("\\trowd\\trgaph0", ta, tb, "\\cellx", w, 
+        bl <- paste0("\\trowd\\trgaph0", ta, trrh, tb, "\\cellx", w, 
                      algn, "\\cell\\row\n")
         cnt <- cnt + 1
       }
@@ -1161,9 +1212,14 @@ get_footnotes_rtf <- function(ftnlst, content_width, rs, talgn = "center") {
       fs <- ""
       # Get font size - Not used yet
       if (!is.null(ftnts$font_size)) {
+        if (ftnts$font_size == rs$font_size) {
+          fz <- paste0("\\fs", ftnts$font_size * 2, 
+                       get_spacing_multiplier(ftnts$font_size, rs)) 
+        } else {
+          fz <- paste0("\\fs", ftnts$font_size * 2, 
+                       get_spacing_multiplier(ftnts$font_size)) 
+        }
         
-        fz <- paste0("\\fs", ftnts$font_size * 2, 
-                     get_spacing_multiplier(ftnts$font_size)) 
         fs <- paste0("\\fs", rs$font_size * 2)
       }
       
@@ -1182,7 +1238,7 @@ get_footnotes_rtf <- function(ftnlst, content_width, rs, talgn = "center") {
         rw <- ceiling(i / cols)
         
         # Start row
-        ret <- append(ret, paste0("\\trowd\\trgaph0", ta))
+        ret <- append(ret, paste0("\\trowd\\trgaph0", ta, trrh))
         
         for (j in seq_len(cols)) {
           
@@ -1581,6 +1637,15 @@ get_page_by_rtf <- function(pgby, width, value, rs, talgn, pgby_cnt = NULL) {
   else if (talgn %in% c("center", "centre"))
     ta <- "\\trqc"
   
+  if (!is.null(rs$user_line_height)) {
+    # Use minus sign to fix the line height, or Word would still adjust row height
+    # with the font size
+    trrh <- paste0("\\trrh-", rs$row_height)
+  } else {
+    # Row height is not set originally. Keep it as it is.
+    trrh <- ""
+  }
+  
   if (!is.null(pgby)) { 
     
     if (!any(class(pgby) == "page_by"))
@@ -1608,7 +1673,7 @@ get_page_by_rtf <- function(pgby, width, value, rs, talgn, pgby_cnt = NULL) {
       
       tb <- get_cell_borders(1, 1, trows, 1, pgby$borders)
 
-      ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, tb, 
+      ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, trrh, tb, 
                                      "\\cellx", w1, algn, 
                                   "\\cell\\row\n")
       cnt <- cnt + 1 
@@ -1702,7 +1767,7 @@ get_page_by_rtf <- function(pgby, width, value, rs, talgn, pgby_cnt = NULL) {
     dev.off()
     
     # Construct RTF for pageby value
-    ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, tb, 
+    ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, trrh, tb, 
                                    "\\cellx", w1, algn, " ",
                                    page_by_text, "\\cell\\row\n")
     
@@ -1715,7 +1780,7 @@ get_page_by_rtf <- function(pgby, width, value, rs, talgn, pgby_cnt = NULL) {
       
       tb <- get_cell_borders(trows, 1, trows, 1, pgby$borders)
       
-      ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, tb, 
+      ret[length(ret) + 1] <- paste0("\\trowd\\trgaph0", ta, trrh, tb, 
                                      "\\cellx", w1, algn, 
                                   "\\cell\\row\n")
       cnt <- cnt + 1 

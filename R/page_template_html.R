@@ -157,8 +157,14 @@ get_page_header_html <- function(rs) {
     
     max_height <- 0
     
+    # Get customized line height
+    lh_code <- ""
+    if (!is.null(rs$user_line_height)) {
+      lh_code <- get_line_height_html(rs)
+    }
+    
     for (i in seq(1, maxh)) {
-      ret <- paste0(ret, "<tr>")
+      ret <- paste0(ret, paste0("<tr ",lh_code ,">"))
 
       if (left_width > 0) {
         if (hl_num >= i) {
@@ -393,9 +399,15 @@ get_page_footer_html <- function(rs) {
     
     max_height <- 0
     
+    # Get customized line height
+    lh_code <- ""
+    if (!is.null(rs$user_line_height)) {
+      lh_code <- get_line_height_html(rs)
+    }
+    
     for (i in seq(1, maxf)) {
 
-      ret <- paste0(ret, "<tr>")
+      ret <- paste0(ret, paste0("<tr ",lh_code ,">"))
 
       if (left_width > 0) {
         if (fl_num >= i) {
@@ -561,11 +573,21 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
       
       # Open device context
       pdf(NULL)
+      lh_code <- ""
+      
       if (!is.null(ttls$font_size)) {
         ttlfs <- ttls$font_size
       } else {
         ttlfs <- rs$font_size
       }
+      
+      if (ttlfs == rs$font_size) {
+        # Get customized line height when title font size is the same as content
+        if (!is.null(rs$user_line_height)) {
+          lh_code <- get_line_height_html(rs)
+        }
+      }
+      
       par(family = get_font_family(rs$font), ps = ttlfs)
       
       ret[length(ret) + 1] <- paste0("<table ",
@@ -583,9 +605,9 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          al <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          al <- paste0("<tr ",lh_code ,">","<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          al <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          al <- paste0("<tr ",lh_code ,">","<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Can append now, since it is first
@@ -604,9 +626,9 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          bl <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          bl <- paste0("<tr ",lh_code ,">","<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          bl <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          bl <- paste0("<tr ",lh_code ,">","<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Wait to append until after title rows
@@ -623,7 +645,7 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
         rwnum <- ceiling(i / cols)
         
         mxlns <- 0
-        rw <- "<tr>"
+        rw <- paste0("<tr ",lh_code ,">")
         
         for (j in seq_len(cols)) {
           
@@ -940,10 +962,19 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
 
 
       pdf(NULL)
+      lh_code <- ""
+
       if (!is.null(ftnts$font_size)) {
         ftntfs <- ftnts$font_size
       } else {
         ftntfs <- rs$font_size
+      }
+      
+      if (ftntfs == rs$font_size) {
+        # Get customized line height when title font size is the same as content
+        if (!is.null(rs$user_line_height)) {
+          lh_code <- get_line_height_html(rs)
+        }
       }
       par(family = get_font_family(rs$font), ps = ftntfs)
       ret[length(ret) + 1] <- paste0("<table ",
@@ -962,9 +993,9 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
 
         
         if (tb == "")
-          al <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          al <- paste0("<tr ",lh_code ,">", "<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          al <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          al <- paste0("<tr ",lh_code ,">", "<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Can append now, since it is first
@@ -985,9 +1016,9 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          bl <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          bl <- paste0("<tr ",lh_code ,">", "<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          bl <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          bl <- paste0("<tr ",lh_code ,">", "<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         cnt <- cnt + 1
@@ -1001,7 +1032,7 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
         rwnum <- ceiling(i / cols)
         
         mxlns <- 0
-        rw <- "<tr>"
+        rw <- paste0("<tr ",lh_code ,">")
 
         for (j in seq_len(cols)) {
   
@@ -1266,6 +1297,12 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
   if (rs$units == "inches")
     u <- "in"
 
+  # Get customized line height when footnote font size is the same as content
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (length(thdrlst) > 0) {
 
     for (ttlhdr in thdrlst) {
@@ -1309,7 +1346,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
                                         2, ttlhdr$borders,
                                         border_color = get_style(rs, "border_color"))
 
-            al <- paste0("<tr><td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
+            al <- paste0("<tr ",lh_code ,">", "<td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
                          "<td style=\"text-align:right;", tb2, 
                          "\">&nbsp;</td></tr>\n")
             cnt <- cnt + 1
@@ -1331,7 +1368,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
                                         2, ttlhdr$borders,
                                         border_color = get_style(rs, "border_color"))
             
-            bl <- paste0("<tr><td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
+            bl <- paste0("<tr ",lh_code ,">", "<td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
                          "<td style=\"text-align:right;", tb2, 
                          "\">&nbsp;</td></tr>\n")
             cnt <- cnt + 1
@@ -1377,7 +1414,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
         if (al != "")
           ret <- append(ret, al)
         
-        ret <- append(ret, paste0("<tr><td style=\"text-align:left;", b1, "\">",
+        ret <- append(ret, paste0("<tr ",lh_code ,">", "<td style=\"text-align:left;", b1, "\">",
                                   encodeHTML(ttl, nbsp = rs$line_break,
                                              allow_html_code = rs$allow_code), 
                                   "</td><td style=\"text-align:right;", b2, "\">", 
@@ -1439,6 +1476,12 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
     exclude_top <- "top"
 
 
+  # Get customized line height when footnote font size is the same as content
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (!is.null(pgby)) {
 
     if (!any(class(pgby) == "page_by"))
@@ -1470,7 +1513,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
                                   exclude = exclude_top, 
                                   border_color = get_style(rs, "border_color"))
 
-      ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, 
+      ret[length(ret) + 1] <- paste0("<tr ",lh_code ,">", "<td style=\"", tb, 
                                      "\">&nbsp;</td></tr>\n")
       cnt <- cnt + 1
     }
@@ -1586,7 +1629,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
     dev.off()
     
     # Construct HTML for page by
-    ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, "\">",
+    ret[length(ret) + 1] <- paste0("<tr ",lh_code ,">", "<td style=\"", tb, "\">",
                                    page_by_text, "</td></tr>\n")
   
 
@@ -1595,7 +1638,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
       tb <- get_cell_borders_html(trows, 1, trows, 1, pgby$borders, 
                                   border_color = get_style(rs, "border_color"))
 
-      ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, 
+      ret[length(ret) + 1] <- paste0("<tr ",lh_code ,">", "<td style=\"", tb, 
                                      "\">&nbsp;</td></tr>\n")
       cnt <- cnt + 1
       

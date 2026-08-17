@@ -528,7 +528,7 @@ page_setup_rtf <- function(rs) {
   rs$char_width <- cw
   rs$line_size <- rs$content_size[["width"]]
   rs$cell_padding <- cp
-  rs$spacing_multiplier <- get_spacing_multiplier(rs$font_size)
+  rs$spacing_multiplier <- get_spacing_multiplier(rs$font_size, rs)
   rs$page_break_rtf <- paste0(pb, rs$spacing_multiplier)
   rs$border_height <- 15
   
@@ -611,7 +611,7 @@ page_setup_rtf <- function(rs) {
 }
 
 #' @noRd
-get_spacing_multiplier <- function(font_size) {
+get_spacing_multiplier <- function(font_size, rs = NULL) {
   
   if (font_size == 8) {
     sm <- "\\sl-228\\slmult0" 
@@ -629,6 +629,13 @@ get_spacing_multiplier <- function(font_size) {
     sm <- "\\sl-325\\slmult0"
   } else {
     sm <- "\\sl-250\\slmult0" 
+  }
+  
+  # Customized line height setting
+  if (!is.null(rs)) {
+    if (!is.null(rs$user_line_height)) {
+      sm <- paste0("\\sl-", rs$row_height, "\\slmult0")
+    }
   }
   
   return(sm)

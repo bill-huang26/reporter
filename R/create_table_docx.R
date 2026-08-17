@@ -838,6 +838,13 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
   # Get borders
   brdrs <- ts$borders
   
+  # Get row height if user's height exists. If not exist, don't use row height
+  # code as it is
+  rht <- ""
+  if (!is.null(rs$user_line_height)) {
+    rht <- get_row_height(round(rs$row_height * conv))
+  }
+  
   # Format labels for each level
   ln <- c()
   for (l in lvls) {
@@ -869,7 +876,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
     cnt[length(cnt) + 1] <- 1 
     
     # Start row
-    r <-  "<w:tr>\n"
+    r <-  paste0("<w:tr>\n", rht)
     
     # Open device context
     pdf(NULL)
@@ -1162,7 +1169,8 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   # Table Body
   for(i in seq_len(nrow(t))) {
     
-    ret[i] <- paste0("<w:tr>")
+    # ret[i] <- paste0("<w:tr>")
+    ret[i] <- ""
     
     mxrw <- 1
     
@@ -1297,7 +1305,7 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     # else 
     
     rht <- get_row_height(round(rs$row_height * mxrw * conv))
-    ret[i] <- paste0(rht, ret[i], "</w:tr>")
+    ret[i] <- paste0("<w:tr>", rht, ret[i], "</w:tr>")
     
     
   }

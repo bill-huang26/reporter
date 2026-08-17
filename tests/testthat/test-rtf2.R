@@ -5198,7 +5198,7 @@ test_that("rtf2-138: Courier is displayed as Courier New as expected.", {
   }
 })
 
-test_that("rtf2-139: Customized line height works as expected.", {
+test_that("rtf2-139: Customized small line height works as expected.", {
   
   if (dev == TRUE) {
     fp <- file.path(base_path, "rtf2/test139.rtf")
@@ -5209,18 +5209,58 @@ test_that("rtf2-139: Customized line height works as expected.", {
     dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
     
     tbl <- create_table(dat) %>%
-      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") 
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
     
-    rpt <- create_report(fp, output_type = "RTF", font = "Arial",
+    rpt <- create_report(fp, output_type = "rtf", font = "Arial",
                          font_size = 10, orientation = "landscape") %>%
       set_margins(top = 1, bottom = 1) %>%
-      report_options(line_height = 0.17) %>%
+      # report_options(line_height = 0.12, title_block = "paragraph") %>%
+      report_options(line_height = 0.12) %>%
       page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
       titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
       add_content(tbl) %>%
-      page_footer("Left1", "Center1", "Right1")
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
     
-    # Line Height from 0.1736 to 0.17 inches. Lines from 24 to 25.
+    # The text squishing is expected.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-139b: Customized large line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test139b.rtf")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
+    
+    rpt <- create_report(fp, output_type = "rtf", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      report_options(line_height = 0.2) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
+    
+    # Large line height should not cause overflow.
     res <- write_report(rpt)
     
     expect_equal(file.exists(fp), TRUE)
