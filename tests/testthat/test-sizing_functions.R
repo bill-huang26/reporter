@@ -509,7 +509,7 @@ test_that("get_col_widths_variable works with allow_html_code as expected.", {
 })
  
 test_that("get_col_widths_variable works with percentage width as expected.", {
-
+  
   df <- mtcars
   
   tbl <- create_table(df) %>% 
@@ -519,11 +519,67 @@ test_that("get_col_widths_variable works with percentage width as expected.", {
   
   lbls <- get_labels(df, tbl)
   
-  res <- get_col_widths_variable(df, tbl, lbls, "Arial", 12, "inches", .2,
+  res <- get_col_widths_variable(df, tbl, lbls, "Arial", 12, "inches", .2, content_width = 8)
+  res
+  
+  expect_equal(res[["disp"]], 1.6)
+  
+  
+})
+
+test_that("get_col_widths_variable works with Chinese as expected.", {
+
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一")
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths_variable(df, tbl, lbls, "SimSun", 10, "inches", .2,
                                  content_width = 8)
   res
   
-  expect_equal(res[["disp"]] == 1.6, TRUE)
+  expect_equal(res[["group2"]] == 1.15, TRUE)
+})
+
+test_that("get_col_widths works as expected.", {
+  
+  base_path <- tempdir()
+  fp <- file.path(base_path, "output/test1.out")
+  
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一")
+  
+  rs <- create_report(fp, output_type = "txt", font = "simsun", 
+                      orientation = "portrait")
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths(df, tbl, lbls, rs$char_width, rs$units,
+                        content_width = rs$content_size[["width"]])
+  
+  char_num <- round(res / rs$char_width) - 1
+  
+  expect_equal(as.numeric(char_num), c(6,14,10,9,8))
 })
 
 test_that("stub_dedupe works as expected", {

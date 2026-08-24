@@ -634,7 +634,7 @@ page_setup_docx <- function(rs) {
     rs$line_height <- rs$user_line_height
   } else {
     rs$row_height <- rh
-    rs$line_height <- lh
+    rs$line_height <- rh
   }
   
   # A zero height paragraph to break between tables.
@@ -647,26 +647,46 @@ page_setup_docx <- function(rs) {
               				</w:rPr>
               			</w:pPr></w:p>\n'
   
-  rs$blank_row <- paste0('<w:p><w:pPr>
+  if (tolower(rs$font) != "simsun") {
+    rs$blank_row <- paste0('<w:p><w:pPr>
               				<w:spacing w:after="8" w:line="', round(rs$row_height * conv) + radj,
-              				'" w:lineRule="auto"/>
+                           '" w:lineRule="auto"/>
               				<w:contextualSpacing/>
               				<w:rPr>
               					<w:sz w:val="', rs$font_size * 2, '"/>
               				</w:rPr>
               			</w:pPr></w:p>\n')
-  
-  # This is for adding extra blanks after the table, left more buffer to prevent from
-  # unexpected page break
-  rs$blank_row_below <- paste0('<w:p><w:pPr>
+    
+    # This is for adding extra blanks after the table, left more buffer to prevent from
+    # unexpected page break
+    rs$blank_row_below <- paste0('<w:p><w:pPr>
               				<w:spacing w:after="8" w:line="', round(rs$row_height * conv) + radj - 3,
-                         '" w:lineRule="auto"/>
+                                 '" w:lineRule="auto"/>
               				<w:contextualSpacing/>
               				<w:rPr>
               					<w:sz w:val="', rs$font_size * 2, '"/>
               				</w:rPr>
               			</w:pPr></w:p>\n')
-  
+  } else {
+    # For Chinese, use the exact height without auto-adjustment by font size
+    rs$blank_row <- paste0('<w:p><w:pPr>
+              				<w:spacing w:before="0" w:after="0" w:line="', round(rs$row_height * conv),
+                           '" w:lineRule="exact"/>
+              				<w:rPr>
+              					<w:sz w:val="', 1, '"/>
+              				</w:rPr>
+              			</w:pPr></w:p>\n')
+    
+    
+    rs$blank_row_below <- paste0('<w:p><w:pPr>
+              				<w:spacing w:before="0" w:after="0" w:line="', round(rs$row_height * conv),
+                                 '" w:lineRule="exact"/>
+              				<w:rPr>
+              					<w:sz w:val="', 1, '"/>
+              				</w:rPr>
+              			</w:pPr></w:p>\n')
+  }
+
   rs$cell_margin <- paste0('<w:tblCellMar>
                            <w:left w:w="32" w:type="dxa"/>
                            <w:right w:w="32" w:type="dxa"/>
@@ -797,51 +817,65 @@ get_rh <- function(font, font_size) {
   
   if (font_size == 8) {
     
-    if (tolower(font) == "times")
+    if (tolower(font) == "times") {
       rh <- 0.141  
-    else if (tolower(font) == "arial")
+    } else if (tolower(font) == "arial") {
       rh <- 0.141 
-    else 
+    } else if (tolower(font) == "simsun") {
+      rh <- 0.145
+    } else {
       rh <- 0.141
+    }
     
     
   } else if (font_size == 9) {
     
-    if (tolower(font) == "times")
+    if (tolower(font) == "times") {
       rh <- 0.156
-    else if (tolower(font) == "arial")
+    } else if (tolower(font) == "arial") {
       rh <- 0.156 
-    else 
+    } else if (tolower(font) == "simsun") {
+      rh <- 0.162
+    } else {
       rh <- 0.155 
+    }
     
   } else if (font_size == 10) {
     
-    if (tolower(font) == "times")
-      rh <- 0.178  
-    else if (tolower(font) == "arial")
+    if (tolower(font) == "times") {
+      rh <- 0.178
+    } else if (tolower(font) == "arial") {
       rh <- 0.178 #0.182  # 0.1585366
-    else
+    } else if (tolower(font) == "simsun") {
+      rh <- 0.179
+    } else {
       rh <- 0.175 #0.182  # 0.1585366
-    
+    }
+      
   } else if (font_size == 11) {
     
-    if (tolower(font) == "times")
+    if (tolower(font) == "times") {
       rh <- 0.195
-    else if (tolower(font) == "arial")
+    } else if (tolower(font) == "arial") {
       rh <- 0.195 # 0.168
-    else 
+    } else if (tolower(font) == "simsun") {
+      rh <- 0.199
+    } else {
       rh <- 0.192 # 0.168
-    
+    }
     
   } else if (font_size == 12) {
     
     # inches 
-    if (tolower(font) == "times")
+    if (tolower(font) == "times") {
       rh <- 0.212  # 1911765 
-    else if (tolower(font) == "arial")
+    } else if (tolower(font) == "arial") {
       rh <- 0.212 #0.212  # 1911765 
-    else 
+    } else if (tolower(font) == "simsun") {
+      rh <- 0.217
+    } else {
       rh <- 0.212  # 1911765 
+    }
     
   } else if (font_size == 14) {
     

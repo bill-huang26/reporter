@@ -344,7 +344,7 @@ create_table_text <- function(rs, ts, pi, content_blank_row, wrap_flag,
   
   ls <- rs$line_size
   if (length(rws) > 0)
-    ls <- max(nchar(rws))
+    ls <- max(get_nchar(rws))
   
   if (!is.null(ts$title_hdr)) {
     ttls <- get_title_header(ts$title_hdr, ls , rs$line_size, 
@@ -572,7 +572,7 @@ get_table_header <- function(rs, ts, pi) {
   
   
   # Underline
-  sep <- paste0(paste0(rep(rs$uchar, nchar(r) - 1), collapse = ""), " ")
+  sep <- paste0(paste0(rep(rs$uchar, get_nchar(r) - 1), collapse = ""), " ")
   
   ln[[length(ln) + 1]] <- sep
 

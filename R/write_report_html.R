@@ -575,7 +575,7 @@ page_setup_html <- function(rs) {
     rs$line_height <- rs$user_line_height
   } else {
     rs$row_height <- rh
-    rs$line_height <- lh
+    rs$line_height <- rh
   }
   rs$char_width <- cw
   
@@ -673,7 +673,7 @@ page_replace_html <- function(pg, target, type = "titles", page, rs = NULL) {
           }
           
           raw_title <- encodeHTML(v_string, nbsp = rs$line_break,
-                                  allow_html_code = rs$allow_code)
+                                  allow_html_code = rs$allow_code, font = rs$font)
           new_title <- update_page(raw_title, page)
           pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
         }

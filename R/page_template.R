@@ -63,12 +63,12 @@ get_page_header <- function(rs) {
       if (length(phdrr) >= i)
         hr <- phdrr[[i]]
       
-      gp <- rs$line_size - (nchar(hl) + nchar(hr))
+      gp <- rs$line_size - (get_nchar(hl) + get_nchar(hr))
       
       #print("header")
       if (gp >= 0) {
         
-        lw <- rs$line_size - nchar(hr)
+        lw <- rs$line_size - get_nchar(hr)
         ln <- paste0(pad_right(hl, lw), hr) 
       }
       
@@ -476,7 +476,7 @@ get_page_by <- function(pgby, width, value, pgby_cnt = NULL) {
     
     for (pbln in lns) {
     
-      gp <- ll - nchar(pbln) 
+      gp <- ll - get_nchar(pbln) 
       
   
       if (gp > 0) {
@@ -1057,9 +1057,9 @@ get_page_footer <- function(rs) {
       if (length(pftrc) >= i)
         fc <- as.character(pftrc[[i]])
       
-      l_sz <- if (is.null(fl)) 0 else nchar(fl)
-      r_sz <- if (is.null(fr)) 0 else nchar(fr)
-      c_sz <- if (is.null(fc)) 0 else nchar(fc)
+      l_sz <- if (is.null(fl)) 0 else get_nchar(fl)
+      r_sz <- if (is.null(fr)) 0 else get_nchar(fr)
+      c_sz <- if (is.null(fc)) 0 else get_nchar(fc)
       
       gp <- rs$line_size - (l_sz + r_sz + c_sz)
       
@@ -1070,7 +1070,7 @@ get_page_footer <- function(rs) {
         else
           fl <- pad_right(fl, r_sz)
         
-        lw <- rs$line_size - nchar(fr) - nchar(fl)
+        lw <- rs$line_size - get_nchar(fr) - get_nchar(fl)
         ln <- paste0(fl, pad_both(fc, lw), fr)
       }
       else {
@@ -1179,12 +1179,12 @@ page_info <- function(data, keys, font_name, col_width, col_align,
 #' @noRd
 pad_right <- Vectorize(function(s, w) {
   
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s
   else
-    ret <- paste0(s, paste0(rep_len(" ", length.out = w - nchar(s)), collapse = ""))
+    ret <- paste0(s, paste0(rep_len(" ", length.out = w - get_nchar(s)), collapse = ""))
 
   return(ret)
 }, USE.NAMES = FALSE)
@@ -1192,7 +1192,7 @@ pad_right <- Vectorize(function(s, w) {
 #' @noRd
 pad_left <- Vectorize(function(s, w) {
   
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s
@@ -1207,8 +1207,7 @@ pad_left <- Vectorize(function(s, w) {
 #' @noRd
 pad_both <- Vectorize(function(s, w) {
   
-  
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s

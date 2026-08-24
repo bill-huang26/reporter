@@ -97,6 +97,17 @@ test_that("split_text() works as expected.", {
   
 })
 
+test_that("split_text() works with Chinese as expected.", {
+  
+  cnt <- paste0("亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白。")
+  
+  
+  res <- split_text(cnt, 30, 1, "Simsun", 10, "inches")
+  
+  res
+  expect_equal(length(res$text[[1]]), 9)
+})
+
 
 test_that("get_text_body_pdf() works as expected.", {
   

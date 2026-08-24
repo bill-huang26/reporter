@@ -424,7 +424,6 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
     if (is.control(nm) | all(is.na(dat[[nm]]) == TRUE))
       w <- 0
     else {
-      
       # Clear out label rows, as these can mess up column width calculations.
       # Label row widths are dealt with later.
       if ("..blank" %in% names(dat) & merge_label_row) {
@@ -433,7 +432,7 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
         attributes(dat[[nm]]) <- colattr
       }
       
-      w <- max(nchar(as.character(dat[[nm]])), na.rm = TRUE) * char_width
+      w <- max(get_nchar(as.character(dat[[nm]])), na.rm = TRUE) * char_width
       
       sd <- stri_split(as.character(dat[[nm]]), regex=" |\n|\r|\t", simplify = TRUE)
       mwidths[[nm]]  <- max(nchar(as.character(sd)), na.rm = TRUE) * char_width 
@@ -453,7 +452,7 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
     # Determine width of words in label for this column
     s <- stri_split(labels[[nm]], regex=" |\n|\r|\t", simplify = TRUE)
     #l <- strwidth(s[[1]], units="inches", family=font_family)
-    l <- max(nchar(as.character(s)), na.rm = TRUE) * char_width
+    l <- max(get_nchar(as.character(s)), na.rm = TRUE) * char_width
     
     # print(paste("s:", s))
     # print(paste("l:", l))
@@ -1473,9 +1472,15 @@ get_page_breaks <- function(x, page_size, lpg_rows, content_offsets,
     #   userForce <- FALSE
     
     # Need to check the inserted blank lines, multiple tables
-    page_equal <- (is.na(lastPage) == is.na(currentPage)) && 
-      (is.nan(lastPage) == is.nan(currentPage)) && 
-      (is.na(lastPage) || (lastPage == currentPage))
+    
+    # For the very first row, no need to check user's page
+    if (i > 1) {
+      page_equal <- (is.na(lastPage) == is.na(currentPage)) && 
+        (is.nan(lastPage) == is.nan(currentPage)) && 
+        (is.na(lastPage) || (lastPage == currentPage))
+    } else {
+      page_equal <- TRUE
+    }
     
     userForce <- !page_equal
     
@@ -1689,4 +1694,15 @@ get_pgby_value <- function(value, pgby_cnt) {
   }
   
   return(ret)
+}
+
+get_nchar <- function(s) {
+  s <- as.character(s)
+  
+  chinese_count <- stri_count_regex(s, "[\u4E00-\u9FFF]")
+  non_chinese_count <- nchar(s) - chinese_count
+  
+  total_count <- chinese_count*2 + non_chinese_count
+  
+  return(total_count)
 }

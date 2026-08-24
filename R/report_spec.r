@@ -70,7 +70,7 @@
 #' pass the desired character string to the missing parameter.
 #' @param font The font to use on the report.  The font specified will be
 #' used for the entire report.  Valid values are "Courier", "Arial", "Times",
-#' and "fixed".  The value of "fixed" will create a fixed-width, text style
+#' "Simsun" and "fixed".  The value of "fixed" will create a fixed-width, text style
 #' report in Courier font.  The \code{font} parameter only applies to 
 #' RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".
 #' @param font_size The size of the font to use on the report. The \code{font_size}
@@ -198,9 +198,13 @@ create_report <- function(file_path = "", output_type = "TXT",
   if (is.null(font))
     font <- "fixed"
   else {
-    if (!tolower(font) %in% c("fixed", "courier", "arial", "times"))
+    if (!tolower(font) %in% c("fixed", "courier", "arial", "times", "simsun"))
       stop(paste0("font value invalid.  ", 
-                  "Valid values are 'Courier', 'Arial', 'Times', and 'fixed'."))
+                  "Valid values are 'Courier', 'Arial', 'Times', 'Simsun' and 'fixed'."))
+  }
+  
+  if (tolower(font) == "simsun" & output_type == "PDF") {
+    warning("Chinese is not supported in PDF.")
   }
   
   # Trap invalid font_size parameter

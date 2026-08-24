@@ -5297,6 +5297,71 @@ test_that("rtf2-140: Percentage column widths work as expected.", {
   } else
     expect_equal(TRUE, TRUE)
 })
+
+test_that("rtf2-141: Output Chinese as expected.", {
+  
+  if (dev == TRUE) {
+    
+    # Read in prepared data
+    df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+    
+    df$trt3 <- df$trt1
+    df$trt4 <- df$trt2
+    df$trt5 <- df$trt1
+    
+    df <- rbind(df, df, df)
+    
+    tbl <- create_table(df, borders = "all") %>%
+      titles("表 14-2.1. 基线人口学特征", "(安全分析集)", borders = "all") %>%
+      # stub(c("group1", "group2"), width = 1) %>%
+      stub(c("group1", "group2")) %>%
+      page_by(subgroup, label = "亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白：", 
+              borders = "all") %>%
+      define(group1, label_row = T, blank_after = T) %>%
+      define(group2, indent = 0.25) %>%
+      define(trt1, label = "试验药物一") %>%
+      define(trt2, label = "试验药物二") %>%
+      define(trt3, label = "试验药物三") %>%
+      define(trt4, label = "试验药物四") %>%
+      define(trt5, label = "安慰剂") %>%
+      define(subgroup, visible = FALSE) %>%
+      spanning_header(from = "trt1", to = "trt3", label = "高试验药物") %>%
+      spanning_header(from = "trt4", to = "trt5", label = "低试验药物")
+    
+    font_lst <- c(8, 9, 10, 11, 12)
+    
+    for (f in font_lst) {
+      file_name <- paste0("test141_", f, ".rtf")
+      fp <- file.path(base_path, "rtf2/", file_name)
+      
+      rpt <- create_report(fp, output_type = "RTF", font = "SimSun",
+                           font_size = f, orientation = "portrait") %>%
+        set_margins(top = 1, bottom = 1) %>%
+        # report_options(line_height = 0.175) %>%
+        page_header("研究123", "分析数据审阅说明") %>%
+        add_content(tbl, blank_row = "none") %>%
+        page_footer("左页尾", "中页尾", "第 [pg] 页, 共 [tpg] 页") %>%
+        footnotes("用于分析目的。其中包括人口统计学、治疗组和人群标帜。", 
+                  "受试者水平分析数据集。", borders = "all")
+      
+      res <- write_report(rpt)
+      expect_equal(file.exists(fp), TRUE)
+    }
+    
+    # font size = 10
+    #    line height = 0.175
+    
+  } else
+    expect_equal(TRUE, TRUE)
+})
 # User Tests --------------------------------------------------------------
 
 test_that("user1: demo table works.", {

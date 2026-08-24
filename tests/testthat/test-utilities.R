@@ -342,7 +342,7 @@ test_that("utils15: split_cells_variable works as expected.", {
 
 })
 
-test_that("utils15: split_cells_variable works with indentation as expected.", {
+test_that("utils15b: split_cells_variable works with indentation as expected.", {
 
   # split_cells_variable <- function(x, col_widths, font, font_size, units)
 
@@ -370,6 +370,34 @@ test_that("utils15: split_cells_variable works with indentation as expected.", {
   expect_equal(res$data[2, "..row"], 7)
   expect_equal(res$data[3, "..row"], 4)
 
+})
+
+test_that("utils15c: split_cells_variable works with Chinese as expected.", {
+  
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值, 标准差"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一") %>%
+    define(group2, width = 1)
+  
+  lbls <- get_labels(df, tbl)
+  
+  col_width <- get_col_widths_variable(df, tbl, lbls, "SimSun", 10, "inches", .2,
+                                       content_width = 8)
+  
+  res <- split_cells_variable(df, col_width, "SimSun", 10, "inches", "RTF", ts = tbl)
+  res$widths
+  
+  expect_equal(any(class(res$data) == "data.frame"), TRUE)
+  expect_equal(res$data[7, "..row"], 2)
 })
 
 
@@ -758,6 +786,43 @@ test_that("utils25: split_strings() works as expected.", {
                c("<p style=\"color: blue; font-size: 18px;\"> Blue 18",
                  "px <b> Title </b> : Page",
                  " [pg] of [tpg] </p>"))
+  
+  # split_strings() requires that the pdf(NULL) destination be turned on.
+  # Otherwise, will create a Rplots.pdf file in test directory.
+  dev.off()
+})
+
+test_that("utils25: split_strings() works with Chinese as expected.", {
+  
+  pdf(NULL)
+  par(family = "GB1", ps = 10)
+  
+  res <- split_strings("亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白。",
+                       1, "inches", delimiter = "")
+  
+  
+  
+  res
+  
+  expect_equal(length(res$text), 10)
+  expect_equal(length(res$widths), 10)
+  
+  # split_strings() requires that the pdf(NULL) destination be turned on.
+  # Otherwise, will create a Rplots.pdf file in test directory.
+  dev.off()
+  
+  
+  pdf(NULL)
+  par(family = "GB1", ps = 11)
+  
+  res <- split_strings("75 (51.7)", 0.78, "inches", delimiter = "", multiplier = 1.14)
+  
+  
+  
+  res
+  
+  expect_equal(length(res$text), 2)
+  expect_equal(length(res$widths), 2)
   
   # split_strings() requires that the pdf(NULL) destination be turned on.
   # Otherwise, will create a Rplots.pdf file in test directory.

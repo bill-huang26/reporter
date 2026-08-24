@@ -72,11 +72,11 @@ gen_groups <- function(tot, group_cnt, last_indices = FALSE) {
 get_font_family <- function(font_name) {
   
   # Trap missing or invalid font_name parameter
-  if (!tolower(font_name) %in% c("arial", "courier", "times")) {
+  if (!tolower(font_name) %in% c("arial", "courier", "times", "simsun")) {
     
     stop(paste0("ERROR: font_name parameter on get_font_family() ",
                 "function is invalid: '", font_name,
-      "'\n\tValid values are: 'Arial', 'Courier', and 'Times'."
+      "'\n\tValid values are: 'Arial', 'Courier', 'Times' and 'Simsun'."
       ))
   }
   
@@ -86,6 +86,8 @@ get_font_family <- function(font_name) {
     fam <- "sans"
   } else if (tolower(font_name) == "times") {
     fam <- "serif"
+  } else if (tolower(font_name) == "simsun") {
+    fam <- "GB1"
   }
   
   return(fam)
@@ -484,8 +486,16 @@ split_cells <- function(x, col_widths, ts = NULL, char_width = NULL) {
     names(row_values) <- names(x)
 
     a <- align_cells(row_values, max_length)
-    a$..row <- i
+    
+    # Retain all the control variables
+    for (k in seq_len(nrow(a))) {
+      for (c in names(x)[is.controlv(names(x))]) {
+        a[k, c] <- x[i, c]
+      }
+    }
 
+    a$..row <- i
+    
     if (is.null(dat))
       dat <- a
     else
@@ -507,7 +517,8 @@ split_cells <- function(x, col_widths, ts = NULL, char_width = NULL) {
 #' @noRd
 split_strings <- function(strng, width, units, multiplier = 1.03,
                           allow_rtf_code = FALSE,
-                          allow_html_code = FALSE) {
+                          allow_html_code = FALSE,
+                          delimiter = " ") {
   if (sum(c(allow_rtf_code, allow_html_code)) > 1) {
     stop("`allow_rtf_code` and `allow_html_code` cannot both be TRUE.")
   }
@@ -553,18 +564,18 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
             wrds <- c(wrds, word)
             wrds_html <- c(wrds_html, TRUE)
           } else {
-            split_word <- strsplit(word, " ", fixed = TRUE)[[1]]
+            split_word <- strsplit(word, delimiter, fixed = TRUE)[[1]]
             wrds <- c(wrds, split_word)
             wrds_html <- c(wrds_html, rep(FALSE, length(split_word)))
           }
         }
       } else {
-        wrds <- strsplit(split, " ", fixed = TRUE)[[1]]
+        wrds <- strsplit(split, delimiter, fixed = TRUE)[[1]]
       }
       
       # Old code
       # lngths <- (suppressWarnings(strwidth(wrds, units = un)) + 
-      #              suppressWarnings(strwidth(" ", units = un))) * multiplier
+      #              suppressWarnings(strwidth(delimiter, units = un))) * multiplier
 
       if (length(wrds) > 0) {
         
@@ -582,15 +593,15 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
           wrds_no_rtf <- gsub(rtf_symbol_regex, "", wrds_no_rtf)
           wrds_no_rtf <- gsub(rtf_brace_regex, "", wrds_no_rtf)
           
-          lngths <- (strwdth(wrds_no_rtf, un) + strwdth(" ", un)) * multiplier
+          lngths <- (strwdth(wrds_no_rtf, un) + strwdth(delimiter, un)) * multiplier
           
           lngths[wrds_no_rtf == "" & !original_blank] <- 0
         } else if (allow_html_code) {
-          lngths <- (strwdth(wrds, un) + strwdth(" ", un)) * multiplier
+          lngths <- (strwdth(wrds, un) + strwdth(delimiter, un)) * multiplier
 
           lngths[wrds_html] <- 0
         } else {
-          lngths <- (strwdth(wrds, un) + strwdth(" ", un)) * multiplier
+          lngths <- (strwdth(wrds, un) + strwdth(delimiter, un)) * multiplier
         }
       }
       
@@ -598,12 +609,11 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
       for (i in seq_along(wrds)) {
         
         lnlngth <- lnlngth + lngths[i] 
-        if (lnlngth <= w)
+        if (lnlngth <= w) {
           ln <- append(ln, wrds[i])
-        else {
+        } else {
           
           if (length(ln) == 0) {
-            
             lns[length(lns) + 1] <- wrds[i]
             if (units == "cm")
               wdths[length(wdths) + 1] <- ccm(lnlngth)
@@ -614,7 +624,7 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
             
           } else {
             # Assign current lines and counts
-            lns[length(lns) + 1] <- paste(ln, collapse = " ")
+            lns[length(lns) + 1] <- paste(ln, collapse = delimiter)
             if (units == "cm")
               wdths[length(wdths) + 1] <- ccm(lnlngth - lngths[i])
             else
@@ -632,7 +642,7 @@ split_strings <- function(strng, width, units, multiplier = 1.03,
       # Deal with last line
       if (length(ln) > 0) {
         
-        lns[length(lns) + 1] <- paste(ln, collapse = " ")
+        lns[length(lns) + 1] <- paste(ln, collapse = delimiter)
         if (units == "cm")
           wdths[length(wdths) + 1] <- ccm(lnlngth)
         else
@@ -721,8 +731,13 @@ split_string_rtf <- function(strng, width, units, font = "Arial", nm = "",
     allow_rtf_code <- FALSE
   }
   
-  res <- split_strings(cstrng, width - indntw, units, multiplier = mp,
-                       allow_rtf_code)
+  if (tolower(font) == "simsun") {
+    res <- split_strings(cstrng, width - indntw, units, multiplier = mp,
+                         allow_rtf_code, delimiter = "")
+  } else {
+    res <- split_strings(cstrng, width - indntw, units, multiplier = mp,
+                         allow_rtf_code)
+  }
   
   
   # Concat lines and add line ending to all but last line.
@@ -747,7 +762,8 @@ split_string_rtf <- function(strng, width, units, font = "Arial", nm = "",
 #' @noRd
 split_string_html <- function(strng, width, units, nm = "", char_width = 1,
                               insert_line_break = TRUE,
-                              allow_html_code = FALSE) {
+                              allow_html_code = FALSE, font = "Arial",
+                              font_size = 10) {
   
   
   # Deal with indents
@@ -771,8 +787,22 @@ split_string_html <- function(strng, width, units, nm = "", char_width = 1,
     allow_html_code <- FALSE
   }
   
-  res <- split_strings(cstrng, width - indntw, units, multiplier = 1,
-                       allow_html_code = allow_html_code)
+  if (tolower(font) == "simsun") {
+    
+    # Adjust multiplier for Chinese. See test 80
+    multiplier <- 1
+    if (font_size %in% c(8, 9)) {
+      multiplier <- 1.02
+    } else if (font_size %in% c(11, 12)) {
+      multiplier <- 1.03
+    }
+    
+    res <- split_strings(cstrng, width - indntw, units, multiplier = multiplier,
+                         allow_html_code = allow_html_code, delimiter = "")
+  } else {
+    res <- split_strings(cstrng, width - indntw, units, multiplier = 1,
+                         allow_html_code = allow_html_code)
+  }
   
   if (insert_line_break) {
     ret_string <- paste0(blnks, res$text, collapse = "\n")
@@ -814,8 +844,12 @@ split_string_docx <- function(strng, width, units, nm = "", char_width = 1,
   #   }
   # }
   
-  
-  res <- split_strings(cstrng, width - indntw, units, multiplier = mp)
+  if (tolower(font) == "simsun") {
+    res <- split_strings(cstrng, width - indntw, units, multiplier = 1,
+                         delimiter = "")
+  } else {
+    res <- split_strings(cstrng, width - indntw, units, multiplier = mp)
+  }
   
   if (insert_line_break) {
     ret_string <- paste0(blnks, res$text, collapse = "\n")
@@ -887,10 +921,13 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
   }
   
   fnt <- "mono"
-  if (tolower(font) == "arial")
+  if (tolower(font) == "arial") {
     fnt <- "sans"
-  else if (tolower(font) == "times")
+  } else if (tolower(font) == "times") {
     fnt <- "serif"
+  } else if (tolower(font) == "simsun") {
+    fnt <- "GB1"
+  }
   
   defs <- ts$col_defs
   
@@ -926,7 +963,8 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
           if (output_type %in% c("HTML")) {
             break_label_res <- split_string_html(x[[i, nm]], sum(col_widths) - break_label_indent, units,
                                                  insert_line_break = rs$line_break,
-                                                 allow_html_code = rs$allow_code)
+                                                 allow_html_code = rs$allow_code, font = font,
+                                                 font_size = font_size)
             
             break_label_df[i, nm] <- break_label_res$html
             break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
@@ -940,7 +978,8 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
           } else if (output_type == "PDF") {
             
-            break_label_res <- split_string_text(x[[i, nm]], sum(col_widths) - break_label_indent, units)
+            break_label_res <- split_string_text(x[[i, nm]], sum(col_widths) - break_label_indent, units,
+                                                 font = font)
             
             break_label_df[i, nm] <- paste0(break_label_res$text, collapse = "\n")
             break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
@@ -978,7 +1017,8 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
           if (output_type %in% c("HTML")) {
             res <- split_string_html(x[[i, nm]], sum(col_widths), units,
                                      insert_line_break = rs$line_break,
-                                     allow_html_code = rs$allow_code)
+                                     allow_html_code = rs$allow_code, font = font,
+                                     font_size = font_size)
             
             cell <- res$html
             
@@ -990,7 +1030,7 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             cell <- res$rtf
           } else if (output_type == "PDF") {
             
-            res <- split_string_text(x[[i, nm]], sum(col_widths), units)
+            res <- split_string_text(x[[i, nm]], sum(col_widths), units, font = font)
             
             cell <- paste0(res$text, collapse = "\n")
             
@@ -1009,23 +1049,27 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
               res <- split_string_html(x[[i, nm]], col_widths[[nm]] - defs[[nm]]$indent, 
                                        units, nm, char_width,
                                        insert_line_break = rs$line_break,
-                                       allow_html_code = rs$allow_code)
+                                       allow_html_code = rs$allow_code, font = font,
+                                       font_size = font_size)
             } else if (nm == "stub" & !is.null(ts$stub)) {
               stub_var <- x$..stub_var[i]
               if (!is.null(defs[[stub_var]]$indent)) {
                 res <- split_string_html(x[[i, nm]], col_widths[[nm]] - defs[[stub_var]]$indent, 
                                          units, nm, char_width,
                                          insert_line_break = rs$line_break,
-                                         allow_html_code = rs$allow_code)
+                                         allow_html_code = rs$allow_code, font = font,
+                                         font_size = font_size)
               } else {
                 res <- split_string_html(x[[i, nm]], col_widths[[nm]], units, nm, char_width,
                                          insert_line_break = rs$line_break,
-                                         allow_html_code = rs$allow_code)
+                                         allow_html_code = rs$allow_code, font = font,
+                                         font_size = font_size)
               }
             } else {
               res <- split_string_html(x[[i, nm]], col_widths[[nm]], units, nm, char_width,
                                        insert_line_break = rs$line_break,
-                                       allow_html_code = rs$allow_code)
+                                       allow_html_code = rs$allow_code, font = font,
+                                       font_size = font_size)
             }
             
             cell <- res$html
@@ -1060,17 +1104,17 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             # For indenting values, the width should be (col_widths - indentation)
             if (!is.null(defs[[nm]]$indent)) {
               res <- split_string_text(x[[i, nm]], col_widths[[nm]] - defs[[nm]]$indent, 
-                                       units, nm, char_width)
+                                       units, nm, char_width, font = font)
             } else if (nm == "stub" & !is.null(ts$stub)) {
               stub_var <- x$..stub_var[i]
               if (!is.null(defs[[stub_var]]$indent)) {
                 res <- split_string_text(x[[i, nm]], col_widths[[nm]] - defs[[stub_var]]$indent, 
-                                         units, nm, char_width)
+                                         units, nm, char_width, font = font)
               } else {
-                res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width)
+                res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
               }
             } else {
-              res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width)
+              res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
             }
             
             cell <- paste0(res$text, collapse = "\n")
@@ -1268,9 +1312,11 @@ dedupe_pages <- function(pgs, defs) {
       if (dedupe) {
         # Process for non-visible variables for dedupe
         for (d in dedupe_vars) {
-          if (defs[[d]]$visible == FALSE) {
-            new_d <- paste0("..x.", d)
-            dedupe_vars[dedupe_vars == d] <- new_d
+          if (!is.null(defs[[d]])) {
+            if (defs[[d]]$visible == FALSE) {
+              new_d <- paste0("..x.", d)
+              dedupe_vars[dedupe_vars == d] <- new_d
+            }
           }
         }
         
@@ -1875,10 +1921,14 @@ get_lines_rtf <- function(txt, width, font, font_size = 10, units = "inches") {
   
   
   f <- "mono"
-  if (tolower(font) == "arial")
+  if (tolower(font) == "arial") {
     f <- "sans"
-  else if (tolower(font) == "times")
+  } else if (tolower(font) == "times") {
     f <- "serif"
+  } else if (tolower(font) == "simsun") {
+    f <- "GB1"
+  }
+    
   
   names(width) <- NULL
   
@@ -1903,10 +1953,13 @@ get_text_width <- function(txt, font, font_size = 10, units = "inches",
   
   
   f <- "mono"
-  if (tolower(font) == "arial")
+  if (tolower(font) == "arial") {
     f <- "sans"
-  else if (tolower(font) == "times")
+  } else if (tolower(font) == "times") {
     f <- "serif"
+  } else if (tolower(font) == "simsun") {
+    f <- "GB1"
+  }
   
   un <- "inches"
 

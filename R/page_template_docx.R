@@ -1884,45 +1884,9 @@ get_page_by_docx <- function(pgby, width, value, rs, talgn,
     #   (1) All TRUE, FALSE -> Directly output as all bold or not bold
     #   (2) Only label or value is bold -> Specially process the line with label and value
     
-    # if (pgby$bold %in% c(T, F)) {
-    #   # Account for multiple pgby lines
-    #   tmp <- split_string_html(paste0(pgby$label, value), width, rs$units)
-    #   
-    #   vl <- tmp$html
-    #   cnt <- cnt + tmp$lines
-    #   vrht <- get_row_height(round(rs$row_height * conv) * tmp$lines)
-    #   
-    #   ret <- append(ret, paste0("<w:tr>", vrht, 
-    #                             cell_abs(vl, width = w, 
-    #                                      borders = vb, bold = pgby$bold), 
-    #                             "</w:tr>\n"))
-    #   
-    # } else if (pgby$bold %in% c("value", "label", T, F)) {
     if (pgby$bold %in% c("value", "label", T, F)) {
       
-      # -----  This is for test ------- #
-      # pgby <- list("label" = paste0(
-      #   "This is a very long\nlabel with intentionally line change and also",
-      #   " long text which should take at least three lines: "
-      # ),
-      #              "bold" = "label")
-      # # value <- "serota"
-      # 
-      # # pgby <- list("label" = "Flower Type: ",
-      # # "bold" = "value")
-      # value <- paste0(
-      #   "This is a very long value without intentionally line change and also",
-      #   " long text which should take at least three lines: ",
-      #   "serota"
-      # )
-      # width <- 5
-      # rs <- list("units" = "inches")
-      # conv <- 1440
-      # vb <- c()
-      # w <- round(width * conv)
-      # cnt <- 0
       tmp_cnt <- 0
-      # ------------------------------- #
       if (pgby$bold == "value") {
         bold <- c(FALSE, TRUE)
       } else if (pgby$bold == "label") {
