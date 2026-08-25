@@ -791,7 +791,7 @@ split_string_html <- function(strng, width, units, nm = "", char_width = 1,
     
     # Adjust multiplier for Chinese. See test 80
     multiplier <- 1
-    if (font_size %in% c(8, 9)) {
+    if (font_size %in% c(8, 9, 10)) {
       multiplier <- 1.02
     } else if (font_size %in% c(11, 12)) {
       multiplier <- 1.03
@@ -978,8 +978,7 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
           } else if (output_type == "PDF") {
             
-            break_label_res <- split_string_text(x[[i, nm]], sum(col_widths) - break_label_indent, units,
-                                                 font = font)
+            break_label_res <- split_string_text(x[[i, nm]], sum(col_widths) - break_label_indent, units)
             
             break_label_df[i, nm] <- paste0(break_label_res$text, collapse = "\n")
             break_label_df[i, paste0("..break_label_lines",break_label_num)] <- break_label_res$lines
@@ -1030,7 +1029,7 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             cell <- res$rtf
           } else if (output_type == "PDF") {
             
-            res <- split_string_text(x[[i, nm]], sum(col_widths), units, font = font)
+            res <- split_string_text(x[[i, nm]], sum(col_widths), units)
             
             cell <- paste0(res$text, collapse = "\n")
             
@@ -1104,17 +1103,17 @@ split_cells_variable <- function(x, col_widths, font, font_size, units,
             # For indenting values, the width should be (col_widths - indentation)
             if (!is.null(defs[[nm]]$indent)) {
               res <- split_string_text(x[[i, nm]], col_widths[[nm]] - defs[[nm]]$indent, 
-                                       units, nm, char_width, font = font)
+                                       units, nm, char_width)
             } else if (nm == "stub" & !is.null(ts$stub)) {
               stub_var <- x$..stub_var[i]
               if (!is.null(defs[[stub_var]]$indent)) {
                 res <- split_string_text(x[[i, nm]], col_widths[[nm]] - defs[[stub_var]]$indent, 
-                                         units, nm, char_width, font = font)
+                                         units, nm, char_width)
               } else {
-                res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
+                res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width)
               }
             } else {
-              res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width, font = font)
+              res <- split_string_text(x[[i, nm]], col_widths[[nm]], units, nm, char_width)
             }
             
             cell <- paste0(res$text, collapse = "\n")
@@ -1323,7 +1322,7 @@ dedupe_pages <- function(pgs, defs) {
         if(any(dedupe_vars %in% nms)) {
 
           # Convert to character if necessary
-          if (class(dat[[def$var_c]]) != "character"){
+          if (inherits(dat[[def$var_c]], "character")){
             dat[[def$var_c]] <- as.character(dat[[def$var_c]])
           }
 
