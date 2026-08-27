@@ -579,7 +579,7 @@ test_that("get_col_widths works as expected.", {
   
   char_num <- round(res / rs$char_width) - 1
   
-  expect_equal(as.numeric(char_num), c(6,14,10,9,8))
+  expect_equal(as.numeric(char_num), c(6,13,9,9,8))
 })
 
 test_that("stub_dedupe works as expected", {
@@ -628,4 +628,19 @@ test_that("get_pgby_cnt works as expected", {
   expect_equal(res4, 1)
   
   
+})
+
+test_that("get_nchar works as expected", {
+  
+  res1 <- get_nchar("123b5")
+  
+  expect_equal(res1, 5)
+  
+  res2 <- get_nchar("最小值, 最大值")
+  
+  expect_equal(res2, 13)
+  
+  res3 <- get_nchar("试验药物一")
+  
+  expect_equal(res3, 9)
 })
