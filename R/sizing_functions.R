@@ -435,7 +435,7 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
       w <- max(get_nchar(as.character(dat[[nm]])), na.rm = TRUE) * char_width
       
       sd <- stri_split(as.character(dat[[nm]]), regex=" |\n|\r|\t", simplify = TRUE)
-      mwidths[[nm]]  <- max(nchar(as.character(sd)), na.rm = TRUE) * char_width 
+      mwidths[[nm]]  <- max(get_nchar(as.character(sd)), na.rm = TRUE) * char_width 
 
     }
      
@@ -1696,13 +1696,13 @@ get_pgby_value <- function(value, pgby_cnt) {
   return(ret)
 }
 
-get_nchar <- function(s) {
+get_nchar <- function(s, chinese_weight = 1.88) {
   s <- as.character(s)
   
-  chinese_count <- stri_count_regex(s, "[\u4E00-\u9FFF]")
+  chinese_count <- stri_count_regex(s, "[\\p{Han}\\u3000-\\u303F\\uFF00-\uFFEF]")
   non_chinese_count <- nchar(s) - chinese_count
   
-  total_count <- chinese_count*2 + non_chinese_count
+  total_count <- round(chinese_count*chinese_weight + non_chinese_count)
   
   return(total_count)
 }

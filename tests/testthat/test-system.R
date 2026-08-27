@@ -3851,6 +3851,11 @@ test_that("test114: Output Chinese as expected.", {
               borders = "all", blank_row = "none") %>%
       define(group1, label_row = T, blank_after = T) %>%
       define(group2, indent = 0.25) %>%
+      # define(trt1, label = "试验药物一", width = 0.9) %>%
+      # define(trt2, label = "试验药物二", width = 0.9) %>%
+      # define(trt3, label = "试验药物三", width = 0.9) %>%
+      # define(trt4, label = "试验药物四", width = 0.9) %>%
+      # define(trt5, label = "安慰剂", width = 0.9) %>%
       define(trt1, label = "试验药物一") %>%
       define(trt2, label = "试验药物二") %>%
       define(trt3, label = "试验药物三") %>%
