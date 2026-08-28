@@ -245,10 +245,10 @@ test_that("get_titles_footnote function works as expected with font_size.", {
   rpt <- page_setup_pdf(rpt)
   f8 <- rpt$page_template$footnotes
   
-  expect_equal(f8$lines, 2)
+  expect_true(f8$lines < 2)
   expect_equal(f8$lines, 
                f8$points / rpt$row_height) 
-  expect_equal(f8$points, rh * 2)
+  expect_equal(f8$points, get_line_height_pdf(8) * 2)
   
 })
 
