@@ -691,6 +691,7 @@ get_page_footer_docx <- function(rs) {
     
     tret <- get_footnotes_docx(rs$footer_footnotes, rs$content_size[["width"]], rs)
     ret <- paste0(tret$docx, rs$table_break, ret)
+    ret <- paste0(get_page_numbers_docx(ret))
     cnt <- cnt + tret$lines
     cnt_content <- cnt_content + tret$lines_content
     
