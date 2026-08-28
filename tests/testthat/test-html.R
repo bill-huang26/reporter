@@ -1645,11 +1645,11 @@ test_that("html-45-3: Spanning header gap should not exist with inside border.",
   }
 })
 
-test_that("html-46-4: Spanning header with invisible columns works as expected.", {
+test_that("html-45-4: Spanning header with invisible columns works as expected.", {
   
   if (dev == TRUE) {
     
-    fp <- file.path(base_path, "html/test46-4.html")
+    fp <- file.path(base_path, "html/test45-4.html")
     
     dat <- mtcars[1:20,]
     

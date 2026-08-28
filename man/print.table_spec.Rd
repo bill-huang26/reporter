@@ -47,11 +47,11 @@ tbl
 \seealso{
 \code{\link{create_table}} function to create a table specification.
 
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{create_table}()},
-\code{\link{define}()},
-\code{\link{spanning_header}()},
-\code{\link{stub}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=create_table]{create_table()}},
+\code{\link[=define]{define()}},
+\code{\link[=spanning_header]{spanning_header()}},
+\code{\link[=stub]{stub()}}
 }
 \concept{table}

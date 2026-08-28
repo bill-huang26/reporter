@@ -34,7 +34,7 @@ txt
 \seealso{
 \code{\link{create_text}} function to create a text specification.
 
-Other text: 
-\code{\link{create_text}()}
+Other text:
+\code{\link[=create_text]{create_text()}}
 }
 \concept{text}

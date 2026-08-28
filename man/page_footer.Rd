@@ -116,20 +116,20 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 # 2020-10-17 11:53:51                                                Page 1 of 1
 }
 \seealso{
-Other report: 
-\code{\link{add_content}()},
-\code{\link{create_report}()},
-\code{\link{footer_image}()},
-\code{\link{footnotes}()},
-\code{\link{header_image}()},
-\code{\link{options_fixed}()},
-\code{\link{page_by}()},
-\code{\link{page_header}()},
-\code{\link{print.report_spec}()},
-\code{\link{report_options}()},
-\code{\link{set_margins}()},
-\code{\link{title_header}()},
-\code{\link{titles}()},
-\code{\link{write_report}()}
+Other report:
+\code{\link[=add_content]{add_content()}},
+\code{\link[=create_report]{create_report()}},
+\code{\link[=footer_image]{footer_image()}},
+\code{\link[=footnotes]{footnotes()}},
+\code{\link[=header_image]{header_image()}},
+\code{\link[=options_fixed]{options_fixed()}},
+\code{\link[=page_by]{page_by()}},
+\code{\link[=page_header]{page_header()}},
+\code{\link[=print.report_spec]{print.report_spec()}},
+\code{\link[=report_options]{report_options()}},
+\code{\link[=set_margins]{set_margins()}},
+\code{\link[=title_header]{title_header()}},
+\code{\link[=titles]{titles()}},
+\code{\link[=write_report]{write_report()}}
 }
 \concept{report}

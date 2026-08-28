@@ -192,9 +192,9 @@ write_report(rpt)
 # file.show(tmp)
 }
 \seealso{
-Other styles: 
-\code{\link{add_style}()},
-\code{\link{get_theme}()},
-\code{\link{print.style_spec}()}
+Other styles:
+\code{\link[=add_style]{add_style()}},
+\code{\link[=get_theme]{get_theme()}},
+\code{\link[=print.style_spec]{print.style_spec()}}
 }
 \concept{styles}

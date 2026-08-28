@@ -255,11 +255,11 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 #                                                                    Page 2 of 2
 }
 \seealso{
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{create_table}()},
-\code{\link{print.table_spec}()},
-\code{\link{spanning_header}()},
-\code{\link{stub}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=create_table]{create_table()}},
+\code{\link[=print.table_spec]{print.table_spec()}},
+\code{\link[=spanning_header]{spanning_header()}},
+\code{\link[=stub]{stub()}}
 }
 \concept{table}

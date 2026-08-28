@@ -58,8 +58,8 @@ Variables can be identified by position, a quoted variable name, or an
 unquoted variable name.
 }
 \seealso{
-Other attributes: 
-\code{\link{ftn}()},
-\code{\link{ttl}()}
+Other attributes:
+\code{\link[=ftn]{ftn()}},
+\code{\link[=ttl]{ttl()}}
 }
 \concept{attributes}

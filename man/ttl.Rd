@@ -47,8 +47,8 @@ used internally to the system.
 \seealso{
 \code{\link{titles}} function.
 
-Other attributes: 
-\code{\link{ftn}()},
-\code{\link{span}()}
+Other attributes:
+\code{\link[=ftn]{ftn()}},
+\code{\link[=span]{span()}}
 }
 \concept{attributes}

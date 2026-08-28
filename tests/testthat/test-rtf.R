@@ -1421,9 +1421,6 @@ test_that("rtf43: Symbols are proper orientation on landscape.", {
     
     res <- write_report(rpt)
     
-    
-    file.show(res$modified_path)
-    
     expect_equal(file.exists(fp), TRUE)
     
     

@@ -43,8 +43,8 @@ the system.
 \seealso{
 \code{\link{footnotes}} to create a footnote.
 
-Other attributes: 
-\code{\link{span}()},
-\code{\link{ttl}()}
+Other attributes:
+\code{\link[=span]{span()}},
+\code{\link[=ttl]{ttl()}}
 }
 \concept{attributes}

@@ -5356,9 +5356,6 @@ test_that("rtf2-141: Output Chinese as expected.", {
       expect_equal(file.exists(fp), TRUE)
     }
     
-    # font size = 10
-    #    line height = 0.175
-    
   } else
     expect_equal(TRUE, TRUE)
 })
