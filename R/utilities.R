@@ -745,14 +745,32 @@ split_string_rtf <- function(strng, width, units, font = "Arial", nm = "",
   # Doing it here handles for the entire report, as every piece runs
   # through here.
   if (insert_line_break) {
-    ret_string <- paste0(blnks, encodeRTF(res$text, allow_rtf_code), 
-                         collapse = "\\line ")
+    # ret_string <- paste0(blnks, encodeRTF(res$text, allow_rtf_code), 
+    #                      collapse = "\\line ")
+    encode_txt <- encodeRTF(res$text, allow_rtf_code)
   } else {
     splits <- unlist(stri_split_fixed(as.character(cstrng), "\n"))
-    ret_string <- paste0(encodeRTF(splits, allow_rtf_code), collapse = "\\line ")
+    # ret_string <- paste0(encodeRTF(splits, allow_rtf_code), collapse = "\\line ")
+    encode_txt <- encodeRTF(splits, allow_rtf_code)
   }
   
-  ret <- list(rtf = ret_string,
+  ret_string <- ""
+  # If users input \\line, there will be a blank. Don't repeat the blank.
+  for (i in seq_len(length(encode_txt))) {
+    s <- encode_txt[i]
+    
+    if (i == 1) {
+      ret_string <- s
+    } else {
+      if (grepl("^\\s", s)) {
+        ret_string <- paste0(ret_string, "\\line", s)
+      } else {
+        ret_string <- paste0(ret_string, "\\line ", s)
+      }
+    }
+  }
+  
+  ret <- list(rtf = as.character(ret_string),
               lines = length(res$text),
               widths = res$widths + indntw)
   
