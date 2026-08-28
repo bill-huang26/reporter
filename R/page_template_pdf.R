@@ -1120,8 +1120,10 @@ get_footnotes_pdf <- function(ftnlst, content_width, rs,
       fs <- rs$font_size
       if (!is.null(ftnts$font_size)) {
         fs <- ftnts$font_size
+        lh <- get_line_height_pdf(ftnts$font_size)
       } else {
         fs <- rs$font_size
+        lh <- olh
       }
         
       pdf(NULL)
@@ -1130,9 +1132,9 @@ get_footnotes_pdf <- function(ftnlst, content_width, rs,
       # If all borders on, change line height to account for extra points 
       # needed for border
       if (any(brdrs %in% c("all", "inside")))
-        lh <- olh + bs
-      else
-        lh <- olh
+        lh <- lh + bs
+      # else
+      #   lh <- olh
       
       al <- ""
 

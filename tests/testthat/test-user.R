@@ -1758,30 +1758,36 @@ test_that("user18: Adverse Events table with break labels works.", {
     # -------------------------------------------- #
     #        DOCX (bigger footnote in footer)      #
     # -------------------------------------------- #
-    fp <- file.path(base_path, "user/user18_6.docx")
-    
-    rpt <- create_report(fp, 
-                         font = "Arial",
-                         font_size = 9,
-                         orientation = "portrait", 
-                         output_type = "DOCX")  %>%
-      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
-      add_content(tbl_1) %>%
+    file_lst <- c("rtf", "docx", "pdf", "html")
+    for (f in file_lst) {
+      footnote_to_footer <- FALSE
+      if (f %in% c("rtf", "docx")) {
+        footnote_to_footer <- TRUE
+      }
+      fp <- file.path(base_path, paste0("user/user18_6.", f))
       
-      # ----- Title setting -----#
-      titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
-             "Preferred Term and Grade",
-             "(Safety Analysis Set)",
-             bold = T,
-             font_size = 11)
-    
-    rpt <- set_footnote(rpt, program_path, last_footnote, font_size = 10, 
-                        valign = "bottom", footer = TRUE)
-    
-    # Write the report
-    res <- write_report(rpt)
-    expect_equal(file.exists(fp), TRUE)
-    
+      rpt <- create_report(fp, 
+                           font = "Arial",
+                           font_size = 9,
+                           orientation = "portrait", 
+                           output_type = f)  %>%
+        set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+        add_content(tbl_1) %>%
+        
+        # ----- Title setting -----#
+        titles("Table 14-6.1.3.1.  Treatment-emergent Adverse Events by System Organ Class,",
+               "Preferred Term and Grade",
+               "(Safety Analysis Set)",
+               bold = T,
+               font_size = 11)
+      
+      rpt <- set_footnote(rpt, program_path, last_footnote, font_size = 10, 
+                          valign = "bottom", footer = footnote_to_footer)
+      
+      # Write the report
+      res <- write_report(rpt)
+      expect_equal(file.exists(fp), TRUE)
+    }
     
     # -------------------------------------------- #
     #                   HTML                       #
@@ -1852,6 +1858,58 @@ test_that("user18: Adverse Events table with break labels works.", {
              "(Safety Analysis Set)",
              bold = T,
              font_size = 11)
+    
+    # Write the report
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # -------------------------------------------- #
+    #     TXT with report footnote page            #
+    # -------------------------------------------- #
+    tbl <- create_table(df_freq, 
+                        borders = "outside",
+                        n_format = custom_n_format) %>%
+      
+      # ----- Column setting -----#
+      column_defaults(from = trt1, to = trt3, align = "center", width = trt_width) %>%
+      define(blank_grp, blank_before = T, visible = FALSE) %>%
+      stub(vars = c("total", "AESOC", "AEDECOD", "AESEV"), 
+           label = "System Organ Class\n  Preferred Term\n    Grade", 
+           width = item_width) %>%
+      define(AESOC, break_label = "(Continued)") %>%
+      define(AEDECOD, indent = 0.16, break_label = "(Cont.)") %>%
+      define(AESEV, indent = 0.32) %>%
+      define(trt1, label = "Treatment A", n=arm_pop[1]) %>%
+      define(trt2, label = "Treatment B", n=arm_pop[2]) %>%
+      define(trt3, label = "Treatment C", n=arm_pop[3]) 
+
+    
+    fp <- file.path(base_path, "user/user18_6.txt")
+    rpt <- create_report(fp, 
+                         orientation = "portrait", 
+                         output_type = "TXT")  %>%
+      set_margins(top = 1, bottom = 0.75, right = 1, left = 1.5) %>%
+      add_content(tbl) %>%
+      
+      # ----- Title setting -----#
+      titles("Table 14.1  Treatment-emergent Adverse Events by System Organ Class,",
+             "Preferred Term and Grade",
+             "(Safety Analysis Set)",
+             bold = T,
+             font_size = 11) %>%
+      
+      footnotes("Page [pg] of [tpg]", align = "right",
+                blank_row = "none", valign = "top", footer = T) %>%
+      footnotes("The analysis is performed on the maximum severity grade.",
+                align = "left", blank_row = "none", valign = "top", footer = T) %>%
+      footnotes("Coded using MedDRA version 22.1.",
+                align = "left", blank_row = "none", valign = "top", footer = T) %>%
+      footnotes("Severity of adverse event will be graded using CTCAE version 4.0.",
+                align = "left", blank_row = "none", valign = "top", footer = T) %>%
+      footnotes("{supsc('*')} Reported Verbatim Term are displayed for Uncoded AEs.",
+                align = "left", blank_row = "none", valign = "top", footer = T) %>%
+      footnotes(paste0("Program: ", program_path), footer = T) %>%
+      footnotes(last_footnote, blank_row = "none", footer = T) 
     
     # Write the report
     res <- write_report(rpt)
