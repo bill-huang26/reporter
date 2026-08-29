@@ -221,7 +221,8 @@ create_table_pages_html <- function(rs, cntnt, lpg_rows) {
   widths_uom <- get_col_widths_variable(fdat, ts, labels, 
                                         rs$font, rs$font_size, rs$units, 
                                         rs$gutter_width, merge_label_row,
-                                        allow_html_code = rs$allow_code) 
+                                        allow_html_code = rs$allow_code,
+                                        content_width = rs$content_size[["width"]]) 
   # print("Widths UOM")
   # print(widths_uom)
   
@@ -675,8 +676,14 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
     }
   }
   
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   # Table Header
-  ret[1] <- "<tr>\n"
+  ret[1] <- paste0("<tr",lh_code ,">\n")
   cols[1] <- "<colgroup>\n"
   
 
@@ -705,15 +712,18 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       # Split label strings if they exceed column width
       tmp <- split_string_html(lbls[k], widths[k], rs$units,
                                insert_line_break = rs$line_break,
-                               allow_html_code = rs$allow_code)
+                               allow_html_code = rs$allow_code,
+                               font = rs$font, font_size = rs$font_size)
       
 
       if (ts$header_bold)
         tstr <- paste0("<b>", encodeHTML(tmp$html, nbsp = rs$line_break,
-                                         allow_html_code = rs$allow_code), "</b>")
+                                         allow_html_code = rs$allow_code,
+                                         font = rs$font), "</b>")
       else 
         tstr <- encodeHTML(tmp$html, nbsp = rs$line_break,
-                           allow_html_code = rs$allow_code)
+                           allow_html_code = rs$allow_code,
+                           font = rs$font)
 
       if (b == "") {
         ret[1] <- paste0(ret[1], "<td class=\"thdr ", ha[k], "\">", 
@@ -768,7 +778,7 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       
       }
 
-      ret[1] <- paste0(ret[1], "<tr><td class=\"tc ts\"", 
+      ret[1] <- paste0(ret[1], paste0("<tr",lh_code ,">") ,"<td class=\"tc ts\"", 
                        "\" style=\"", b1, "\">&nbsp;</td>",
                        "<td class=\"tc\" colspan=\"", length(sz) - 1, 
                        "\" style=\"", b2, "\">&nbsp;</td></tr>")
@@ -784,10 +794,10 @@ get_table_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       }
   
       if (b == "") {
-        ret[1] <- paste0(ret[1], "<tr><td class=\"tc\" colspan=\"", length(sz), 
+        ret[1] <- paste0(ret[1], paste0("<tr",lh_code ,">"), "<td class=\"tc\" colspan=\"", length(sz), 
                        "\">&nbsp;</td></tr>")
       } else {
-        ret[1] <- paste0(ret[1], "<tr><td class=\"tc\" colspan=\"", length(sz), 
+        ret[1] <- paste0(ret[1], paste0("<tr",lh_code ,">") ,"<td class=\"tc\" colspan=\"", length(sz), 
                          "\" style=\"", b, "\">&nbsp;</td></tr>")
       }
     }
@@ -852,6 +862,13 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
   brdrs <- ts$borders
   
   brdrcolor <- get_style(rs, "border_color")
+  
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (brdrcolor == "")
     brdrcolor <- "black"
   
@@ -886,7 +903,7 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
     cnt[length(cnt) + 1] <- 1 
     
     # Start row
-    r <-  "<tr>\n"
+    r <-  paste0("<tr", lh_code, ">\n")
     
     # Open device context
     pdf(NULL)
@@ -898,7 +915,8 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       # Split label strings if they exceed column width
       tmp <- split_string_html(lbls[k], widths[k], rs$units,
                                insert_line_break = rs$line_break,
-                               allow_html_code = rs$allow_code)
+                               allow_html_code = rs$allow_code,
+                               font = rs$font, font_size = rs$font_size)
       
       
       b <- get_cell_borders_html(length(lvls) - l + 1, k, length(lvls) + 1, 
@@ -952,10 +970,12 @@ get_spanning_header_html <- function(rs, ts, pi, ex_brdr = FALSE) {
       
       if (s$bold[k])
         tstr <- paste0("<b>", encodeHTML(vl, nbsp = rs$line_break,
-                                         allow_html_code = rs$allow_code), "</b>")
+                                         allow_html_code = rs$allow_code,
+                                         font = rs$font), "</b>")
       else 
         tstr <- encodeHTML(vl, nbsp = rs$line_break,
-                           allow_html_code = rs$allow_code)
+                           allow_html_code = rs$allow_code,
+                           font = rs$font)
       
       # Check gap information
       gap <- ""
@@ -1147,14 +1167,20 @@ get_table_body_html <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     }
   }
   
+  # Get customized line height
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   # Table Body
   for(i in seq_len(nrow(t))) {
     
     
     if (i == 1)
-      ret[i] <- "<tbody>\n<tr>"
+      ret[i] <- paste0("<tbody>\n<tr", lh_code, ">")
     else
-      ret[i] <- "<tr>"
+      ret[i] <- paste0("<tr", lh_code, ">")
     
     mxrw <- 1
     
@@ -1240,18 +1266,11 @@ get_table_body_html <- function(rs, tbl, widths, algns, talgn, tbrdrs,
           vl <- as.character(vl)
         else 
           vl <- encodeHTML(vl, nbsp = rs$line_break,
-                           allow_html_code = rs$allow_code)
+                           allow_html_code = rs$allow_code,
+                           font = rs$font)
         
         if (merge_label_row  & flgs[i] %in% c("B", "A", "L")) {
           if (j == 1) {
-            
-            # # Strip out line feeds for label rows
-            # vl <- gsub("\n", " ", vl, fixed = TRUE)
-            # 
-            # # Recalculate based on total width of table
-            # tmp <- split_string_html(vl, sum(wdths), rs$units)
-            # 
-            # vl <- tmp$html
             
             stl <- get_cell_styles(nms[j], styles, flgs, i, tbl)
             
@@ -1337,9 +1356,17 @@ get_table_body_html <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #' @description Have to check wrapping on a lot of files.  May have unintended 
 #' results.
 #' @noRd
-encodeHTML <- function(strng, nbsp = TRUE, allow_html_code = FALSE) {
+encodeHTML <- function(strng, nbsp = TRUE, allow_html_code = FALSE, font = "Arial") {
   
   ret <- strng
+  
+  if (tolower(font) == "simsun") {
+    # The width of the non-breaking space (`&nbsp;`) is full width.
+    # &ensp is equal to half the width of a Chinese character.
+    space <- "&ensp;"
+  } else {
+    space <- "&nbsp;"
+  }
   
   if (allow_html_code == FALSE) {
     ret <- gsub("&", "&amp;", ret , fixed = TRUE)
@@ -1349,11 +1376,23 @@ encodeHTML <- function(strng, nbsp = TRUE, allow_html_code = FALSE) {
 
   ret <- gsub("\n", "<br>", ret , fixed = TRUE)
   if (nbsp & allow_html_code == FALSE) {
-    ret <- gsub(" ", "&nbsp;", ret, fixed = TRUE)
+    ret <- gsub(" ", space, ret, fixed = TRUE)
   }
   if (ret == "")
-    ret <- "&nbsp;"
+    ret <- space
   
   return(ret)
 }
 
+#' @description get customized row height code
+#' @noRd
+get_line_height_html <- function(rs) {
+  unit <- "cm"
+  if (rs$units == "inches") {
+    unit <- "in"
+  }
+  
+  ret <- paste0(" style = \"line-height: ", rs$row_height, unit,"; overflow: hidden;\"")
+  
+  return(ret)
+}

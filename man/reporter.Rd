@@ -125,6 +125,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item David Bosak \email{dbosak01@gmail.com}
   \item Bill Huang \email{Bill.Huang@Toastmasters.org.tw}
 }
 

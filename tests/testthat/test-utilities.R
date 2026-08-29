@@ -342,7 +342,7 @@ test_that("utils15: split_cells_variable works as expected.", {
 
 })
 
-test_that("utils15: split_cells_variable works with indentation as expected.", {
+test_that("utils15b: split_cells_variable works with indentation as expected.", {
 
   # split_cells_variable <- function(x, col_widths, font, font_size, units)
 
@@ -370,6 +370,34 @@ test_that("utils15: split_cells_variable works with indentation as expected.", {
   expect_equal(res$data[2, "..row"], 7)
   expect_equal(res$data[3, "..row"], 4)
 
+})
+
+test_that("utils15c: split_cells_variable works with Chinese as expected.", {
+  
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值, 标准差"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一") %>%
+    define(group2, width = 1)
+  
+  lbls <- get_labels(df, tbl)
+  
+  col_width <- get_col_widths_variable(df, tbl, lbls, "SimSun", 10, "inches", .2,
+                                       content_width = 8)
+  
+  res <- split_cells_variable(df, col_width, "SimSun", 10, "inches", "RTF", ts = tbl)
+  res$widths
+  
+  expect_equal(any(class(res$data) == "data.frame"), TRUE)
+  expect_equal(res$data[7, "..row"], 2)
 })
 
 
@@ -660,13 +688,23 @@ test_that("utils25: split_strings() works as expected.", {
   # --------------------------- #
   rtf_input <- "{\\b\\li-550 [Report]} This [is] a  testing string with RTF \\li45 [code]"
   res2_orig <- split_strings(rtf_input, 2, "inches")
-  res2_orig$text <- c("{\\b\\li-550 [Report]} This [is]",
-                      "a  testing string with RTF",
-                      "\\li45 [code]")
 
   res2 <- split_strings(rtf_input, 2, "inches", allow_rtf_code = TRUE)
-  res2$text <- c("{\\b\\li-550 [Report]} This [is] a  testing",
-                 "string with RTF \\li45 [code]")
+  expect_true(length(res2_orig$text) > length(res2$text))
+  expect_identical(res2$text,
+                   c("{\\b\\li-550 [Report]} This [is] a  testing",
+                      "string with RTF \\li45 [code]"))
+  
+  rtf_input <- "\\li360 6\\line {\\cf11 Cylinder and more. \\line When \\line this very long string the body footnote can flow to the next page}"
+  res3 <- split_strings(rtf_input, 2, "inches", allow_rtf_code = TRUE)
+  res3
+  expect_identical(res3$text,
+                   c("\\li360 6", " {\\cf11 Cylinder and more.",
+                     " When", " this very long string the body",
+                     "footnote can flow to the next", "page}")
+                   )
+  res3_orig <- split_strings(rtf_input, 2, "inches")
+  expect_true(length(res3_orig$text) < length(res3$text))
 
   # --------------------------- #
   #      Allow HTML code        #
@@ -741,6 +779,50 @@ test_that("utils25: split_strings() works as expected.", {
   result_21_base <- split_strings(test_21_base, 4.09725, "inches", allow_html_code = TRUE)
 
   expect_equal(length(result_21$text), length(result_21_base$text))
+  
+  test_22 <- '<p style="color: blue; font-size: 18px;">Blue 18 <br>px <b>Title</b>: Page<br> [pg] of [tpg]</p>'
+  result_22 <- split_strings(test_22, 4.09725, "inches", allow_html_code = TRUE)
+  expect_equal(result_22$text,
+               c("<p style=\"color: blue; font-size: 18px;\"> Blue 18",
+                 "px <b> Title </b> : Page",
+                 " [pg] of [tpg] </p>"))
+  
+  # split_strings() requires that the pdf(NULL) destination be turned on.
+  # Otherwise, will create a Rplots.pdf file in test directory.
+  dev.off()
+})
+
+test_that("utils25: split_strings() works with Chinese as expected.", {
+  
+  pdf(NULL)
+  par(family = "GB1", ps = 10)
+  
+  res <- split_strings("亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白。",
+                       1, "inches", delimiter = "")
+  
+  
+  
+  res
+  
+  expect_equal(length(res$text), 10)
+  expect_equal(length(res$widths), 10)
+  
+  # split_strings() requires that the pdf(NULL) destination be turned on.
+  # Otherwise, will create a Rplots.pdf file in test directory.
+  dev.off()
+  
+  
+  pdf(NULL)
+  par(family = "GB1", ps = 11)
+  
+  res <- split_strings("75 (51.7)", 0.78, "inches", delimiter = "", multiplier = 1.14)
+  
+  
+  
+  res
+  
+  expect_equal(length(res$text), 2)
+  expect_equal(length(res$widths), 2)
   
   # split_strings() requires that the pdf(NULL) destination be turned on.
   # Otherwise, will create a Rplots.pdf file in test directory.
@@ -959,4 +1041,89 @@ test_that("utils35: get_group_count works as expected.", {
 
   group_counts2 <- get_group_count(group)
   expect_equal(group_counts2, c(3, 3, 3, 2, 2, 3, 3, 3))
+})
+
+test_that("utils36: dedupe_pages works as expected", {
+  
+  # Prepare data
+  subjid <- c(100,100,101,101,101,102,103,103,104,104)
+  name <- c("Quintana, Gabriel", "Allison, Blas", "Minniear, Presley",
+            "al-Kazemi, Najwa", "Schaffer, Ashley", "Laner, Tahma",
+            "Perry, Sean", "Crews, Deshawn Joseph", "Person, Ladon",
+            "Smith, Shaileigh")
+  sex <- c("M", "F", "F", "M", "M", "F", "M", "F", "F", "F")
+  age <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+  height <- c(NA, NA, 183, 183, 183, NA, 166, 166, NA, NA)
+  arm <- c(rep("A", 5), rep("B", 5))
+
+  df <- data.frame(subjid, name, sex, height, age, arm)
+  
+  df <- add_blank_rows(df, location = "below", vars = "arm")
+  
+  page <- list()
+  page[[1]] <- df
+  
+  # ----------------------------------------------------------- #
+  #                 Single Dedupe works                         #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(arm, blank_after = TRUE, dedupe = TRUE)
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
+  # The ending value is not replaced because it's blank row
+  expect_identical(result[[1]]$arm,
+                   c("A"," "," "," "," ","A","B"," "," "," "," ","B"))
+  
+  # ----------------------------------------------------------- #
+  #                 Multiple Dedupe works                       #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(arm, blank_after = TRUE, dedupe = c("subjid", "arm"))
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
+  expect_identical(result[[1]]$arm,
+                   c("A"," ","A"," "," ","A","B","B"," ","B"," ","B"))
+  
+  # ----------------------------------------------------------- #
+  #              Multiple Dedupe without itself works           #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(arm, blank_after = TRUE, dedupe = c("subjid", "sex"))
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
+  expect_identical(result[[1]]$arm,
+                   c("A","A","A","A"," ","A","B","B","B","B"," ","B"))
+  
+  # ----------------------------------------------------------- #
+  #              Multiple Dedupe not in data works              #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(arm, blank_after = TRUE, dedupe = c("a", "arm", NA))
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
+  # Column `a`, NA is not in the data set, so it is omitted
+  expect_identical(result[[1]]$arm,
+                   c("A"," "," "," "," ","A","B"," "," "," "," ","B"))
+  
+  # ----------------------------------------------------------- #
+  #              Multiple Dedupe with NA value works            #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(arm, blank_after = TRUE, dedupe = c("height", "arm"))
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
+  # ----------------------------------------------------------- #
+  #         Multiple Dedupe with previous dedupe works          #
+  # ----------------------------------------------------------- #
+  tbl <- create_table(df) %>%
+    define(subjid, dedupe = TRUE) %>%
+    define(arm, blank_after = TRUE, dedupe = c("subjid", "arm"))
+  
+  result <- dedupe_pages(page, tbl$col_defs)
+  
 })

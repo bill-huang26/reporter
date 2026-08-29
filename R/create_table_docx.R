@@ -215,7 +215,8 @@ create_table_pages_docx <- function(rs, cntnt, lpg_rows) {
   # Get column widths
   widths_uom <- get_col_widths_variable(fdat, ts, labels, 
                                         rs$font, rs$font_size, rs$units, 
-                                        rs$gutter_width) 
+                                        rs$gutter_width,
+                                        content_width = rs$content_size[["width"]]) 
   # print("Widths UOM")
   # print(widths_uom)
   
@@ -506,7 +507,15 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
   if (rs$paper_size != "none") {
     
     # Determine number of filler lines needed
+    # To be deleted
+    # print(paste0("rs$body_line_count: ", rs$body_line_count))
+    # print(paste0("row_count: ", row_count))
+    # print(paste0("ftnts$lines_content: ", ftnts$lines_content))
+    # print(paste0("lpg_rows: ", lpg_rows))
+    # print(paste0("blen: ", blen))
+    # print(paste0("boff: ", boff))
     len_diff <- rs$body_line_count - row_count - ftnts$lines_content - lpg_rows - blen - boff
+    # print(paste0("len_diff: ", len_diff)) # To be deleted
     
     if (vflag == "bottom" & len_diff > 0) {
   
@@ -837,6 +846,13 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
   # Get borders
   brdrs <- ts$borders
   
+  # Get row height if user's height exists. If not exist, don't use row height
+  # code as it is
+  rht <- ""
+  if (!is.null(rs$user_line_height) | tolower(rs$font) == "simsun") {
+    rht <- get_row_height(round(rs$row_height * conv))
+  }
+  
   # Format labels for each level
   ln <- c()
   for (l in lvls) {
@@ -868,7 +884,7 @@ get_spanning_header_docx <- function(rs, ts, pi, ex_brdr = FALSE) {
     cnt[length(cnt) + 1] <- 1 
     
     # Start row
-    r <-  "<w:tr>\n"
+    r <-  paste0("<w:tr>\n", rht)
     
     # Open device context
     pdf(NULL)
@@ -1161,7 +1177,8 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
   # Table Body
   for(i in seq_len(nrow(t))) {
     
-    ret[i] <- paste0("<w:tr>")
+    # ret[i] <- paste0("<w:tr>")
+    ret[i] <- ""
     
     mxrw <- 1
     
@@ -1295,8 +1312,16 @@ get_table_body_docx <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     #   ret[i] <- paste0(ret[i], "</w:tr>\n</tbody>")
     # else 
     
-    rht <- get_row_height(round(rs$row_height * mxrw * conv))
-    ret[i] <- paste0(rht, ret[i], "</w:tr>")
+    # If user's row height is not assigned, don't use row height code and let 
+    # MS Word to automatically adjust row height by font size.
+    # As for Chinese, apply the row height too
+    if (!is.null(rs$user_line_height) | tolower(rs$font) == "simsun") {
+      rht <- get_row_height(round(rs$row_height * mxrw * conv))
+    } else{
+      rht <- ""
+    }
+    
+    ret[i] <- paste0("<w:tr>", rht, ret[i], "</w:tr>")
     
     
   }

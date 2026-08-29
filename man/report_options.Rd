@@ -11,7 +11,8 @@ report_options(
   line_count = NULL,
   page_wrap = TRUE,
   auto_page = TRUE,
-  title_block = "table"
+  title_block = "table",
+  line_height = NULL
 )
 }
 \arguments{
@@ -57,6 +58,11 @@ auto paging. Note that turning off auto pagination may cause page overflows.}
 structure is useful on some editors which do not render the table title 
 block appropriately.  Note that if the "paragraph" setting is applied,
 some features of the \code{\link{titles}} function may not work as expected.}
+
+\item{line_height}{The line height for the report. The unit is the same as the
+`units` in \code{\link{create_report}}. By default, the line height is estimated
+by the font and the font size for different file formats. This parameter allows
+you to adjust the line height of the report.}
 }
 \value{
 The report_spec with option settings.
@@ -95,20 +101,20 @@ rpt <- create_report(tmp, orientation="portrait", output_type = "RTF",
 write_report(rpt)
 }
 \seealso{
-Other report: 
-\code{\link{add_content}()},
-\code{\link{create_report}()},
-\code{\link{footer_image}()},
-\code{\link{footnotes}()},
-\code{\link{header_image}()},
-\code{\link{options_fixed}()},
-\code{\link{page_by}()},
-\code{\link{page_footer}()},
-\code{\link{page_header}()},
-\code{\link{print.report_spec}()},
-\code{\link{set_margins}()},
-\code{\link{title_header}()},
-\code{\link{titles}()},
-\code{\link{write_report}()}
+Other report:
+\code{\link[=add_content]{add_content()}},
+\code{\link[=create_report]{create_report()}},
+\code{\link[=footer_image]{footer_image()}},
+\code{\link[=footnotes]{footnotes()}},
+\code{\link[=header_image]{header_image()}},
+\code{\link[=options_fixed]{options_fixed()}},
+\code{\link[=page_by]{page_by()}},
+\code{\link[=page_footer]{page_footer()}},
+\code{\link[=page_header]{page_header()}},
+\code{\link[=print.report_spec]{print.report_spec()}},
+\code{\link[=set_margins]{set_margins()}},
+\code{\link[=title_header]{title_header()}},
+\code{\link[=titles]{titles()}},
+\code{\link[=write_report]{write_report()}}
 }
 \concept{report}

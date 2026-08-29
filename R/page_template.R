@@ -63,12 +63,12 @@ get_page_header <- function(rs) {
       if (length(phdrr) >= i)
         hr <- phdrr[[i]]
       
-      gp <- rs$line_size - (nchar(hl) + nchar(hr))
+      gp <- rs$line_size - (get_nchar(hl) + get_nchar(hr))
       
       #print("header")
       if (gp >= 0) {
         
-        lw <- rs$line_size - nchar(hr)
+        lw <- rs$line_size - get_nchar(hr)
         ln <- paste0(pad_right(hl, lw), hr) 
       }
       
@@ -341,102 +341,6 @@ get_titles <- function(titles, content_width, page_width, uchar, char_width) {
 }
 
 
-
-#' Get title text strings suitable for printing
-#' @import stringi
-#' @param titles A list of title objects
-#' @param width The width to set the title strings to
-#' @return A vector of strings
-#' @noRd
-get_titles_back <- function(titles, content_width, page_width, uchar, char_width) {
-  
-  if (is.null(content_width)) {
-    stop("width cannot be null.") 
-    
-  }
-  
-  ret <- c()
-  
-  if (!is.null(titles)) { 
-    
-    for (ttl in titles) {
-      
-      if (!any(class(ttl) == "title_spec")) {
-        stop("titles parameter value is not a title spec.")
-      }
-      
-      if (ttl$width == "page")
-        width <- page_width
-      else if (ttl$width == "content")
-        width <- content_width
-      else if (is.numeric(ttl$width))
-        width <- ceiling(ttl$width / char_width)
-      
-      ll <- width 
-      
-      if (ttl$blank_row %in% c("above", "both") & length(ttl$titles) > 0)
-        ret[length(ret) + 1] <- ""
-      
-      if (any(ttl$borders %in% c("top", "all")) & length(ttl$titles) > 0)
-        ret[length(ret) + 1] <-  paste0(rep(uchar, ll), 
-                                        collapse = "")
-      
-      for (i in seq_along(ttl$titles)) {
-        
-        t <- ttl$titles[i]
-        
-        gp <- ll - nchar(t)
-        
-        #print("titles")
-        if (gp > 0) {
-          
-          if (ttl$align == "left")
-            ln <- pad_right(t, ll)
-          else if (ttl$align == "right")
-            ln <- pad_left(t, ll)
-          else if (ttl$align == "center" | ttl$align == "centre")
-            ln <- pad_both(t, ll)
-          
-        } else {
-          warning(paste0("Title exceeds available width.",
-                         "\nTitle: ", t,
-                         "\nTitle width: ", nchar(t),
-                         "\nLine length: ", ll))
-          
-          tgp <- ll - 3
-          
-          if (tgp >= 0) {
-            if (ttl$align == "left") {
-              ln <- paste0(substr(pad_right(t, ll), 1, tgp), "...")
-            } else if (ttl$align == "right") {
-              ln <- paste0("...", substr(pad_left(t, ll), 1, tgp))
-            } else if (ttl$align == "center" | ttl$align == "centre") {
-              ln <- paste0(substr(pad_both(t, ll), 1, tgp), "...")
-            }
-            
-            
-          } else ln <- ""
-          
-        }
-        
-        
-        ret[length(ret) + 1] <- ln
-      }
-      
-      if (any(ttl$borders %in% c("bottom", "all")) & length(ttl$titles) > 0)
-        ret[length(ret) + 1] <- paste0(rep(uchar, ll ), 
-                                       collapse = "")
-      
-      if (ttl$blank_row %in% c("below", "both") & length(ttl$titles) > 0)
-        ret[length(ret) + 1] <- ""
-    }
-    
-  }
-  
-  
-  return(ret)
-}
-
 #' Get page by text strings suitable for printing
 #' @import stringi
 #' @param titles Page by object
@@ -468,14 +372,15 @@ get_page_by <- function(pgby, width, value, pgby_cnt = NULL) {
     if (pgby$blank_row %in% c("above", "both"))
       ret[length(ret) + 1] <- ""
   
-
+    # Don't display "NA" when value is NA to differentiate real character "NA"
+    value <- ifelse(is.na(value),"",value)
     pb <- paste0(pgby$label, value)
     
     lns <- unlist(stri_split_fixed(pb, "\n"))
     
     for (pbln in lns) {
     
-      gp <- ll - nchar(pbln) 
+      gp <- ll - get_nchar(pbln) 
       
   
       if (gp > 0) {
@@ -904,107 +809,6 @@ get_footnotes <- function(footnotes, content_width, page_width,
   return(ret)
 }
 
-
-#' Get footnote text strings suitable for printing
-#' @param rs The report spec
-#' @return A vector of strings
-#' @noRd
-get_footnotes_back <- function(footnotes, content_width, page_width, 
-                          uchar = "-", char_width) {
-  
-  if (is.null(char_width)) {
-    stop("width cannot be null.") 
-    
-  }
-  
-  ret <- c()
-  
-  if (!is.null(footnotes)) {
-    for (ftn in footnotes) {
-      
-      if (!any(class(ftn) == "footnote_spec"))
-        stop("footnotes parameter value is not a footnote spec.")
-      
-      if (ftn$width == "page")
-        width <- page_width
-      else if (ftn$width == "content")
-        width <- content_width
-      else if (is.numeric(ftn$width))
-        width <- ceiling(ftn$width / char_width)
-      
-      ll <- width 
-      
-      if (ftn$blank_row %in% c("above", "both") & length(ftn$footnotes) > 0)
-        ret[length(ret) + 1] <- ""
-      
-      if (any(ftn$borders %in% c("top", "all")) & length(ftn$footnotes) > 0) {
-        # ret[length(ret) + 1] <- paste0(paste0(rep(uchar, ll), 
-        #                                       collapse = ""), " ")
-        
-        ret[length(ret) + 1] <- paste0(rep(uchar, ll), collapse = "")
-      }
-      
-      for (i in seq_along(ftn$footnotes)) {
-        
-        f <- ftn$footnotes[i]
-        
-        gp <- ll - nchar(f)
-        
-        #print("footnotes")
-        if (gp > 0) {
-          
-          # if (ftn$align == "left")
-          #   ln <- pad_right(paste0(f, " "), ll + 1)
-          # else if (ftn$align == "right")
-          #   ln <- pad_left(paste0(f, " "), ll + 1)
-          # else if (ftn$align == "center" | ftn$align == "centre")
-          #   ln <- pad_both(paste0(f, " "), ll + 1)
-          
-          if (ftn$align == "left")
-            ln <- pad_right(f, ll)
-          else if (ftn$align == "right")
-            ln <- pad_left(f, ll)
-          else if (ftn$align == "center" | ftn$align == "centre")
-            ln <- pad_both(f, ll)
-          
-        } else {
-          warning(paste0("Footnote exceeds available width.",
-                         "\nFootnote: ", f,
-                         "\nFootnote length: ", nchar(f), 
-                         "\nLine Length: ", ll))
-          
-          tln <- ll - 3
-          
-          if (tln >= 0) {
-            
-            if (ftn$align == "left") {
-              ln <- paste0(substr(pad_right(f , ll), 1, tln), "...")
-            } else if (ftn$align == "right") {
-              ln <- paste0("...", substr(pad_left(f, ll), 1, tln))
-            } else if (ftn$align == "center" | ftn$align == "centre") {
-              ln <- paste0(substr(pad_both(f, ll), 1, tln), "...")
-            }
-          } else ln <- "" 
-        }
-        
-        
-        ret[length(ret) + 1] <- ln
-      }
-      
-      if (any(ftn$borders %in% c("bottom", "all")) & length(ftn$footnotes) > 0) {
-        # ret[length(ret) + 1] <- paste0(paste0(rep(uchar, ll), 
-        #                                       collapse = ""), " ")
-        ret[length(ret) + 1] <- paste0(rep(uchar, ll), collapse = "")
-      }
-      
-      if (ftn$blank_row %in% c("below", "both") & length(ftn$footnotes) > 0)
-        ret[length(ret) + 1] <- ""
-    }
-  }
-  
-  return(ret)
-}
-
 #' Get page footer text strings suitable for printing
 #' @param rs The report spec
 #' @return A vector of strings
@@ -1056,9 +860,9 @@ get_page_footer <- function(rs) {
       if (length(pftrc) >= i)
         fc <- as.character(pftrc[[i]])
       
-      l_sz <- if (is.null(fl)) 0 else nchar(fl)
-      r_sz <- if (is.null(fr)) 0 else nchar(fr)
-      c_sz <- if (is.null(fc)) 0 else nchar(fc)
+      l_sz <- if (is.null(fl)) 0 else get_nchar(fl)
+      r_sz <- if (is.null(fr)) 0 else get_nchar(fr)
+      c_sz <- if (is.null(fc)) 0 else get_nchar(fc)
       
       gp <- rs$line_size - (l_sz + r_sz + c_sz)
       
@@ -1069,7 +873,7 @@ get_page_footer <- function(rs) {
         else
           fl <- pad_right(fl, r_sz)
         
-        lw <- rs$line_size - nchar(fr) - nchar(fl)
+        lw <- rs$line_size - get_nchar(fr) - get_nchar(fl)
         ln <- paste0(fl, pad_both(fc, lw), fr)
       }
       else {
@@ -1178,12 +982,12 @@ page_info <- function(data, keys, font_name, col_width, col_align,
 #' @noRd
 pad_right <- Vectorize(function(s, w) {
   
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s
   else
-    ret <- paste0(s, paste0(rep_len(" ", length.out = w - nchar(s)), collapse = ""))
+    ret <- paste0(s, paste0(rep_len(" ", length.out = w - get_nchar(s)), collapse = ""))
 
   return(ret)
 }, USE.NAMES = FALSE)
@@ -1191,7 +995,7 @@ pad_right <- Vectorize(function(s, w) {
 #' @noRd
 pad_left <- Vectorize(function(s, w) {
   
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s
@@ -1206,8 +1010,7 @@ pad_left <- Vectorize(function(s, w) {
 #' @noRd
 pad_both <- Vectorize(function(s, w) {
   
-  
-  l <- w - nchar(s)
+  l <- w - get_nchar(s)
   
   if (l < 0)
     ret <- s

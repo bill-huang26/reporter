@@ -4712,6 +4712,53 @@ test_that("rtf2-127: More RTF codes work as expected", {
   }
 })
 
+test_that("rtf2-127b: More RTF codes with \\line code work as expected", {
+  
+  if (dev) {
+    fp <- file.path(base_path, "rtf2/test127b.rtf")
+    
+    df <- read.table(header = TRUE, text = '
+       var label A B
+       "ampg" "\\li360 N" "19" "13"
+       "ampg" "\\li360 Mean" "18.8" "22.0 (4.9)"
+       "ampg" "\\li360 Median" "16.4{\\sub mm}" "21.4{\\super 2}"
+       "ampg" "\\li360 {\\cf12 Q1 - Q3}" "15.1 - 21.2" "19.2 - 22.8"
+       "ampg" "\\li360 Range" "{\\cf2 10.4 - 33.9}" "14.7 - 32.4"
+       "cyl" "\\li360 8\\line Cylinder" "\\ul 10 ( 52.6%) \\ul0" "4 ( 30.8%)"
+       "cyl" "\\li360 6\\line {\\cf11 Cylinder and more. \\line When \\line this very long string the body footnote can flow to the next page}" "4 ( 21.1%)" "3 ( 23.1%)"
+       "cyl" "\\li0 Sometime this is needed\\line{ }Cylinder" "\\ul\\line 5 ( 26.3%) \\ul0" "\\line 6 ( 46.2%)"')
+    
+    # Create table
+    tbl <- create_table(df, first_row_blank = TRUE, borders=c("top", "bottom")) |>
+      stub(c("var", "label"), width = .8) |> # vary the width here to see unpredictable result. width=2.8 looks ok. when 0.8 page footnote overlfow
+      define(var, blank_after = TRUE, label_row = TRUE,
+             format = c(ampg = "\\i Here is a italic label \\i0.",
+                        cyl = "\\ul Under line label \\ul0")) |>
+      define(A, label = "\\shad {{\\cf6 Group A}} {common::supsc('2')}\\shad0", align = "center", n = 19) |>
+      define(B, label = "\\outl Group B \\outl0", align = "center", n = 13) |>
+      footnotes("\\i\\fs14 * Italic Small Table Footnote{common::supsc('2')} \\fs18")
+    
+    # Create report and add content
+    rpt <- create_report(fp, orientation = "portrait", output_type = "RTF",
+                         font = "Times") |>
+      report_options(allow_code = TRUE, title_block = "paragraph", line_break = FALSE) |>
+      
+      page_header(left = "\\strike Strikethrough header \\strike0", right = "Study: Cars") |>
+      titles("{{\\b\\i\\highlight7\\cf2 This is yellow italic highlight}}",
+             "\\fs0\\fs28 {{\\cf2 This is a blue big title{{\\super{{a}}}}}} \\fs18") |>
+      add_content(tbl) |>
+      footnotes("\\i\\fs14\\cf6 * Italic Small \\line\\li207\\fi-207 Report Footnote {{\\ul\\super{common::symbol('alpha')}}} OK \\fs18") |>
+      page_footer(left = "Left",
+                  center = "Confidential",
+                  right = "Page [pg] of [tpg]")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
 test_that("rtf2-128: Line break can be turned off by report_options as expected.", {
   
   if (dev) {
@@ -5007,6 +5054,311 @@ test_that("rtf2-134: line_count can be set in report_options as expected.", {
   }
 })
 
+test_that("rtf2-135: Empty page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test135.rtf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- ""
+    dat$cyl[2] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "rtf", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Empty and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-136: Numeric page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test136.rtf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "rtf", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Numeric and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-137: Multiple dedupe works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test137.rtf")
+    
+    # Setup
+    subjid <- c(100,100,101,101,101,102,103,103,104,104)
+    param <- c(rep("Hemoglobin", 3), rep("Triglycerides", 4), rep("Platelets", 3))
+    result <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+    Lab <- c(NA, NA, "central", "central", "central", NA, "local", "local", NA, NA)
+    arm <- c(rep("A", 5), rep("B", 5))
+    
+    df <- data.frame(subjid, arm, param, Lab, result)
+    
+    tbl1 <- create_table(df, first_row_blank = FALSE) %>%
+      define(subjid, label = "Subject", align = "left", dedupe = TRUE) %>%
+      define(param, label = "Lab Test", dedupe = c("subjid", "param")) %>%
+      define(result, label = "Result") %>%
+      define(Lab, visible = FALSE) %>%
+      define(arm, label = "Arm",
+             blank_after = TRUE,
+             dedupe = c("Lab", "arm"),
+             align = "right") 
+    
+    rpt <- create_report(fp, output_type = "RTF", font = fnt, font_size = fsz) %>%
+      page_header(left = "Company", right = c("Study ABC", "Status: Closed")) %>%
+      titles("Table 1.0", "Multiple Dedupe of subjid, arm, and lab test",
+             "Lab is non-visible for arm's dedupe", align = "center") %>%
+      footnotes("Program Name: table1_0.R") %>%
+      page_footer(left = "Time", center = "Confidential",
+                  right = "Page [pg] of [tpg]") %>%
+      add_content(tbl1)
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-138: Courier is displayed as Courier New as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test138.rtf")
+    
+    txt <- create_text(cnt, width = 6, borders = "outside", align = "right") %>%
+      titles("Text 1.0", "My Nice Text", borders = "none", font_size = 12) %>%
+      footnotes("My footnote 1", "My footnote 2", borders = "none")
+    
+    rpt <- create_report(fp, output_type = "RTF", font = "courier",
+                         font_size = 10) %>%
+      report_options(title_block = "paragraph") %>%
+      titles("Text 1.0", "My Nice Text", font_size = 14) %>%
+      titles("Title in Header", header = TRUE) %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", "Right") %>%
+      add_content(txt, align = "right") %>%
+      page_footer("Left1", "Center1", "Right1")
+    
+    # There is no visual difference between Courier and Courier New
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+    
+    # Check if there is Courier New
+    rtf <- readLines(fp, warn = FALSE)
+    expect_equal(rtf[1],
+                 "{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Courier New;}}")
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-139: Customized small line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test139.rtf")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
+    
+    rpt <- create_report(fp, output_type = "rtf", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      # report_options(line_height = 0.12, title_block = "paragraph") %>%
+      report_options(line_height = 0.12) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
+    
+    # The text squishing is expected.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-139b: Customized large line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test139b.rtf")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
+    
+    rpt <- create_report(fp, output_type = "rtf", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      report_options(line_height = 0.2) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
+    
+    # Large line height should not cause overflow.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("rtf2-140: Percentage column widths work as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test140.rtf")
+    
+    dat <- iris
+    
+    
+    tbl <- create_table(dat, borders = "none") %>%
+      titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+      define(Sepal.Length, label = "Sepal Length", width = "33.33333%", align = "center") %>%
+      define(Sepal.Width, label = "Sepal Width", width = 1, align = "centre") %>%
+      define(Species, blank_after = TRUE)
+    
+    rpt <- create_report(fp, output_type = "RTF", font = fnt,
+                         font_size = 12, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1")) %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+      footnotes("My footnote 1", "My footnote 2")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
+
+test_that("rtf2-141: Output Chinese as expected.", {
+  
+  if (dev == TRUE) {
+    
+    # Read in prepared data
+    df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+    
+    df$trt3 <- df$trt1
+    df$trt4 <- df$trt2
+    df$trt5 <- df$trt1
+    
+    df <- rbind(df, df, df)
+    
+    tbl <- create_table(df, borders = "all") %>%
+      titles("表 14-2.1. 基线人口学特征", "(安全分析集)", borders = "all") %>%
+      # stub(c("group1", "group2"), width = 1) %>%
+      stub(c("group1", "group2")) %>%
+      page_by(subgroup, label = "亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白：", 
+              borders = "all") %>%
+      define(group1, label_row = T, blank_after = T) %>%
+      define(group2, indent = 0.25) %>%
+      define(trt1, label = "试验药物一") %>%
+      define(trt2, label = "试验药物二") %>%
+      define(trt3, label = "试验药物三") %>%
+      define(trt4, label = "试验药物四") %>%
+      define(trt5, label = "安慰剂") %>%
+      define(subgroup, visible = FALSE) %>%
+      spanning_header(from = "trt1", to = "trt3", label = "高试验药物") %>%
+      spanning_header(from = "trt4", to = "trt5", label = "低试验药物")
+    
+    font_lst <- c(8, 9, 10, 11, 12)
+    
+    for (f in font_lst) {
+      file_name <- paste0("test141_", f, ".rtf")
+      fp <- file.path(base_path, "rtf2/", file_name)
+      
+      rpt <- create_report(fp, output_type = "RTF", font = "SimSun",
+                           font_size = f, orientation = "portrait") %>%
+        set_margins(top = 1, bottom = 1) %>%
+        # report_options(line_height = 0.175) %>%
+        page_header("研究123", "分析数据审阅说明") %>%
+        add_content(tbl, blank_row = "none") %>%
+        page_footer("左页尾", "中页尾", "第 [pg] 页, 共 [tpg] 页") %>%
+        footnotes("用于分析目的。其中包括人口统计学、治疗组和人群标帜。", 
+                  "受试者水平分析数据集。", borders = "all")
+      
+      res <- write_report(rpt)
+      expect_equal(file.exists(fp), TRUE)
+    }
+    
+  } else
+    expect_equal(TRUE, TRUE)
+})
 # User Tests --------------------------------------------------------------
 
 test_that("user1: demo table works.", {

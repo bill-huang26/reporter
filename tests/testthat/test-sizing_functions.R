@@ -340,7 +340,7 @@ test_that("get_page_wraps works as expected.", {
 })
 
 
-test_that("get_col_widths_rtf works as expected.", {
+test_that("get_col_widths_variable works as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -365,7 +365,7 @@ test_that("get_col_widths_rtf works as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with indentation as expected.", {
+test_that("get_col_widths_variable works with indentation as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -390,7 +390,7 @@ test_that("get_col_widths_rtf works with indentation as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with stub as expected.", {
+test_that("get_col_widths_variable works with stub as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -415,7 +415,7 @@ test_that("get_col_widths_rtf works with stub as expected.", {
   
 })
 
-test_that("get_col_widths_rtf works with stub and indentation as expected.", {
+test_that("get_col_widths_variable works with stub and indentation as expected.", {
   
   # dat, ts, labels, font, 
   # font_size, uom, gutter_width
@@ -507,6 +507,80 @@ test_that("get_col_widths_variable works with allow_html_code as expected.", {
   expect_equal(as.numeric(which(res_old == res_new)), c(5, 11:18))
   expect_equal(as.numeric(which(res_old > res_new)), c(1:4, 6:10, 19, 20))
 })
+ 
+test_that("get_col_widths_variable works with percentage width as expected.", {
+  
+  df <- mtcars
+  
+  tbl <- create_table(df) %>% 
+    define(mpg, label = "Miles Per Gallon") %>% 
+    define(cyl, width = 1.5) %>% 
+    define(disp, width = "20%") 
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths_variable(df, tbl, lbls, "Arial", 12, "inches", .2, content_width = 8)
+  res
+  
+  expect_equal(res[["disp"]], 1.6)
+  
+  
+})
+
+test_that("get_col_widths_variable works with Chinese as expected.", {
+
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一")
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths_variable(df, tbl, lbls, "SimSun", 10, "inches", .2,
+                                 content_width = 8)
+  res
+  
+  expect_equal(res[["group2"]] == 1.15, TRUE)
+})
+
+test_that("get_col_widths works as expected.", {
+  
+  base_path <- tempdir()
+  fp <- file.path(base_path, "output/test1.out")
+  
+  df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+  
+  tbl <- create_table(df) %>% 
+    define(trt1, label = "试验药物一")
+  
+  rs <- create_report(fp, output_type = "txt", font = "simsun", 
+                      orientation = "portrait")
+  
+  lbls <- get_labels(df, tbl)
+  
+  res <- get_col_widths(df, tbl, lbls, rs$char_width, rs$units,
+                        content_width = rs$content_size[["width"]])
+  
+  char_num <- round(res / rs$char_width) - 1
+  
+  expect_equal(as.numeric(char_num), c(6,13,9,9,8))
+})
 
 test_that("stub_dedupe works as expected", {
   
@@ -554,4 +628,19 @@ test_that("get_pgby_cnt works as expected", {
   expect_equal(res4, 1)
   
   
+})
+
+test_that("get_nchar works as expected", {
+  
+  res1 <- get_nchar("123b5")
+  
+  expect_equal(res1, 5)
+  
+  res2 <- get_nchar("最小值, 最大值")
+  
+  expect_equal(res2, 13)
+  
+  res3 <- get_nchar("试验药物一")
+  
+  expect_equal(res3, 9)
 })

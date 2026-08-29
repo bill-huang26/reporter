@@ -364,9 +364,10 @@ create_table <- function(x, show_cols = "all", use_attributes = "all",
 #' variable.  Valid values are TRUE or FALSE.  Default is FALSE.
 #' @param blank_before Whether to place a blank row before unique values of this
 #' variable.  Valid values are TRUE or FALSE.  Default is FALSE.
-#' @param dedupe Whether to dedupe the values for this variable.  Variables
-#' that are deduped only show the value on the first row of each group.  This 
-#' option is commonly used for grouping variables.
+#' @param dedupe Whether to dedupe the values for this variable. Set to TRUE for 
+#' a variable that is deduped only showing the value on the first row of each group.
+#' As for deduping on multiple variables, set to a character vector such as
+#' \code{c("subjid", "arm")}.
 #' @param id_var Whether this variable should be considered an ID variable.
 #' ID variables are retained on each page when the page is wrapped. ID variables
 #' are also moved to the far left of the page.
@@ -524,6 +525,13 @@ define <- function(x, vars, label = NULL, format = NULL,
     # Convert list to vector
     vars_c <- unlist(vars_c)
     
+  }
+  
+  # Error Detection of Input Parameters
+  if (!is.null(width)) {
+    if (!is.numeric(width) & !grepl("^[0-9]+(\\.[0-9]+)?%$", width)) {
+      stop("`width` must be a numeric value or a character value with '%', such as '10.5%'.")
+    }
   }
   
 

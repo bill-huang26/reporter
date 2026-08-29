@@ -216,7 +216,8 @@ create_table_pages_rtf <- function(rs, cntnt, lpg_rows) {
   widths_uom <- get_col_widths_variable(fdat, ts, labels, 
                                         rs$font, rs$font_size, rs$units, 
                                         rs$gutter_width,
-                                        allow_rtf_code = rs$allow_code) 
+                                        allow_rtf_code = rs$allow_code,
+                                        content_width = rs$content_size[["width"]]) 
   
   # print("Widths UOM")
   # print(widths_uom)
@@ -766,13 +767,21 @@ get_table_header_rtf <- function(rs, ts, widths, lbls, halgns, talgn) {
     }
   }
   
+  if (!is.null(rs$user_line_height)) {
+    # Use minus sign to fix the line height, or Word would still adjust row height
+    # with the font size
+    trrh <- "\\trrh-"
+  } else {
+    trrh <- "\\trrh"
+  }
+  
   # Table Header
   # Request from Astellas
   # Need to watch this for undesired side effects.
   if (ts$continuous) 
-    ret[1] <-  paste0("\\trowd\\trkeep\\trhdr\\trgaph0", ta, "\\trrh", rh)  
+    ret[1] <-  paste0("\\trowd\\trkeep\\trhdr\\trgaph0", ta, trrh, rh)  
   else 
-    ret[1] <-  paste0("\\trowd\\trgaph0", ta, "\\trrh", rh)
+    ret[1] <-  paste0("\\trowd\\trgaph0", ta, trrh, rh)
   
   # Loop for cell definitions
   for(j in seq_along(nms)) {
@@ -823,7 +832,7 @@ get_table_header_rtf <- function(rs, ts, widths, lbls, halgns, talgn) {
     w <- round(sum(widths, na.rm = TRUE) * conv)
     
     ret[1] <- paste0(ret[1], "\n\\trowd\\trgaph0", ta, 
-                     "\\trrh", rh, b, "\\cellx", w,
+                     trrh, rh, b, "\\cellx", w,
                      "\\ql\\cell\\row")
    cnt <- cnt + 1
   }
@@ -927,8 +936,16 @@ get_spanning_header_rtf <- function(rs, ts, pi) {
     r <- ""
     cnt[length(cnt) + 1] <- 1 
     
+    if (!is.null(rs$user_line_height)) {
+      # Use minus sign to fix the line height, or Word would still adjust row height
+      # with the font size
+      trrh <- "\\trrh-"
+    } else {
+      trrh <- "\\trrh"
+    }
+    
     # Table Header
-    r <-  paste0("\\trowd\\trgaph0", ta, "\\trrh", rh)
+    r <-  paste0("\\trowd\\trgaph0", ta, trrh, rh)
     
     # Label justification, width, and row concatenation
 
@@ -1250,14 +1267,22 @@ get_table_body_rtf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
     }
   }
   
+  if (!is.null(rs$user_line_height)) {
+    # Use minus sign to fix the line height, or Word would still adjust row height
+    # with the font size
+    trrh <- "\\trrh-"
+  } else {
+    trrh <- "\\trrh"
+  }
+  
   # Table Body
   for(i in seq_len(nrow(t))) {
     
     
     if (i ==  1 & continuous == FALSE)
-      ret[i] <- paste0("{\\trowd\\trgaph0\\trrh", rh, ta)
+      ret[i] <- paste0("{\\trowd\\trgaph0", trrh, rh, ta)
     else 
-      ret[i] <- paste0("\\trowd\\trgaph0\\trrh", rh, ta)
+      ret[i] <- paste0("\\trowd\\trgaph0", trrh, rh, ta)
     
     
 

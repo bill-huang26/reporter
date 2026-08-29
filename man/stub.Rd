@@ -190,11 +190,11 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 #
 }
 \seealso{
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{create_table}()},
-\code{\link{define}()},
-\code{\link{print.table_spec}()},
-\code{\link{spanning_header}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=create_table]{create_table()}},
+\code{\link[=define]{define()}},
+\code{\link[=print.table_spec]{print.table_spec()}},
+\code{\link[=spanning_header]{spanning_header()}}
 }
 \concept{table}

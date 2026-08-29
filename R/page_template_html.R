@@ -157,8 +157,14 @@ get_page_header_html <- function(rs) {
     
     max_height <- 0
     
+    # Get customized line height
+    lh_code <- ""
+    if (!is.null(rs$user_line_height)) {
+      lh_code <- get_line_height_html(rs)
+    }
+    
     for (i in seq(1, maxh)) {
-      ret <- paste0(ret, "<tr>")
+      ret <- paste0(ret, paste0("<tr",lh_code ,">"))
 
       if (left_width > 0) {
         if (hl_num >= i) {
@@ -167,11 +173,13 @@ get_page_header_html <- function(rs) {
             # Split strings if they exceed width
             tmp <- split_string_html(hl[[i]], left_width, rs$units,
                                      insert_line_break = rs$line_break,
-                                     allow_html_code = rs$allow_code)
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:left\">", 
                           encodeHTML(tmp$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code),
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font),
                           "</td>\n")
             
             lcnt <- tmp$lines
@@ -198,11 +206,13 @@ get_page_header_html <- function(rs) {
             # Split strings if they exceed width
             tmp3 <- split_string_html(hc[[i]], center_width, rs$units,
                                       insert_line_break = rs$line_break,
-                                      allow_html_code = rs$allow_code)
+                                      allow_html_code = rs$allow_code,
+                                      font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:center\">", 
                           encodeHTML(tmp3$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code),
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font),
                           "</td>\n")
             
             ccnt <- tmp3$lines
@@ -229,11 +239,13 @@ get_page_header_html <- function(rs) {
             # Split strings if they exceed width
             tmp2 <- split_string_html(hr[[i]], right_width, rs$units,
                                       insert_line_break = rs$line_break,
-                                      allow_html_code = rs$allow_code)
+                                      allow_html_code = rs$allow_code,
+                                      font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:right\">", 
                           encodeHTML(tmp2$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code), 
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font), 
                           "</td></tr>\n")
             
             rcnt <- tmp2$lines 
@@ -393,9 +405,15 @@ get_page_footer_html <- function(rs) {
     
     max_height <- 0
     
+    # Get customized line height
+    lh_code <- ""
+    if (!is.null(rs$user_line_height)) {
+      lh_code <- get_line_height_html(rs)
+    }
+    
     for (i in seq(1, maxf)) {
 
-      ret <- paste0(ret, "<tr>")
+      ret <- paste0(ret, paste0("<tr",lh_code ,">"))
 
       if (left_width > 0) {
         if (fl_num >= i) {
@@ -404,11 +422,13 @@ get_page_footer_html <- function(rs) {
             # Split strings if they exceed width
             tmp1 <- split_string_html(fl[[i]], left_width, rs$units,
                                       insert_line_break = rs$line_break,
-                                      allow_html_code = rs$allow_code)
+                                      allow_html_code = rs$allow_code,
+                                      font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:left\">", 
                           encodeHTML(tmp1$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code),
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font),
                           "</td>")
             lcnt <- tmp1$lines
           } else {
@@ -434,11 +454,13 @@ get_page_footer_html <- function(rs) {
             # Split strings if they exceed width
             tmp2 <- split_string_html(fc[[i]], center_width, rs$units,
                                       insert_line_break = rs$line_break,
-                                      allow_html_code = rs$allow_code)
+                                      allow_html_code = rs$allow_code,
+                                      font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:center\">", 
                           encodeHTML(tmp2$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code),
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font),
                           "</td>")
             ccnt <- tmp2$lines
           } else {
@@ -463,11 +485,13 @@ get_page_footer_html <- function(rs) {
           if (image_right == FALSE) {
             tmp3 <- split_string_html(fr[[i]], right_width, rs$units,
                                       insert_line_break = rs$line_break,
-                                      allow_html_code = rs$allow_code)
+                                      allow_html_code = rs$allow_code,
+                                      font = rs$font, font_size = rs$font_size)
             
             ret <- paste0(ret, "<td style=\"text-align:right\">", 
                           encodeHTML(tmp3$html, nbsp = rs$line_break,
-                                     allow_html_code = rs$allow_code),
+                                     allow_html_code = rs$allow_code,
+                                     font = rs$font),
                           "</td>")
             
             rcnt <- tmp3$lines
@@ -561,11 +585,21 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
       
       # Open device context
       pdf(NULL)
+      lh_code <- ""
+      
       if (!is.null(ttls$font_size)) {
         ttlfs <- ttls$font_size
       } else {
         ttlfs <- rs$font_size
       }
+      
+      if (ttlfs == rs$font_size) {
+        # Get customized line height when title font size is the same as content
+        if (!is.null(rs$user_line_height)) {
+          lh_code <- get_line_height_html(rs)
+        }
+      }
+      
       par(family = get_font_family(rs$font), ps = ttlfs)
       
       ret[length(ret) + 1] <- paste0("<table ",
@@ -583,9 +617,9 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          al <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          al <- paste0("<tr",lh_code ,">","<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          al <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          al <- paste0("<tr",lh_code ,">","<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Can append now, since it is first
@@ -604,9 +638,9 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          bl <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          bl <- paste0("<tr",lh_code ,">","<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          bl <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          bl <- paste0("<tr",lh_code ,">","<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Wait to append until after title rows
@@ -623,7 +657,7 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
         rwnum <- ceiling(i / cols)
         
         mxlns <- 0
-        rw <- "<tr>"
+        rw <- paste0("<tr",lh_code ,">")
         
         for (j in seq_len(cols)) {
           
@@ -661,7 +695,8 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
           # Split title strings if they exceed width
           tmp <- split_string_html(vl, cwidth, rs$units,
                                    insert_line_break = rs$line_break,
-                                   allow_html_code = rs$allow_code)
+                                   allow_html_code = rs$allow_code,
+                                   font = rs$font, font_size = rs$font_size)
           
           # Track max lines for counting
           if (tmp$lines > mxlns)
@@ -669,10 +704,11 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
           
           if (ttls$bold)
             tstr <- paste0("<b>", encodeHTML(tmp$html, nbsp = rs$line_break,
-                                             allow_html_code = rs$allow_code), "</b>")
+                                             allow_html_code = rs$allow_code,
+                                             font = rs$font), "</b>")
           else 
             tstr <- encodeHTML(tmp$html, nbsp = rs$line_break,
-                               allow_html_code = rs$allow_code)
+                               allow_html_code = rs$allow_code, font = rs$font)
           
           fz <- ""
           if (!is.null(ttls$font_size)){
@@ -714,172 +750,6 @@ get_titles_html <- function(ttllst, content_width, rs, talgn = "center") {
   }
   
 
-  
-  res <- list(html = paste0(ret, collapse = ""), 
-              lines = cnt,
-              border_flag = border_flag)
-  
-  return(res)
-}
-
-
-#' @import grDevices
-#' @noRd
-get_titles_html_back <- function(ttllst, content_width, rs, talgn = "center") {
-  
-  ret <- c()
-  cnt <- 0
-  border_flag <- FALSE
-  
-  # ta <- "align=\"left\" "
-  # if (talgn == "right")
-  #   ta <- "align=\"right\" "
-  # else if (talgn %in% c("center", "centre"))
-  #   ta <- "align=\"center\" "
-  
-  sty <- paste0(get_style_html(rs, "title_font_color"),
-                get_style_html(rs, "title_background"),
-                get_style_html(rs, "title_font_bold"),
-                get_style_html(rs, "title_font_size"))
-  
-  u <- rs$units
-  if (rs$units == "inches")
-    u <- "in"
-  
-  if (length(ttllst) > 0) {
-    
-    for (ttls in ttllst) {
-      
-      
-      if (ttls$width == "page")
-        width <- rs$content_size[["width"]]
-      else if (ttls$width == "content")
-        width <- content_width
-      else if (is.numeric(ttls$width))
-        width <- ttls$width
-      
-      w <- round(width, 3)
-      
-      if (ttls$align %in% c("centre", "center"))
-        algn <- "text-align: center;"
-      else if (ttls$align == "right")
-        algn <- "text-align: right;"
-      else
-        algn <- "text-align: left;"
-      
-      alcnt <- 0
-      blcnt <- 0
-      
-      # Open device context
-      pdf(NULL)
-      par(family = get_font_family(rs$font), ps = rs$font_size)
-      
-      ret[length(ret) + 1] <- paste0("<table ",
-                                     "style=\"width:", w, u, ";", 
-                                     algn, sty,
-                                     "\">\n")
-      
-      for (i in seq_along(ttls$titles)) {
-        
-        
-        
-        al <- ""
-        if (i == 1) {
-          if (any(ttls$blank_row %in% c("above", "both"))) {
-            
-            alcnt <- 1
-            
-            tb <- get_cell_borders_html(i, 1, length(ttls$titles) + alcnt, 
-                                        1, ttls$borders, 
-                                        border_color = get_style(rs, "border_color"))
-            
-            if (tb == "")
-              al <- "<tr><td>&nbsp;</td></tr>\n"
-            else 
-              al <- paste0("<tr><td style=\"", tb, "\">&nbsp;</td></tr>\n")
-            
-            cnt <- cnt + 1
-          }
-        }
-        
-        bl <- ""
-        if (i == length(ttls$titles)) {
-          if (any(ttls$blank_row %in% c("below", "both"))) {
-            blcnt <- 1
-            
-            tb <- get_cell_borders_html(i + alcnt + blcnt, 1,
-                                        length(ttls$titles) + alcnt + blcnt,
-                                        1, ttls$borders,
-                                        border_color = get_style(rs, "border_color"))
-            
-            if (tb == "")
-              bl <- "<tr><td>&nbsp;</td></tr>\n"
-            else 
-              bl <- paste0("<tr><td style=\"", tb, "\">&nbsp;</td></tr>\n")
-            
-            cnt <- cnt + 1
-          }
-          
-        }
-        
-        b <- get_cell_borders_html(i + alcnt, 1,
-                                   length(ttls$titles) + alcnt + blcnt,
-                                   1, ttls$borders,
-                                   border_color = get_style(rs, "border_color"))
-        
-        # Split title strings if they exceed width
-        tmp <- split_string_html(ttls$titles[[i]], width, rs$units,
-                                 insert_line_break = rs$line_break,
-                                 allow_html_code = rs$allow_code)
-        
-        if (ttls$bold)
-          tstr <- paste0("<b>", encodeHTML(tmp$html, nbsp = rs$line_break,
-                                           allow_html_code = rs$allow_code), "</b>")
-        else 
-          tstr <- encodeHTML(tmp$html, nbsp = rs$line_break,
-                             allow_html_code = rs$allow_code)
-        
-        fz <- ""
-        if (!is.null(ttls$font_size)){
-          
-          fz <- paste0("font-size:", ttls$font_size, "pt;") 
-        }
-        
-        
-        # Concatenate title string
-        if (al != "")
-          ret <- append(ret, al)
-        
-        if (b == "" & fz == "") {
-          ret <- append(ret, paste0("<tr><td>", tstr, 
-                                    "</td></tr>\n"))
-        } else {
-          
-          ret <- append(ret, paste0("<tr><td style=\"", b, fz, "\">", 
-                                    tstr, 
-                                    "</td></tr>\n"))
-        }
-        
-        if (bl != "")
-          ret <- append(ret, bl)
-        
-        cnt <- cnt + tmp$lines
-        
-        # A flag to indicate that this block has bottom borders.  
-        # Used to eliminate border duplication on subsequent blocks.
-        if ("bottom" %in% get_outer_borders(ttls$borders))
-          border_flag <- TRUE
-      }
-      
-      ret[length(ret) + 1] <- "</table>"
-      dev.off()
-      
-      
-    }
-    
-  }
-  
-  
   
   res <- list(html = paste0(ret, collapse = ""), 
               lines = cnt,
@@ -940,10 +810,19 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
 
 
       pdf(NULL)
+      lh_code <- ""
+
       if (!is.null(ftnts$font_size)) {
         ftntfs <- ftnts$font_size
       } else {
         ftntfs <- rs$font_size
+      }
+      
+      if (ftntfs == rs$font_size) {
+        # Get customized line height when title font size is the same as content
+        if (!is.null(rs$user_line_height)) {
+          lh_code <- get_line_height_html(rs)
+        }
       }
       par(family = get_font_family(rs$font), ps = ftntfs)
       ret[length(ret) + 1] <- paste0("<table ",
@@ -962,9 +841,9 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
 
         
         if (tb == "")
-          al <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          al <- paste0("<tr",lh_code ,">", "<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          al <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          al <- paste0("<tr",lh_code ,">", "<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         # Can append now, since it is first
@@ -985,9 +864,9 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
                                     border_color = get_style(rs, "border_color"))
         
         if (tb == "")
-          bl <- paste0("<tr><td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
+          bl <- paste0("<tr",lh_code ,">", "<td colspan=\"", cols, "\">&nbsp;</td></tr>\n")
         else 
-          bl <- paste0("<tr><td style=\"", tb, "\" colspan=\"", cols, 
+          bl <- paste0("<tr",lh_code ,">", "<td style=\"", tb, "\" colspan=\"", cols, 
                        "\">&nbsp;</td></tr>\n")
         
         cnt <- cnt + 1
@@ -1001,7 +880,7 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
         rwnum <- ceiling(i / cols)
         
         mxlns <- 0
-        rw <- "<tr>"
+        rw <- paste0("<tr",lh_code ,">")
 
         for (j in seq_len(cols)) {
   
@@ -1040,7 +919,8 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
           # Split footnote strings if they exceed width
           tmp <- split_string_html(vl, cwidth, rs$units,
                                    insert_line_break = rs$line_break,
-                                   allow_html_code = rs$allow_code)
+                                   allow_html_code = rs$allow_code,
+                                   font = rs$font, font_size = rs$font_size)
   
           # Track max lines for counting
           if (tmp$lines > mxlns)
@@ -1049,10 +929,12 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
           
           if (ftnts$italics)
             txt <- paste0("<i>", encodeHTML(tmp$html, nbsp = rs$line_break,
-                                            allow_html_code = rs$allow_code), "</i>")
+                                            allow_html_code = rs$allow_code,
+                                            font = rs$font), "</i>")
           else
             txt <- encodeHTML(tmp$html, nbsp = rs$line_break,
-                              allow_html_code = rs$allow_code)
+                              allow_html_code = rs$allow_code,
+                              font = rs$font)
   
           # if (b == "")
           #   ret <- append(ret, paste0("<tr><td>", txt, 
@@ -1105,154 +987,6 @@ get_footnotes_html <- function(ftnlst, content_width, rs, talgn = "center",
   return(res)
 }
 
-
-#' @import grDevices
-#' @noRd
-get_footnotes_html_back <- function(ftnlst, content_width, rs, talgn = "center", 
-                               ex_brdr = FALSE) {
-  
-  ret <- c()
-  cnt <- 0
-  exclude_top <- NULL
-  if (ex_brdr)
-    exclude_top <- "top"
-  
-  u <- rs$units
-  if (rs$units == "inches")
-    u <- "in"
-  
-  sty <- paste0(get_style_html(rs, "footnote_font_color"),
-                get_style_html(rs, "footnote_background"),
-                get_style_html(rs, "footnote_font_bold"))
-  
-  
-  if (length(ftnlst) > 0) {
-    
-    for (ftnts in ftnlst) {
-      
-      if (ftnts$width == "page")
-        width <- rs$content_size[["width"]]
-      else if (ftnts$width == "content")
-        width <- content_width
-      else if (is.numeric(ftnts$width))
-        width <- ftnts$width
-      
-      w <- round(width, 3)
-      
-      
-      if (ftnts$align %in% c("centre", "center"))
-        algn <- "text-align: center;"
-      else if (ftnts$align == "right")
-        algn <- "text-align: right;"
-      else
-        algn <- "text-align: left;"
-      
-      alcnt <- 0
-      blcnt <- 0
-      
-      
-      pdf(NULL)
-      par(family = get_font_family(rs$font), ps = rs$font_size)
-      ret[length(ret) + 1] <- paste0("<table ",
-                                     "style=\"width:", w, u, ";",
-                                     algn, sty,
-                                     "\">\n")
-      
-      for (i in seq_along(ftnts$footnotes)) {
-        
-        
-        al <- ""
-        if (i == 1) {
-          if (any(ftnts$blank_row %in% c("above", "both"))) {
-            
-            alcnt <- 1
-            
-            tb <- get_cell_borders_html(i, 1, length(ftnts$footnotes) + alcnt,
-                                        1, ftnts$borders, exclude = exclude_top,
-                                        border_color = get_style(rs, "border_color"))
-            
-            if (tb == "")
-              al <- "<tr><td>&nbsp;</td></tr>\n"
-            else 
-              al <- paste0("<tr><td style=\"", tb, "\">&nbsp;</td></tr>\n")
-            
-            cnt <- cnt + 1
-            
-          }
-        }
-        
-        bl <- ""
-        if (i == length(ftnts$footnotes)) {
-          if (any(ftnts$blank_row %in% c("below", "both"))) {
-            blcnt <- 1
-            
-            tb <- get_cell_borders_html(i + alcnt + blcnt, 1,
-                                        length(ftnts$footnotes) + alcnt + blcnt,
-                                        1, ftnts$borders,
-                                        border_color = get_style(rs, "border_color"))
-            
-            if (tb == "")
-              bl <- "<tr><td>&nbsp;</td></tr>\n"
-            else 
-              bl <- paste0("<tr><td style=\"", tb, "\">&nbsp;</td></tr>\n")
-            
-            cnt <- cnt + 1
-          }
-          
-        }
-        
-        b <- get_cell_borders_html(i + alcnt, 1,
-                                   length(ftnts$footnotes) + alcnt + blcnt,
-                                   1, ftnts$borders, exclude = exclude_top,
-                                   border_color = get_style(rs, "border_color"))
-        
-        
-        
-        # Split footnote strings if they exceed width
-        tmp <- split_string_html(ftnts$footnotes[[i]], width, rs$units,
-                                 insert_line_break = rs$line_break,
-                                 allow_html_code = rs$allow_code)
-        
-        if (al != "")
-          ret <- append(ret, al)
-        
-        if (ftnts$italics)
-          txt <- paste0("<i>", encodeHTML(tmp$html, nbsp = rs$line_break,
-                                          allow_html_code = rs$allow_code), "</i>")
-        else
-          txt <- encodeHTML(tmp$html, nbsp = rs$line_break,
-                            allow_html_code = rs$allow_code)
-        
-        if (b == "")
-          ret <- append(ret, paste0("<tr><td>", txt, 
-                                    "</td></tr>\n"))
-        else {
-          ret <- append(ret, paste0("<tr><td style=\"", b, "\">", 
-                                    txt, 
-                                    "</td></tr>\n"))
-        }
-        
-        
-        if (bl != "")
-          ret <- append(ret, bl)
-        
-        cnt <- cnt + tmp$lines
-      }
-      ret[length(ret) + 1] <- "</table>"
-      dev.off()
-      
-      
-    }
-    
-  }
-  
-  
-  res <- list(html = paste0(ret, collapse = ""),
-              lines = cnt)
-  
-  return(res)
-}
-
 #' @import grDevices
 #' @noRd
 get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") {
@@ -1266,6 +1000,12 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
   if (rs$units == "inches")
     u <- "in"
 
+  # Get customized line height when footnote font size is the same as content
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (length(thdrlst) > 0) {
 
     for (ttlhdr in thdrlst) {
@@ -1309,7 +1049,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
                                         2, ttlhdr$borders,
                                         border_color = get_style(rs, "border_color"))
 
-            al <- paste0("<tr><td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
+            al <- paste0("<tr",lh_code ,">", "<td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
                          "<td style=\"text-align:right;", tb2, 
                          "\">&nbsp;</td></tr>\n")
             cnt <- cnt + 1
@@ -1331,7 +1071,7 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
                                         2, ttlhdr$borders,
                                         border_color = get_style(rs, "border_color"))
             
-            bl <- paste0("<tr><td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
+            bl <- paste0("<tr",lh_code ,">", "<td style=\"text-align:left;", tb1, "\">&nbsp;</td>", 
                          "<td style=\"text-align:right;", tb2, 
                          "\">&nbsp;</td></tr>\n")
             cnt <- cnt + 1
@@ -1343,7 +1083,8 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
           # Split strings if they exceed width
           tmp1 <- split_string_html(ttlhdr$titles[[i]], width * .7, rs$units,
                                     insert_line_break = rs$line_break,
-                                    allow_html_code = rs$allow_code)
+                                    allow_html_code = rs$allow_code,
+                                    font = rs$font, font_size = rs$font_size)
 
           ttl <-  tmp1$html 
           tcnt <- tmp1$lines
@@ -1356,7 +1097,8 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
           tmp2 <- split_string_html(ttlhdr$right[[i]],
                                    width * .3, rs$units,
                                    insert_line_break = rs$line_break,
-                                   allow_html_code = rs$allow_code)
+                                   allow_html_code = rs$allow_code,
+                                   font = rs$font, font_size = rs$font_size)
           # hdr <- get_page_numbers_html(tmp2$html, FALSE)
           
           hdr <- tmp2$html
@@ -1377,12 +1119,14 @@ get_title_header_html <- function(thdrlst, content_width, rs, talgn = "center") 
         if (al != "")
           ret <- append(ret, al)
         
-        ret <- append(ret, paste0("<tr><td style=\"text-align:left;", b1, "\">",
+        ret <- append(ret, paste0("<tr",lh_code ,">", "<td style=\"text-align:left;", b1, "\">",
                                   encodeHTML(ttl, nbsp = rs$line_break,
-                                             allow_html_code = rs$allow_code), 
+                                             allow_html_code = rs$allow_code,
+                                             font = rs$font), 
                                   "</td><td style=\"text-align:right;", b2, "\">", 
                                   encodeHTML(hdr, nbsp = rs$line_break,
-                                             allow_html_code = rs$allow_code), 
+                                             allow_html_code = rs$allow_code,
+                                             font = rs$font), 
                                   "</td></tr>\n"))
         
         if (bl != "")
@@ -1439,6 +1183,12 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
     exclude_top <- "top"
 
 
+  # Get customized line height when footnote font size is the same as content
+  lh_code <- ""
+  if (!is.null(rs$user_line_height)) {
+    lh_code <- get_line_height_html(rs)
+  }
+  
   if (!is.null(pgby)) {
 
     if (!any(class(pgby) == "page_by"))
@@ -1470,7 +1220,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
                                   exclude = exclude_top, 
                                   border_color = get_style(rs, "border_color"))
 
-      ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, 
+      ret[length(ret) + 1] <- paste0("<tr",lh_code ,">", "<td style=\"", tb, 
                                      "\">&nbsp;</td></tr>\n")
       cnt <- cnt + 1
     }
@@ -1483,19 +1233,6 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
     pdf(NULL)
     par(family = get_font_family(rs$font), ps = rs$font_size)
     
-    # # Account for multiple pgby lines
-    # tmp <- split_string_html(value, width, rs$units)
-    # 
-    # dev.off()
-    # 
-    # vl <- tmp$html
-    # cnt <- cnt + tmp$lines
-    # 
-    # # Construct HTML for page by
-    # ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, "\">",
-    #                                pgby$label, encodeHTML(vl), "</td></tr>\n")
-    # #cnt <- cnt + 1
-    
     # Add bold
     if (pgby$bold %in% c(TRUE, FALSE)) {
       
@@ -1505,18 +1242,23 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
         sep <- ""
       }
       
+      # Don't display "NA" when value is NA to differentiate real character "NA"
+      value <- ifelse(is.na(value),"",value)
       tmp <- split_string_html(paste0(pgby$label, sep, value), width, rs$units,
                                insert_line_break = rs$line_break,
-                               allow_html_code = rs$allow_code)
+                               allow_html_code = rs$allow_code,
+                               font = rs$font, font_size = rs$font_size)
       vl <- tmp$html
       cnt <- cnt + tmp$lines
       
       if (pgby$bold ) {
         page_by_text <- paste0("<b>", encodeHTML(vl, nbsp = rs$line_break,
-                                                 allow_html_code = rs$allow_code), "</b>")
+                                                 allow_html_code = rs$allow_code,
+                                                 font = rs$font), "</b>")
       } else {
         page_by_text <- encodeHTML(vl, nbsp = rs$line_break,
-                                   allow_html_code = rs$allow_code)
+                                   allow_html_code = rs$allow_code,
+                                   font = rs$font)
       }
       
     } else if (pgby$bold %in% c("value", "label")) {
@@ -1524,20 +1266,23 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
       # Split label
       label_split <- split_string_html(pgby$label, width, rs$units,
                                        insert_line_break = rs$line_break,
-                                       allow_html_code = rs$allow_code)
+                                       allow_html_code = rs$allow_code,
+                                       font = rs$font, font_size = rs$font_size)
       cnt <- cnt + label_split$lines
       
       # Use remain width to split value
       remain_width <- width - label_split$widths[length(label_split$widths)]
       value_split <- split_string_html(value, remain_width, rs$units,
-                                       allow_html_code = rs$allow_code)
+                                       allow_html_code = rs$allow_code,
+                                       font = rs$font, font_size = rs$font_size)
       
       if (value_split$widths[1] > remain_width) {
         
         # If first width is bigger than remaining width, it means value starts a new line
         value_split <- split_string_html(value, width, rs$units,
                                          insert_line_break = rs$line_break,
-                                         allow_html_code = rs$allow_code)
+                                         allow_html_code = rs$allow_code,
+                                         font = rs$font, font_size = rs$font_size)
         cnt <- cnt + value_split$lines
         value_split_txt <- value_split$html
         
@@ -1550,7 +1295,8 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
           remain_value <- trimws(sub(splt[[1]][1], "", value), which = "left")
           remain_value_split <- split_string_html(remain_value, width, rs$units,
                                                   insert_line_break = rs$line_break,
-                                                  allow_html_code = rs$allow_code)
+                                                  allow_html_code = rs$allow_code,
+                                                  font = rs$font, font_size = rs$font_size)
           cnt <- cnt + remain_value_split$lines
           value_split_txt <- paste0(splt[[1]][1], "\n", remain_value_split$html)
         } else {
@@ -1567,16 +1313,16 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
       if (pgby$bold == "label") {
         page_by_text <- paste0("<b>", 
                                encodeHTML(paste0(label_split$html, " "), nbsp = rs$line_break,
-                                          allow_html_code = rs$allow_code), 
+                                          allow_html_code = rs$allow_code, font = rs$font), 
                                "</b>", 
                                encodeHTML(value_split_txt, nbsp = rs$line_break,
-                                          allow_html_code = rs$allow_code))
+                                          allow_html_code = rs$allow_code, font = rs$font))
       } else {
         page_by_text <- paste0(encodeHTML(paste0(label_split$html, " "), nbsp = rs$line_break,
-                                          allow_html_code = rs$allow_code), 
+                                          allow_html_code = rs$allow_code, font = rs$font), 
                                "<b>", 
                                encodeHTML(value_split_txt, nbsp = rs$line_break,
-                                          allow_html_code = rs$allow_code), 
+                                          allow_html_code = rs$allow_code, font = rs$font), 
                                "</b>")
       }
     }
@@ -1584,7 +1330,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
     dev.off()
     
     # Construct HTML for page by
-    ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, "\">",
+    ret[length(ret) + 1] <- paste0("<tr",lh_code ,">", "<td style=\"", tb, "\">",
                                    page_by_text, "</td></tr>\n")
   
 
@@ -1593,7 +1339,7 @@ get_page_by_html <- function(pgby, width, value, rs, talgn, ex_brdr = FALSE, pgb
       tb <- get_cell_borders_html(trows, 1, trows, 1, pgby$borders, 
                                   border_color = get_style(rs, "border_color"))
 
-      ret[length(ret) + 1] <- paste0("<tr><td style=\"", tb, 
+      ret[length(ret) + 1] <- paste0("<tr",lh_code ,">", "<td style=\"", tb, 
                                      "\">&nbsp;</td></tr>\n")
       cnt <- cnt + 1
       

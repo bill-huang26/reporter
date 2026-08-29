@@ -70,9 +70,9 @@ write_report(rpt)
 
 }
 \seealso{
-Other styles: 
-\code{\link{add_style}()},
-\code{\link{create_style}()},
-\code{\link{print.style_spec}()}
+Other styles:
+\code{\link[=add_style]{add_style()}},
+\code{\link[=create_style]{create_style()}},
+\code{\link[=print.style_spec]{print.style_spec()}}
 }
 \concept{styles}

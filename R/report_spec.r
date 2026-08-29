@@ -70,7 +70,7 @@
 #' pass the desired character string to the missing parameter.
 #' @param font The font to use on the report.  The font specified will be
 #' used for the entire report.  Valid values are "Courier", "Arial", "Times",
-#' and "fixed".  The value of "fixed" will create a fixed-width, text style
+#' "Simsun" and "fixed".  The value of "fixed" will create a fixed-width, text style
 #' report in Courier font.  The \code{font} parameter only applies to 
 #' RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".
 #' @param font_size The size of the font to use on the report. The \code{font_size}
@@ -198,9 +198,13 @@ create_report <- function(file_path = "", output_type = "TXT",
   if (is.null(font))
     font <- "fixed"
   else {
-    if (!tolower(font) %in% c("fixed", "courier", "arial", "times"))
+    if (!tolower(font) %in% c("fixed", "courier", "arial", "times", "simsun"))
       stop(paste0("font value invalid.  ", 
-                  "Valid values are 'Courier', 'Arial', 'Times', and 'fixed'."))
+                  "Valid values are 'Courier', 'Arial', 'Times', 'Simsun' and 'fixed'."))
+  }
+  
+  if (tolower(font) == "simsun" & output_type == "PDF") {
+    warning("Chinese is not supported in PDF.")
   }
   
   # Trap invalid font_size parameter
@@ -879,6 +883,10 @@ set_margins <- function(x, top=NULL, bottom=NULL,
 #' structure is useful on some editors which do not render the table title 
 #' block appropriately.  Note that if the "paragraph" setting is applied,
 #' some features of the \code{\link{titles}} function may not work as expected.
+#' @param line_height The line height for the report. The unit is the same as the
+#' `units` in \code{\link{create_report}}. By default, the line height is estimated
+#' by the font and the font size for different file formats. This parameter allows
+#' you to adjust the line height of the report.
 #' @return The report_spec with option settings.
 #' @family report
 #' @examples
@@ -908,7 +916,8 @@ set_margins <- function(x, top=NULL, bottom=NULL,
 #' @export
 report_options <- function(x, allow_code = FALSE, line_break = TRUE,
                            line_count = NULL, page_wrap = TRUE, 
-                           auto_page = TRUE, title_block = "table"){
+                           auto_page = TRUE, title_block = "table",
+                           line_height = NULL){
   if (!"report_spec" %in% class(x)) {
     stop("Input object must be of class 'report_spec'.") 
   }
@@ -934,6 +943,15 @@ report_options <- function(x, allow_code = FALSE, line_break = TRUE,
     if (line_count <= 0)
       stop("line_count must be greater than zero.")
   }
+  if (!is.null(line_height)) {
+    if (!is.numeric(line_height)) {
+      stop("`line_height` should be a numeric value.")
+    } else {
+      if (line_height <= 0) {
+        stop("`line_height` should be greater than 0.")
+      }
+    }
+  }
   
   if (!is.null(x$output_type)) {
     if (toupper(x$output_type) != "RTF" & toupper(x$output_type) != "HTML") {
@@ -950,6 +968,7 @@ report_options <- function(x, allow_code = FALSE, line_break = TRUE,
   x$page_wrap <- page_wrap
   x$title_block <- title_block
   x$user_line_count <- line_count
+  x$user_line_height <- line_height
   
   return(x)
 }
@@ -2706,9 +2725,22 @@ print.report_spec <- function(x, ..., verbose = FALSE){
     cat(paste0("- margins: top ", x$margin_top, " bottom ", 
                x$margin_bottom, " left ", x$margin_left, 
                " right ", x$margin_right, "\n"))
-    if (!is.null(x$line_size)) 
-      cat(paste0("- line size/count: ", x$line_size, "/", x$line_count, "\n"))
-    
+    if (!is.null(x$line_size)) {
+      cat(paste0("- lines per page: ", x$line_count, "\n"))
+      cat(paste0("- content width: ", x$content_size[["width"]], "\n"))
+      cat(paste0("- content height: ", x$content_size[["height"]], "\n"))
+      
+      if (!is.null(x$line_height)) {
+        if (toupper(x$output_type == "RTF")) {
+          cat(paste0("- line height: ", round(x$line_height/x$twip_conversion, 2), "\n"))
+        } else if (toupper(x$output_type == "PDF")) {
+          cat(paste0("- line height: ", round(x$line_height/x$point_conversion, 2), "\n"))
+        } else {
+          cat(paste0("- line height: ", x$line_height, "\n"))
+        }
+      }
+    }
+      
     # if (!is.null(x$column_widths)) {
     #   cat("- column widths: \n")
     #   cat(x$column_widths)

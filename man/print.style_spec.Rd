@@ -47,9 +47,9 @@ print(tm)
 #- table_stub_font_bold: TRUE
 }
 \seealso{
-Other styles: 
-\code{\link{add_style}()},
-\code{\link{create_style}()},
-\code{\link{get_theme}()}
+Other styles:
+\code{\link[=add_style]{add_style()}},
+\code{\link[=create_style]{create_style()}},
+\code{\link[=get_theme]{get_theme()}}
 }
 \concept{styles}

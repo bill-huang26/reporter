@@ -80,9 +80,10 @@ variable.  Valid values are TRUE or FALSE.  Default is FALSE.}
 \item{blank_before}{Whether to place a blank row before unique values of this
 variable.  Valid values are TRUE or FALSE.  Default is FALSE.}
 
-\item{dedupe}{Whether to dedupe the values for this variable.  Variables
-that are deduped only show the value on the first row of each group.  This 
-option is commonly used for grouping variables.}
+\item{dedupe}{Whether to dedupe the values for this variable. Set to TRUE for 
+a variable that is deduped only showing the value on the first row of each group.
+As for deduping on multiple variables, set to a character vector such as
+\code{c("subjid", "arm")}.}
 
 \item{id_var}{Whether this variable should be considered an ID variable.
 ID variables are retained on each page when the page is wrapped. ID variables
@@ -254,11 +255,11 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 #                                                                    Page 2 of 2
 }
 \seealso{
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{create_table}()},
-\code{\link{print.table_spec}()},
-\code{\link{spanning_header}()},
-\code{\link{stub}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=create_table]{create_table()}},
+\code{\link[=print.table_spec]{print.table_spec()}},
+\code{\link[=spanning_header]{spanning_header()}},
+\code{\link[=stub]{stub()}}
 }
 \concept{table}

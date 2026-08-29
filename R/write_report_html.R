@@ -87,8 +87,12 @@ get_html_document <- function(rs) {
   conv <- rs$twip_conversion
   
   fnt <- rs$font
-  if (tolower(rs$font) == "times")
+  if (tolower(rs$font) == "times") {
     fnt <- "Times New Roman"
+  } else if (tolower(rs$font) == "courier") {
+    fnt <- "Courier New"
+  }
+    
   
   u <- rs$units
   if (rs$units == "inches")
@@ -565,8 +569,14 @@ page_setup_html <- function(rs) {
     gtr <- ccm(gtr)
   }
   
-  rs$row_height <- rh
-  rs$line_height <- rh
+  # Apply user's line height if it exists
+  if (!is.null(rs$user_line_height)) {
+    rs$row_height <- rs$user_line_height
+    rs$line_height <- rs$user_line_height
+  } else {
+    rs$row_height <- rh
+    rs$line_height <- rh
+  }
   rs$char_width <- cw
   
   # Content size is the page size minus margins, in units of measure
@@ -583,7 +593,7 @@ page_setup_html <- function(rs) {
                                units_html(rs$units), ";", "\"></div>")
 
   if (is.null(rs$user_line_count)) {
-    rs$line_count <- round(rs$content_size[[1]] / rh) 
+    rs$line_count <- round(rs$content_size[[1]] / rs$row_height) 
   } else
     rs$line_count <- rs$user_line_count
 
@@ -663,7 +673,7 @@ page_replace_html <- function(pg, target, type = "titles", page, rs = NULL) {
           }
           
           raw_title <- encodeHTML(v_string, nbsp = rs$line_break,
-                                  allow_html_code = rs$allow_code)
+                                  allow_html_code = rs$allow_code, font = rs$font)
           new_title <- update_page(raw_title, page)
           pg <- gsub(raw_title, new_title, pg, fixed = TRUE)
         }

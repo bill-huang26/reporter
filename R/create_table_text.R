@@ -193,7 +193,8 @@ create_table_pages_text <- function(rs, cntnt, lpg_rows) {
   # print(widths(dat))
   
   # Get column widths
-  widths_uom <- get_col_widths(fdat, ts, labels, rs$char_width, rs$units)
+  widths_uom <- get_col_widths(fdat, ts, labels, rs$char_width, rs$units,
+                               content_width = rs$content_size[["width"]])
   # print("Widths UOM")
   # print(widths_uom)
   
@@ -343,7 +344,7 @@ create_table_text <- function(rs, ts, pi, content_blank_row, wrap_flag,
   
   ls <- rs$line_size
   if (length(rws) > 0)
-    ls <- max(nchar(rws))
+    ls <- max(get_nchar(rws))
   
   if (!is.null(ts$title_hdr)) {
     ttls <- get_title_header(ts$title_hdr, ls , rs$line_size, 
@@ -571,7 +572,7 @@ get_table_header <- function(rs, ts, pi) {
   
   
   # Underline
-  sep <- paste0(paste0(rep(rs$uchar, nchar(r) - 1), collapse = ""), " ")
+  sep <- paste0(paste0(rep(rs$uchar, get_nchar(r) - 1), collapse = ""), " ")
   
   ln[[length(ln) + 1]] <- sep
 
@@ -912,13 +913,15 @@ get_blank_indicator <- function(pg_num, tot_pg, content_blanks,
   if (is.null(names(content_offset[["upper"]]))) {
     content_offset_up <- content_offset[["upper"]]
   } else {
-    content_offset_up <- content_offset[["upper"]][[pgby]]
+    idx <- names(content_offset[["upper"]]) %in% pgby
+    content_offset_up <- as.numeric(content_offset[["upper"]][idx])
   }
   
   if (is.null(names(content_offset[["lower"]]))) {
     content_offset_low <- content_offset[["lower"]]
   } else {
-    content_offset_low <- content_offset[["lower"]][[pgby]]
+    idx <- names(content_offset[["lower"]]) %in% pgby
+    content_offset_low <- as.numeric( content_offset[["lower"]][idx])
   }
   
   if (pg_num == 1 & pg_num == tot_pg & content_blanks == "both")

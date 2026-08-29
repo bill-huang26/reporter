@@ -407,8 +407,15 @@ page_setup_pdf <- function(rs) {
   }
   
   rs$point_conversion <- conv
-  rs$row_height <- rh
-  rs$line_height <- lh
+  
+  if (!is.null(rs$user_line_height)) {
+    rs$row_height <- rs$user_line_height * conv
+    rs$line_height <- rs$user_line_height * conv
+  } else {
+    rs$row_height <- rh
+    rs$line_height <- lh
+  }
+  
   rs$char_width <- cw
   rs$line_size <- rs$content_size[["width"]]
   rs$cell_padding <- 2
@@ -431,7 +438,7 @@ page_setup_pdf <- function(rs) {
     rs$gutter_width <- gtr
   
   if (is.null(rs$user_line_count)) {
-    rs$line_count <- floor(rs$content_size[[1]] * conv / rh) 
+    rs$line_count <- floor(rs$content_size[[1]] * conv / rs$row_height) 
   } else 
     rs$line_count <- rs$user_line_count
   

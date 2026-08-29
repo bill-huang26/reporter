@@ -51,7 +51,7 @@ pass the desired character string to the missing parameter.}
 
 \item{font}{The font to use on the report.  The font specified will be
 used for the entire report.  Valid values are "Courier", "Arial", "Times",
-and "fixed".  The value of "fixed" will create a fixed-width, text style
+"Simsun" and "fixed".  The value of "fixed" will create a fixed-width, text style
 report in Courier font.  The \code{font} parameter only applies to 
 RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".}
 
@@ -157,20 +157,20 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 \code{\link{create_plot}} functions
 to create content for the report.
 
-Other report: 
-\code{\link{add_content}()},
-\code{\link{footer_image}()},
-\code{\link{footnotes}()},
-\code{\link{header_image}()},
-\code{\link{options_fixed}()},
-\code{\link{page_by}()},
-\code{\link{page_footer}()},
-\code{\link{page_header}()},
-\code{\link{print.report_spec}()},
-\code{\link{report_options}()},
-\code{\link{set_margins}()},
-\code{\link{title_header}()},
-\code{\link{titles}()},
-\code{\link{write_report}()}
+Other report:
+\code{\link[=add_content]{add_content()}},
+\code{\link[=footer_image]{footer_image()}},
+\code{\link[=footnotes]{footnotes()}},
+\code{\link[=header_image]{header_image()}},
+\code{\link[=options_fixed]{options_fixed()}},
+\code{\link[=page_by]{page_by()}},
+\code{\link[=page_footer]{page_footer()}},
+\code{\link[=page_header]{page_header()}},
+\code{\link[=print.report_spec]{print.report_spec()}},
+\code{\link[=report_options]{report_options()}},
+\code{\link[=set_margins]{set_margins()}},
+\code{\link[=title_header]{title_header()}},
+\code{\link[=titles]{titles()}},
+\code{\link[=write_report]{write_report()}}
 }
 \concept{report}

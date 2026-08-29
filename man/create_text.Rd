@@ -89,7 +89,7 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 \code{\link{footnotes}} to add footnotes, and \code{\link{add_content}} 
 to add the text object to a report.
 
-Other text: 
-\code{\link{print.text_spec}()}
+Other text:
+\code{\link[=print.text_spec]{print.text_spec()}}
 }
 \concept{text}

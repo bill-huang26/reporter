@@ -520,24 +520,29 @@ split_text <- function(txt, lines, width, font,
   
   for (k in seq_along(paras)) {
   
+    # Set font
+    delimiter <- " "
+    f <- "mono"
+    if (tolower(font) == "arial") {
+      f <- "sans"
+    } else if (tolower(font) == "times") {
+      f <- "serif"
+    } else if (tolower(font) == "simsun") {
+      f <- "GB1"
+      delimiter <- ""
+    }
+    
     # Split text into words
-    wrds <- strsplit(trimws(paras[k]), " ", fixed = TRUE)[[1]]
+    wrds <- strsplit(trimws(paras[k]), delimiter, fixed = TRUE)[[1]]
     
     if (length(wrds) == 0)
       wrds <- paras[k]
-    
-    # Set font
-    f <- "mono"
-    if (tolower(font) == "arial")
-      f <- "sans"
-    else if (tolower(font) == "times")
-      f <- "serif"
     
     lngths <- c()
     
     
     lngths <- (get_text_width(wrds, units = units, font = font, font_size = font_size) + 
-       get_text_width(" ", units = units, font = font, font_size = font_size)) * 1.03
+       get_text_width(delimiter, units = units, font = font, font_size = font_size)) * 1.03
     
     # Loop through words and add up lines
     for (i in seq_along(wrds)) {
@@ -550,7 +555,7 @@ split_text <- function(txt, lines, width, font,
         
         # If cnt exceeds allowed lines per page, start a new page
         if (cnt <= lines - offset) {
-          lns <- append(lns, paste(ln, collapse = " "))
+          lns <- append(lns, paste(ln, collapse = delimiter))
           wdth[length(wdth) + 1] <- lnlngth - lngths[i] 
           ln <- wrds[i]
           lnlngth <- lngths[i]
@@ -563,7 +568,7 @@ split_text <- function(txt, lines, width, font,
           wdth <- lnlngth  - lngths[i] 
           
           # Assign overflow to next page
-          lns <- paste(ln, collapse = " ")
+          lns <- paste(ln, collapse = delimiter)
           ln <- wrds[i]
           lnlngth <- lngths[i]
   
@@ -578,7 +583,7 @@ split_text <- function(txt, lines, width, font,
       cnt <- cnt + 1
       if (cnt <= lines - offset) {
         # Not a new page
-        lns <- append(lns, paste(ln, collapse = " "))
+        lns <- append(lns, paste(ln, collapse = delimiter))
         wdth[length(wdth) + 1] <- lnlngth
         ln <- c()
         lnlngth <- 0
@@ -590,7 +595,7 @@ split_text <- function(txt, lines, width, font,
         wdths[[length(wdths) + 1]] <- wdth
 
         # Deal with overflow
-        lns <-  paste(ln, collapse = " ")
+        lns <-  paste(ln, collapse = delimiter)
         wdth <- lnlngth  
         
         # Reset line so it won't append any more
@@ -601,7 +606,7 @@ split_text <- function(txt, lines, width, font,
         #lnlngth <- width
         
         # Assign overflow to next page
-        # lns <- paste(ln, collapse = " ")
+        # lns <- paste(ln, collapse = delimiter)
         # ln <- wrds[i]
         # lnlngth <- lngths[i]
         
@@ -619,7 +624,7 @@ split_text <- function(txt, lines, width, font,
     cnt <- cnt + 1
     if (cnt <= lines - offset) {
       if (!is.null(ln)) {
-        lns <- append(lns, paste(ln, collapse = " "))
+        lns <- append(lns, paste(ln, collapse = delimiter))
         wdth[length(wdth) + 1] <- lnlngth
 
       }
@@ -634,7 +639,7 @@ split_text <- function(txt, lines, width, font,
       wdths[[length(wdths) + 1]] <- wdth
       
       if (!is.null(ln)) {
-        lns <-  paste(ln, collapse = " ")
+        lns <-  paste(ln, collapse = delimiter)
         wdth[length(wdth) + 1] <- lnlngth
         pgs[[length(pgs) + 1]] <- lns
         cnts[[length(cnts) + 1]] <- length(lns)

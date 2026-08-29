@@ -147,11 +147,11 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 #       * From Fisher's Iris Dataset
 }
 \seealso{
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{create_table}()},
-\code{\link{define}()},
-\code{\link{print.table_spec}()},
-\code{\link{stub}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=create_table]{create_table()}},
+\code{\link[=define]{define()}},
+\code{\link[=print.table_spec]{print.table_spec()}},
+\code{\link[=stub]{stub()}}
 }
 \concept{table}

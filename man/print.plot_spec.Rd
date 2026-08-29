@@ -31,7 +31,7 @@ print(txt)
 \seealso{
 \code{\link{create_plot}} function to create a plot specification.
 
-Other plot: 
-\code{\link{create_plot}()}
+Other plot:
+\code{\link[=create_plot]{create_plot()}}
 }
 \concept{plot}

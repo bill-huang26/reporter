@@ -94,7 +94,7 @@ write_rtf_output <- function(rs, ls, rtf_path, orig_path, tmp_dir) {
   
   
   # Prepare header
-  hdr[length(hdr) + 1] <- "{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Courier;}}"
+  hdr[length(hdr) + 1] <- "{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Courier New;}}"
   
   # Below table table is from SAS default settings, which are:
   # \cf1 : Black (\red0\green0\blue0;)

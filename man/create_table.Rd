@@ -236,11 +236,11 @@ writeLines(readLines(tmp, encoding = "UTF-8"))
 the \code{\link{titles}}, \code{\link{footnotes}}, and \code{\link{page_by}}
 functions to add those items to the table if desired.
 
-Other table: 
-\code{\link{column_defaults}()},
-\code{\link{define}()},
-\code{\link{print.table_spec}()},
-\code{\link{spanning_header}()},
-\code{\link{stub}()}
+Other table:
+\code{\link[=column_defaults]{column_defaults()}},
+\code{\link[=define]{define()}},
+\code{\link[=print.table_spec]{print.table_spec()}},
+\code{\link[=spanning_header]{spanning_header()}},
+\code{\link[=stub]{stub()}}
 }
 \concept{table}

@@ -93,7 +93,7 @@ write_report(rpt)
 \code{\link{footnotes}} to add footnotes, and \code{\link{add_content}} 
 to add the plot object to a report.
 
-Other plot: 
-\code{\link{print.plot_spec}()}
+Other plot:
+\code{\link[=print.plot_spec]{print.plot_spec()}}
 }
 \concept{plot}

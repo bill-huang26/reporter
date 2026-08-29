@@ -3682,3 +3682,199 @@ test_that("test109: Title header can be wrapped.", {
   }
 })
 
+test_that("test110: Multiple dedupe works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "output/test110.txt")
+    
+    # Setup
+    subjid <- c(100,100,101,101,101,102,103,103,104,104)
+    param <- c(rep("Hemoglobin", 3), rep("Triglycerides", 4), rep("Platelets", 3))
+    result <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+    Lab <- c(NA, NA, "central", "central", "central", NA, "local", "local", NA, NA)
+    arm <- c(rep("A", 5), rep("B", 5))
+    
+    df <- data.frame(subjid, arm, param, Lab, result)
+    
+    tbl1 <- create_table(df, first_row_blank = FALSE) %>%
+      define(subjid, label = "Subject", align = "left", dedupe = TRUE) %>%
+      define(param, label = "Lab Test", dedupe = c("subjid", "param")) %>%
+      define(result, label = "Result") %>%
+      define(Lab, visible = FALSE) %>%
+      define(arm, label = "Arm",
+             blank_after = TRUE,
+             dedupe = c("Lab", "arm"),
+             align = "right") 
+    
+    rpt <- create_report(fp, output_type = "txt", font = "fixed") %>%
+      page_header(left = "Company", right = c("Study ABC", "Status: Closed")) %>%
+      titles("Table 1.0", "Multiple Dedupe of subjid, arm, and lab test",
+             "Lab is non-visible for arm's dedupe", align = "center") %>%
+      footnotes("Program Name: table1_0.R") %>%
+      page_footer(left = "Time", center = "Confidential",
+                  right = "Page [pg] of [tpg]") %>%
+      add_content(tbl1)
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("test111: Empty page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "output/test111.txt")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- ""
+    dat$cyl[2] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "txt", 
+                         font = "fixed") %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Empty and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("test112: Numeric page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "output/test112.txt")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "txt", 
+                         font = "fixed") %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "Numeric and NA page_by") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("test113: Percentage column widths work as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "output/test113.txt")
+    
+    dat <- iris
+    
+    
+    tbl <- create_table(dat, borders = "none") %>%
+      titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+      define(Sepal.Length, label = "Sepal Length", width = "33.33333%", align = "center") %>%
+      define(Sepal.Width, label = "Sepal Width", width = 1, align = "centre") %>%
+      define(Species, blank_after = TRUE)
+    
+    rpt <- create_report(fp, output_type = "txt", font = "fixed", 
+                         orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1")) %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+      footnotes("My footnote 1", "My footnote 2")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
+
+test_that("test114: Output Chinese as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "output/test114.txt")
+    
+    # Read in prepared data
+    df <- read.table(header = TRUE, text = '
+      group1   group2            trt1         trt2         subgroup
+      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"
+      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"
+      "年龄"   "例数"            "145"        "153"        "≥65岁"
+      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"
+      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"
+      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"
+      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"')
+    
+    df$trt3 <- df$trt1
+    df$trt4 <- df$trt2
+    df$trt5 <- df$trt1
+    df_output <- rbind(df, df, df, df, df)
+    
+    tbl <- create_table(df_output, borders = "all") %>%
+      titles("表 14-2.1. 基线人口学特征", "(安全分析集)", borders = "all") %>%
+      stub(c("group1", "group2")) %>%
+      page_by(subgroup, label = "亚组 - 这是一段很长的字，预计会占两行以上。用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白：",
+              borders = "all", blank_row = "none") %>%
+      define(group1, label_row = T, blank_after = T) %>%
+      define(group2, indent = 0.25) %>%
+      # define(trt1, label = "试验药物一", width = 0.9) %>%
+      # define(trt2, label = "试验药物二", width = 0.9) %>%
+      # define(trt3, label = "试验药物三", width = 0.9) %>%
+      # define(trt4, label = "试验药物四", width = 0.9) %>%
+      # define(trt5, label = "安慰剂", width = 0.9) %>%
+      define(trt1, label = "试验药物一") %>%
+      define(trt2, label = "试验药物二") %>%
+      define(trt3, label = "试验药物三") %>%
+      define(trt4, label = "试验药物四") %>%
+      define(trt5, label = "安慰剂") %>%
+      define(subgroup, visible = FALSE) %>%
+      spanning_header(from = "trt1", to = "trt3", label = "高试验药物") %>%
+      spanning_header(from = "trt4", to = "trt5", label = "低试验药物")
+    
+    rpt <- create_report(fp, output_type = "txt", font = "simsun") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("研究123", "分析数据审阅说明") %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("左页尾", "中页尾", "第 [pg] 页, 共 [tpg] 页") %>%
+      footnotes("用于分析目的。其中包括人口统计学、治疗组和人群标帜。", 
+                "受试者水平分析数据集。", borders = "all")
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})

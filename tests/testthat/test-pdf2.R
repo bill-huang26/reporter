@@ -4401,6 +4401,217 @@ test_that("pdf2-117: line_count can be set in report_options as expected.", {
   }
 })
 
+test_that("pdf2-118: Empty page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test118.pdf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- ""
+    dat$cyl[2] <- NA
+        
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "PDF", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "MTCARS Data Listing with Page By") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-119: Numeric page_by works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test119.pdf")
+    
+    # Prepare data
+    dat <- mtcars[order(mtcars$cyl), ]
+    dat <- data.frame(vehicle = rownames(dat), dat)
+    dat$cyl[1] <- NA
+    
+    # Define table
+    tbl <- create_table(dat, show_cols = 1:8) %>% 
+      page_by(cyl, label="Cylinders: ") 
+    
+    # Create the report
+    rpt <- create_report(fp, output_type = "PDF", 
+                         font = "Courier", font_size = 12) %>% 
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>% 
+      titles("Listing 3.0", "MTCARS Data Listing with Page By") %>% 
+      set_margins(top = 1, bottom = 1) %>% 
+      add_content(tbl) %>% 
+      page_footer(left = Sys.time(), 
+                  center = "Confidential", 
+                  right = "Page [pg] of [tpg]")
+    
+    
+    # Write the report
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-120: Multiple dedupe works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test120.pdf")
+    
+    # Setup
+    subjid <- c(100,100,101,101,101,102,103,103,104,104)
+    param <- c(rep("Hemoglobin", 3), rep("Triglycerides", 4), rep("Platelets", 3))
+    result <- c(41, 53, 43, 39, 47, 52, 21, 38, 62, 26)
+    Lab <- c(NA, NA, "central", "central", "central", NA, "local", "local", NA, NA)
+    arm <- c(rep("A", 5), rep("B", 5))
+    
+    df <- data.frame(subjid, arm, param, Lab, result)
+    
+    tbl1 <- create_table(df, first_row_blank = FALSE) %>%
+      define(subjid, label = "Subject", align = "left", dedupe = TRUE) %>%
+      define(param, label = "Lab Test", dedupe = c("subjid", "param")) %>%
+      define(result, label = "Result") %>%
+      define(Lab, visible = FALSE) %>%
+      define(arm, label = "Arm",
+             blank_after = TRUE,
+             dedupe = c("Lab", "arm"),
+             align = "right") 
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt, font_size = fsz) %>%
+      page_header(left = "Company", right = c("Study ABC", "Status: Closed")) %>%
+      titles("Table 1.0", "Multiple Dedupe of subjid, arm, and lab test",
+             "Lab is non-visible for arm's dedupe", align = "center") %>%
+      footnotes("Program Name: table1_0.R") %>%
+      page_footer(left = "Time", center = "Confidential",
+                  right = "Page [pg] of [tpg]") %>%
+      add_content(tbl1)
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-121: Customized small line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test121.pdf")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
+    
+    rpt <- create_report(fp, output_type = "pdf", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      # report_options(line_height = 0.12, title_block = "paragraph") %>%
+      report_options(line_height = 0.12) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
+    
+    # The text squishing is expected.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-121b: Customized large line height works as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test121b.pdf")
+    
+    dat <- iris[1:100, ]
+    
+    dat$row_number <- 1:100
+    dat <- dat[, c("row_number", "Sepal.Width", "Petal.Length", "Petal.Width", "Species")]
+    
+    tbl <- create_table(dat) %>%
+      footnotes("line_height setting in report_options()", "My footnote 2", valign = "bottom") %>%
+      spanning_header(from = 1, to = 2, label = "First Spanning") %>%
+      spanning_header(from = 3, to = 5, label = "Second Spanning") %>%
+      page_by(Species, label = "Page by Label:")
+    
+    rpt <- create_report(fp, output_type = "pdf", font = "Arial",
+                         font_size = 10, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      report_options(line_height = 0.2) %>%
+      page_header("Left", c("Right1", "Right2", "Page [pg] of [tpg]"), blank_row = "below") %>%
+      titles("Table 1.0", "Table with line height adjustment") %>%
+      # title_header("Table 1.0", "Table with line height adjustment") %>%
+      add_content(tbl) %>%
+      page_footer(c("Left1", "Left2"), "Center1", "Right1")
+    
+    # Large line height should not cause overflow.
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-122: Percentage column widths work as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test122.pdf")
+    
+    dat <- iris
+    
+    
+    tbl <- create_table(dat, borders = "none") %>%
+      titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+      define(Sepal.Length, label = "Sepal Length", width = "33.33333%", align = "center") %>%
+      define(Sepal.Width, label = "Sepal Width", width = 1, align = "centre") %>%
+      define(Species, blank_after = TRUE)
+    
+    rpt <- create_report(fp, output_type = "pdf", font = fnt,
+                         font_size = 12, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1")) %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+      footnotes("My footnote 1", "My footnote 2")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
 # # User Tests --------------------------------------------------------------
 
 # Lots of special characters not working
