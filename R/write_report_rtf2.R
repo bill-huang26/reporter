@@ -586,32 +586,32 @@ page_setup_rtf <- function(rs) {
                        pt$page_footer$twips - rs$line_height), 
       width = floor(rs$content_size[[2]] * conv))
   
-  if (debug) {
-    print(paste("Body Height:", rs$body_size[[1]]))
-    print(paste("Body Width:", rs$body_size[[2]]))
-  }
+  # if (debug) {
+  #   print(paste("Body Height:", rs$body_size[[1]]))
+  #   print(paste("Body Width:", rs$body_size[[2]]))
+  # }
   
   
   # Get the page template row count
   # Include all the rows associated with the page template
   rs$page_template_header_count <- sum(pt$page_header$lines, pt$titles$lines, 
     pt$title_hdr$lines, pt$page_by$lines)
-  if (debug)
-    print(paste("Page Template Header Count:", rs$page_template_header_count))
+  # if (debug)
+  #   print(paste("Page Template Header Count:", rs$page_template_header_count))
   
   rs$page_template_footer_count <- sum(pt$footnotes$lines, pt$page_footer$lines)
-  if (debug)
-    print(paste("Page Template Footer Count:", rs$page_template_footer_count))
+  # if (debug)
+  #   print(paste("Page Template Footer Count:", rs$page_template_footer_count))
   
   rs$page_template_row_count <- rs$page_template_header_count + 
     rs$page_template_footer_count
-  if (debug)
-    print(paste("Page Template Row Count:", rs$page_template_row_count))
+  # if (debug)
+  #   print(paste("Page Template Row Count:", rs$page_template_row_count))
   
   # Body line count is the number of rows available for content on each page
   rs$body_line_count <- rs$line_count - rs$page_template_row_count
-  if (debug)
-    print(paste0("Body Line Count: ", rs$body_line_count))
+  # if (debug)
+  #   print(paste0("Body Line Count: ", rs$body_line_count))
   
   return(rs)
 }

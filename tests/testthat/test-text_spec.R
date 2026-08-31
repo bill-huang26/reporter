@@ -12,8 +12,9 @@ test_that("create_text parameter checks work as expected.", {
   
   expect_error(create_text("Hello", width = - 4))
                
-               
+  expect_error(create_text("Hello", align = NULL, width = "4"))          
   
+  expect_error(create_text("Hello", borders = "no"))      
 })
 
 test_that("text print() function works as expected.", {

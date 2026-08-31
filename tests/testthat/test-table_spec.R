@@ -17,7 +17,46 @@ test_that("table spec constructor operator works as expected.", {
   expect_equal(nrow(tbl$data), 10)
   expect_equal(length(tbl$col_defs), 3)
   
+  # Catch error
+  expect_error(create_table(NULL))
+  expect_error(create_table("Not a data"))
+  expect_error(create_table(iris, use_attributes = NULL))
+  expect_error(create_table(iris, page_wrap = "TRUE"))
+  expect_error(create_table(iris, auto_page = "TRUE"))
   
+  # Catch error for define
+  expect_error(create_table(iris) |>
+                 define(TRUE, standard_eval=T))
+  expect_error(create_table(iris) |>
+                 define(Species, width="23"))
+  expect_error(create_table(iris) |>
+                 define(Species, group_cohesion = 1.2))
+  expect_error(create_table(iris) |>
+                 define(Species, group_cohesion = "0.6"))
+  expect_error(create_table(iris) |>
+                 define(Species, break_label = 23))
+  expect_error(create_table(iris) |>
+                 define(Species, page_break = T) |>
+                 define(Sepal.Length, page_break = T))
+  
+  # Catch error for column_defaults
+  expect_error(column_defaults(23))
+  expect_error(create_table(iris) |>
+                 column_defaults(vars = 23, standard_eval=T))
+  
+  # Catch error for spanning_header
+  expect_error(create_table(iris) |>
+                 spanning_header(from = TRUE, standard_eval = T))
+  expect_error(create_table(iris) |>
+                 spanning_header(from = 1, to = TRUE, standard_eval = T))
+  expect_error(create_table(iris) |>
+                 spanning_header(from = "nono", to = 2))
+  expect_error(create_table(iris) |>
+                 spanning_header(from = 1, to = "nono"))
+  expect_error(create_table(iris) |>
+                 spanning_header(from = 88, to = "Petal.Width"))
+  expect_error(create_table(iris) |>
+                 spanning_header(from = "Petal.Width", to = 88))
 })
 
 
@@ -101,7 +140,8 @@ test_that("stub function works as expected.", {
   expect_equal(tbl$col_defs[[1]]$label_row, TRUE)
   expect_equal(is.null(tbl$stub), FALSE)
   
-  
+  # Catch error
+  expect_error(stub(tbl, vars = T, standard_eval = T))
 })
 
 

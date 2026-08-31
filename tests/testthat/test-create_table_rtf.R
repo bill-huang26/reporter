@@ -269,5 +269,27 @@ test_that("get_page_footnotes_rtf works as expected.", {
   
 })
 
-
+test_that("get_spacing_multiplier works as expected.", {
+  
+  ret8 <- get_spacing_multiplier(8)
+  expect_equal(ret8, "\\sl-228\\slmult0")
+  
+  ret9 <- get_spacing_multiplier(9)
+  expect_equal(ret9, "\\sl-244\\slmult0")
+  
+  ret10 <- get_spacing_multiplier(10)
+  expect_equal(ret10, "\\sl-250\\slmult0")
+  
+  ret11 <- get_spacing_multiplier(11)
+  expect_equal(ret11, "\\sl-250\\slmult0")
+  
+  ret12 <- get_spacing_multiplier(12)
+  expect_equal(ret12, "\\sl-275\\slmult0")
+  
+  ret13 <- get_spacing_multiplier(13)
+  expect_equal(ret13, "\\sl-300\\slmult0")
+  
+  ret14 <- get_spacing_multiplier(14)
+  expect_equal(ret14, "\\sl-325\\slmult0")
+})
 

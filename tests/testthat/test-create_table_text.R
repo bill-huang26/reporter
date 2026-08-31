@@ -162,3 +162,63 @@ test_that("get_break_lines works as expected.", {
   
   expect_equal(fdat2$..break_label_lines1, rep(2, nrow(fdat2)))
 })
+
+test_that("update_page_numbers works as expected.", {
+  # Test all pages except for title header
+  fp <- ""
+  
+  dat <- iris
+  
+  tbl <- create_table(dat, borders = "outside") %>%
+    titles("Table Title: Page [pg] of [tpg]") %>%
+    footnotes("Table footnote: Page [pg] of [tpg]")
+  
+  rpt <- create_report(fp, output_type = "pdf", font = "Arial",
+                       font_size = 9, orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1) %>%
+    add_content(tbl) %>%
+    add_content(tbl) %>%
+    titles("Report Title: Page [pg] of [tpg]") %>%
+    footnotes("Report footnote: Page [pg] of [tpg]", borders = "none") %>%
+    page_header(left = "Header: Page [pg] of [tpg]",
+                center = "Header: Page [pg] of [tpg]",
+                right = "Header: Page [pg] of [tpg]") %>%
+    page_footer(left = "Footer: Page [pg] of [tpg]",
+                center = "Footer: Page [pg] of [tpg]",
+                right = "Footer: Page [pg] of [tpg]")
+  
+  # Calculate available space for content 
+  rs <- page_setup(rpt)
+  
+  # Get page template for easy access
+  pt <- rs$page_template
+  
+  # Put content in new variable for easy access
+  ls <- rs$content
+  
+  # Break content into pages
+  ret <- paginate_content(rs, ls)
+  
+  # Assign table column widths back to report spec for reference
+  rs$column_widths <- ret[["widths"]]
+  
+  # Assign graphics flag back to report spec
+  rs$has_graphics <- ret[["has_graphics"]]
+  
+  # Assign pages to ls and continue processing
+  ls <- ret[["pages"]]
+  
+  # Deal with preview
+  if (!is.null(rs$preview)) {
+    if (rs$preview < length(ls[[1]]$pages))
+      ls[[1]]$pages <- ls[[1]]$pages[seq(1, rs$preview)]
+  }
+  
+  # Combine all content pages 
+  res <- create_content(rs, ls, pt)
+  rs <- res$rs
+  ls <- res$ls
+  
+  upt <- update_page_numbers(rs, ls)
+  expect_equal(length(upt), 12)
+})
