@@ -1,3 +1,20 @@
+# reporter 1.4.9
+
+- Enhanced "dedupe" parameter on `define()` function to accept a vector of 
+columns to dedupe by.
+- Output "Courier New" font whenever "Courier" is requested, to ensure compliance
+with regulatory submissions.
+- Added "line_height" parameter to `report_options()` to let user set a custom
+line height.
+- Added line height and line count setting to print function on the report object,
+so user can see what the current values are.
+- Allow percentage style column widths on the `define()` function, passed as a 
+character string with a percent sign, i.e "10%".
+- Added "SimSum" font for Chinese language support.
+- Fixed bug that caused an error on numeric page by values.
+- Fixed line break counting on RTF code insertion. 
+- Fixed bug to allow missing values in the page by variable.
+
 # reporter 1.4.8
 
 * Added `report_options()` function to control various features of the report.
