@@ -512,3 +512,38 @@ test_that("create_table borders parameter works as expected.", {
   expect_equal(tbl$borders, c("outside", "inside"))
   
 })
+
+test_that("lowcase_parens works as expected.", {
+  ret <- lowcase_parens(10)
+  expect_equal(ret, "\n(n=10)")
+})
+
+test_that("upcase_parens works as expected.", {
+  ret <- upcase_parens(10)
+  expect_equal(ret, "\n(N=10)")
+})
+
+test_that("lowcase_n works as expected.", {
+  ret <- lowcase_n(10)
+  expect_equal(ret, "\nn=10")
+})
+
+test_that("upcase_n works as expected.", {
+  ret <- upcase_n(10)
+  expect_equal(ret, "\nN=10")
+})
+
+test_that("print.table_spec works as expected.", {
+  
+  tbl <- create_table(iris, borders = "all", width = 9, headerless = TRUE) %>%
+    page_by(Species) %>%
+    spanning_header(from = 3, to = 4, label = "Spanning Header 1") %>%
+    stub(c("Sepal.Length", "Sepal.Width"), width = 1, align = "center") %>%
+    define(Species, width = 1, align = "center", id_var=T, dedupe=T, page_break = T) %>%
+    define(Petal.Length, page_wrap = T) %>%
+    define(Sepal.Length, visible = FALSE)
+  
+  ret <- print.table_spec(tbl)
+  
+  expect_equal(class(ret), c("table_spec", "list"))
+})

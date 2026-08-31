@@ -105,7 +105,7 @@ get_page_header_html <- function(rs) {
   total_width <- sum(width, na.rm = T)
   if (total_width > rs$content_size[["width"]]) {
     
-    stop(sprintf("Total width of page footer %s %s cannot be greater than content width %s %s.",
+    stop(sprintf("Total width of page header %s %s cannot be greater than content width %s %s.",
                  total_width,
                  rs$units,
                  rs$content_size[["width"]],
@@ -282,7 +282,7 @@ get_page_header_html <- function(rs) {
     }
 
     if (rs$page_header_blank_row == "below") {
-      ret <- paste0(ret, "<br>")
+      ret <- paste0(ret, rs$blank_row)
       cnt <- cnt + 1
     }
   }
@@ -372,14 +372,8 @@ get_page_footer_html <- function(rs) {
       center_pct <- 100 * center_width/rs$content_size[["width"]]
       right_pct <- 100 * right_width/rs$content_size[["width"]]
     }
-
-    # ret <- paste0("<br>\n<table ",
-    #               "style=\"width:100%\">\n",
-    #               paste0("<colgroup>\n<col style=\"width:", left_pct,"%\">\n"),
-    #               paste0("<col style=\"width:", center_pct,"%\">\n"),
-    #               paste0("<col style=\"width:", right_pct,"%\">\n</colgroup>\n"))
     
-    ret <- paste0("<br>\n<table ",
+    ret <- paste0(rs$blank_row, "\n<table ",
                   "style=\"width:100%\">\n",
                   "<colgroup>\n",
                   ifelse(left_pct > 0, paste0("<col style=\"width:", left_pct,"%\">\n"), ""),
@@ -1478,14 +1472,14 @@ get_cell_borders_html <- function(row, col, nrow, ncol, brdrs,
   
 }
 
-get_page_numbers_html <- function(val, tpg = TRUE) {
-  
-  ret <- val
-  
-  ret <- gsub("[pg]", "\\chpgn ", ret, fixed = TRUE)
-  
-  if (tpg)
-    ret <- gsub("[tpg]", "{\\field{\\*\\fldinst  NUMPAGES }}", ret, fixed = TRUE)
-  
-  return(ret)
-}
+# get_page_numbers_html <- function(val, tpg = TRUE) {
+#   
+#   ret <- val
+#   
+#   ret <- gsub("[pg]", "\\chpgn ", ret, fixed = TRUE)
+#   
+#   if (tpg)
+#     ret <- gsub("[tpg]", "{\\field{\\*\\fldinst  NUMPAGES }}", ret, fixed = TRUE)
+#   
+#   return(ret)
+# }

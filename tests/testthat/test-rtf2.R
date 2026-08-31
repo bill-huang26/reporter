@@ -5280,8 +5280,42 @@ test_that("rtf2-140: Percentage column widths work as expected.", {
     tbl <- create_table(dat, borders = "none") %>%
       titles("Table 1.0", "My Nice Irises", "Another Title") %>%
       define(Sepal.Length, label = "Sepal Length", width = "33.33333%", align = "center") %>%
-      define(Sepal.Width, label = "Sepal Width", width = 1, align = "centre") %>%
+      define(Sepal.Width, label = "Sepal Width", width = "20%", align = "centre") %>%
       define(Species, blank_after = TRUE)
+    
+    rpt <- create_report(fp, output_type = "RTF", font = fnt,
+                         font_size = 12, orientation = "landscape") %>%
+      set_margins(top = 1, bottom = 1) %>%
+      page_header("Left", c("Right1")) %>%
+      add_content(tbl, blank_row = "none") %>%
+      page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+      footnotes("My footnote 1", "My footnote 2")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
+
+test_that("rtf2-140b: Percentage column widths work with 100% as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "rtf2/test140b.rtf")
+    
+    dat <- iris
+    
+    tbl <- create_table(dat, borders = "none") %>%
+      titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+      define(Sepal.Length, label = "Sepal Length", width = "20.17%", align = "center") %>%
+      define(Sepal.Width, label = "Sepal Width", width = "20.17%", align = "centre") %>%
+      define(Petal.Length, label = "Petal Length", width = "20.17%", align = "centre") %>%
+      define(Petal.Width, label = "Petal.Width", width = "20.17%", align = "centre") %>%
+      define(Species, width = "19.32%", blank_after = TRUE)
+    
+    total_width <- round(9*0.2017, 2) * 4 + round(9*0.1932, 2)
+    # The total width is 9.02, which is greater than 9
+    # The algorithm needs to prevent from total width exceeding 9
     
     rpt <- create_report(fp, output_type = "RTF", font = fnt,
                          font_size = 12, orientation = "landscape") %>%
@@ -5317,7 +5351,7 @@ test_that("rtf2-141: Output Chinese as expected.", {
     df$trt4 <- df$trt2
     df$trt5 <- df$trt1
     
-    df <- rbind(df, df, df)
+    df <- rbind(df, df, df, df)
     
     tbl <- create_table(df, borders = "all") %>%
       titles("表 14-2.1. 基线人口学特征", "(安全分析集)", borders = "all") %>%

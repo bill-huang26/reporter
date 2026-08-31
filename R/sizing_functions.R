@@ -482,25 +482,76 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
 
   defnms <- c()
   # Let user definitions override everything
+  
+  # Process the user width:
+  # If all the widths are percentage, then...
+  # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
+  # -- to make sure total length won't exceed total width
+  # -- If total percentage > 100%, let it just overrides. It would go to page wrap next in next step
+  # If some widths are percentage and others are absolute values, just override.
+  
+  width_vars <- c()
+  width_lst <- c()
+  width_per_lst <- c()
   for (def in defs) {
     if (!is.null(def$width)) {
-      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
-        fraction <- as.numeric(sub("%", "", def$width)) / 100
-        user_width <- round(content_width * fraction, 2)
-      } else {
-        user_width <- def$width
-      }
+      width_vars <- c(width_vars, def$var_c)
       
-      if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
-        if (user_width >= mwidths[[def$var_c]])
-          ret[[def$var_c]] <- user_width
-        else 
-          ret[[def$var_c]] <- mwidths[[def$var_c]] + char_width
-        
-        defnms[length(defnms) + 1] <- def$var_c
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+        width_per_lst <- c(width_per_lst, as.numeric(sub("%", "", def$width)) / 100)
+        fraction <- as.numeric(sub("%", "", def$width)) / 100
+        width_lst <- c(width_lst, round(content_width * fraction, 2))
+      } else {
+        width_lst <- c(width_lst, def$width)
       }
     }
   }
+  
+  # If all the widths are percentage, then...
+  # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
+  # -- to make sure total length won't exceed total width
+  if (length(width_per_lst) > 1 & length(width_per_lst) == length(width_lst)) {
+    remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
+    last_width <- min(remain_width, width_lst[length(width_lst)])
+    width_lst[length(width_lst)] <- last_width
+  }
+  
+  if (length(width_vars) > 0) {
+    for (i in seq_len(length(width_vars))) {
+      width_var <- width_vars[i]
+      user_width <- width_lst[i]
+      
+      if (width_var %in% names(dat) & !is.null(user_width) && user_width > 0) {
+        if (user_width >= mwidths[[width_var]]) {
+          ret[[width_var]] <- user_width
+        }
+        else {
+          ret[[width_var]] <- mwidths[[width_var]] + char_width
+        }
+        
+        defnms[length(defnms) + 1] <- width_var
+      }
+    }
+  }
+  # for (def in defs) {
+  #   if (!is.null(def$width)) {
+  #     if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+  #       fraction <- as.numeric(sub("%", "", def$width)) / 100
+  #       user_width <- round(content_width * fraction, 2)
+  #     } else {
+  #       user_width <- def$width
+  #     }
+  #     
+  #     if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
+  #       if (user_width >= mwidths[[def$var_c]])
+  #         ret[[def$var_c]] <- user_width
+  #       else 
+  #         ret[[def$var_c]] <- mwidths[[def$var_c]] + char_width
+  #       
+  #       defnms[length(defnms) + 1] <- def$var_c
+  #     }
+  #   }
+  # }
   
   # Deal with stub
   if (!is.null(ts$stub)) {
@@ -776,30 +827,83 @@ get_col_widths_variable <- function(dat, ts, labels, font,
   }
   
   defnms <- c()
+  
   # Let user definitions override everything
+  
+  # Process the user width:
+  # If all the widths are percentage, then...
+  # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
+  # -- to make sure total length won't exceed total width
+  # -- If total percentage > 100%, let it just overrides. It would go to page wrap next in next step
+  # If some widths are percentage and others are absolute values, just override.
+  
+  width_vars <- c()
+  width_lst <- c()
+  width_per_lst <- c()
   for (def in defs) {
-    
-    # Process the percentage width
     if (!is.null(def$width)) {
-      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
-        fraction <- as.numeric(sub("%", "", def$width)) / 100
-        user_width <- round(content_width * fraction, 2)
-      } else {
-        user_width <- def$width
-      }
+      width_vars <- c(width_vars, def$var_c)
       
-      if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
-        if (user_width >= mwidths[[def$var_c]]) {
-          ret[[def$var_c]] <- user_width
-        }
-        else {
-          ret[[def$var_c]] <- mwidths[[def$var_c]] + gutter_width
-        }
-        
-        defnms[length(defnms) + 1] <- def$var_c
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+        width_per_lst <- c(width_per_lst, as.numeric(sub("%", "", def$width)) / 100)
+        fraction <- as.numeric(sub("%", "", def$width)) / 100
+        width_lst <- c(width_lst, round(content_width * fraction, 2))
+      } else {
+        width_lst <- c(width_lst, def$width)
       }
     }
   }
+  
+  # If all the widths are percentage, then...
+  # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
+  # -- to make sure total length won't exceed total width
+  if (length(width_per_lst) > 1 & length(width_per_lst) == length(width_lst)) {
+    remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
+    last_width <- min(remain_width, width_lst[length(width_lst)])
+    width_lst[length(width_lst)] <- last_width
+  }
+  
+  if (length(width_vars) > 0) {
+    for (i in seq_len(length(width_vars))) {
+      width_var <- width_vars[i]
+      user_width <- width_lst[i]
+      
+      if (width_var %in% names(dat) & !is.null(user_width) && user_width > 0) {
+        if (user_width >= mwidths[[width_var]]) {
+          ret[[width_var]] <- user_width
+        }
+        else {
+          ret[[width_var]] <- mwidths[[width_var]] + gutter_width
+        }
+
+        defnms[length(defnms) + 1] <- width_var
+      }
+    }
+  }
+  
+  # for (def in defs) {
+  #   
+  #   # Process the percentage width
+  #   if (!is.null(def$width)) {
+  #     if (grepl("^[0-9]+(\\.[0-9]+)?%$", def$width)) {
+  #       fraction <- as.numeric(sub("%", "", def$width)) / 100
+  #       user_width <- round(content_width * fraction, 2)
+  #     } else {
+  #       user_width <- def$width
+  #     }
+  #     
+  #     if (def$var_c %in% names(dat) & !is.null(user_width) && user_width > 0) {
+  #       if (user_width >= mwidths[[def$var_c]]) {
+  #         ret[[def$var_c]] <- user_width
+  #       }
+  #       else {
+  #         ret[[def$var_c]] <- mwidths[[def$var_c]] + gutter_width
+  #       }
+  #       
+  #       defnms[length(defnms) + 1] <- def$var_c
+  #     }
+  #   }
+  # }
   
   # Deal with stub
   if (!is.null(ts$stub)) {

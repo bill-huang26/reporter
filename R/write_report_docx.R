@@ -517,20 +517,20 @@ write_content_docx <- function(rs, hdr, body, pt) {
 
 #' @description Could be consolidated with RTF
 #' @noRd
-update_page_numbers_docx <- function(path, tpg) {
-  
-  
-  lns <- readLines(path, encoding = "UTF-8")
-  
-  lns <- gsub("[tpg]", tpg, lns, fixed = TRUE)
-  
-  f <- file(path, open = "w+", encoding = "native.enc")
-  
-  writeLines(lns, con = f, useBytes = TRUE)
-  
-  close(f)
-  
-}
+# update_page_numbers_docx <- function(path, tpg) {
+#   
+#   
+#   lns <- readLines(path, encoding = "UTF-8")
+#   
+#   lns <- gsub("[tpg]", tpg, lns, fixed = TRUE)
+#   
+#   f <- file(path, open = "w+", encoding = "native.enc")
+#   
+#   writeLines(lns, con = f, useBytes = TRUE)
+#   
+#   close(f)
+#   
+# }
 
 update_page_docx <- function(lns, pg, tpg = NULL) {
   
@@ -760,15 +760,15 @@ page_setup_docx <- function(rs) {
   } else
     rs$line_count <- rs$user_line_count
 
-  if (debug) {
-    print(paste("Font Size:", rs$font_size))
-    print(paste("Content Height:", rs$content_size[[1]]))
-    print(paste("Content Width:", rs$content_size[[2]]))
-    print(paste("Line Count:", rs$line_count))
-    print(paste("Line Height:", rs$line_height))
-    print(paste("Gutter Width:", rs$gutter_width))
-    print(paste("Char Width:", rs$char_width))
-  }
+  # if (debug) {
+  #   print(paste("Font Size:", rs$font_size))
+  #   print(paste("Content Height:", rs$content_size[[1]]))
+  #   print(paste("Content Width:", rs$content_size[[2]]))
+  #   print(paste("Line Count:", rs$line_count))
+  #   print(paste("Line Height:", rs$line_height))
+  #   print(paste("Gutter Width:", rs$gutter_width))
+  #   print(paste("Char Width:", rs$char_width))
+  # }
   
   
   # Create temp directory structure for docx file
@@ -893,72 +893,72 @@ get_rh <- function(font, font_size) {
 }
 
 
-get_rh2 <- function(font, font_size) {
-  
-  rh <- 0
-  
-  if (font_size == 8) {
-    
-    if (tolower(font) == "times")
-      rh <- 0.144  
-    else if (tolower(font) == "arial")
-      rh <- 0.144 
-    else 
-      rh <- 0.144
-    
-    
-  } else if (font_size == 9) {
-    
-    if (tolower(font) == "times")
-      rh <- 0.166
-    else if (tolower(font) == "arial")
-      rh <- 0.166 
-    else 
-      rh <- 0.1625 
-    
-  } else if (font_size == 10) {
-    
-    if (tolower(font) == "times")
-      rh <- 0.185  
-    else if (tolower(font) == "arial")
-      rh <- 0.185 #0.182  # 0.1585366
-    else
-      rh <- 0.185 #0.182  # 0.1585366
-    
-  } else if (font_size == 11) {
-    
-    if (tolower(font) == "times")
-      rh <- 0.208
-    else if (tolower(font) == "arial")
-      rh <- 0.208 # 0.168
-    else 
-      rh <- 0.203 # 0.168
-
-    
-  } else if (font_size == 12) {
-    
-    # inches 
-    if (tolower(font) == "times")
-      rh <- 0.23  # 1911765 
-    else if (tolower(font) == "arial")
-      rh <- 0.23 #0.212  # 1911765 
-    else 
-      rh <- 0.23  # 1911765 
-
-  } else if (font_size == 14) {
-    
-    # inches 
-    if (tolower(font) == "times")
-      rh <- 0.25 
-    else if (tolower(font) == "arial")
-      rh <- 0.25 
-    else 
-      rh <- 0.25 
-    
-  }
-  
-  return(rh)
-}
+# get_rh2 <- function(font, font_size) {
+#   
+#   rh <- 0
+#   
+#   if (font_size == 8) {
+#     
+#     if (tolower(font) == "times")
+#       rh <- 0.144  
+#     else if (tolower(font) == "arial")
+#       rh <- 0.144 
+#     else 
+#       rh <- 0.144
+#     
+#     
+#   } else if (font_size == 9) {
+#     
+#     if (tolower(font) == "times")
+#       rh <- 0.166
+#     else if (tolower(font) == "arial")
+#       rh <- 0.166 
+#     else 
+#       rh <- 0.1625 
+#     
+#   } else if (font_size == 10) {
+#     
+#     if (tolower(font) == "times")
+#       rh <- 0.185  
+#     else if (tolower(font) == "arial")
+#       rh <- 0.185 #0.182  # 0.1585366
+#     else
+#       rh <- 0.185 #0.182  # 0.1585366
+#     
+#   } else if (font_size == 11) {
+#     
+#     if (tolower(font) == "times")
+#       rh <- 0.208
+#     else if (tolower(font) == "arial")
+#       rh <- 0.208 # 0.168
+#     else 
+#       rh <- 0.203 # 0.168
+# 
+#     
+#   } else if (font_size == 12) {
+#     
+#     # inches 
+#     if (tolower(font) == "times")
+#       rh <- 0.23  # 1911765 
+#     else if (tolower(font) == "arial")
+#       rh <- 0.23 #0.212  # 1911765 
+#     else 
+#       rh <- 0.23  # 1911765 
+# 
+#   } else if (font_size == 14) {
+#     
+#     # inches 
+#     if (tolower(font) == "times")
+#       rh <- 0.25 
+#     else if (tolower(font) == "arial")
+#       rh <- 0.25 
+#     else 
+#       rh <- 0.25 
+#     
+#   }
+#   
+#   return(rh)
+# }
 
 #' @description Replace page number in title and footnote
 #' @details  Replace page number in title and footnote

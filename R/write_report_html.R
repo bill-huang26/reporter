@@ -573,9 +573,13 @@ page_setup_html <- function(rs) {
   if (!is.null(rs$user_line_height)) {
     rs$row_height <- rs$user_line_height
     rs$line_height <- rs$user_line_height
+    rs$blank_row <- sprintf("<div style=\"height: %s%s; clear: both;\"></div>",
+                            rs$user_line_height,
+                            ifelse(rs$units == "inches", "in", rs$units))
   } else {
     rs$row_height <- rh
     rs$line_height <- rh
+    rs$blank_row <- "<br>"
   }
   rs$char_width <- cw
   
@@ -597,15 +601,15 @@ page_setup_html <- function(rs) {
   } else
     rs$line_count <- rs$user_line_count
 
-  if (debug) {
-    print(paste("Font Size:", rs$font_size))
-    print(paste("Content Height:", rs$content_size[[1]]))
-    print(paste("Content Width:", rs$content_size[[2]]))
-    print(paste("Line Count:", rs$line_count))
-    print(paste("Line Height:", rs$line_height))
-    print(paste("Gutter Width:", rs$gutter_width))
-    print(paste("Char Width:", rs$char_width))
-  }
+  # if (debug) {
+  #   print(paste("Font Size:", rs$font_size))
+  #   print(paste("Content Height:", rs$content_size[[1]]))
+  #   print(paste("Content Width:", rs$content_size[[2]]))
+  #   print(paste("Line Count:", rs$line_count))
+  #   print(paste("Line Height:", rs$line_height))
+  #   print(paste("Gutter Width:", rs$gutter_width))
+  #   print(paste("Char Width:", rs$char_width))
+  # }
   # 
   # Get page template
   pt <- page_template_html(rs)

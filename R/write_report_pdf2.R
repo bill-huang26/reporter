@@ -63,50 +63,6 @@ write_report_pdf2 <- function(rs) {
   return(rs)
 }
 
-
-#' @description Returns header for RTF document.  This is independent of content,
-#' except for the page header and footer.
-#' @noRd
-get_pdf_document <- function(rs) {
-  
-  # Set up vectors
-  ret <- c()
-  
-  conv <- rs$twip_conversion
-  
-  fnt <- rs$font
-  if (tolower(rs$font) == "times")
-    fnt <- "Times New Roman"
-  
-  # Prepare header
-  r <- create_pdf(filename = rs$modified_path,
-                  margin_top = rs$margin_top,
-                  margin_left = rs$margin_left,
-                  fontsize = rs$font_size,
-                  page_height = rs$page_size[2],
-                  page_width = rs$page_size[1],
-                  orientation = rs$orientation,
-                  units = rs$units,
-                  info = TRUE)
-  
-  # ph <- get_page_header_pdf(rs)
-  # if (ph$pdf != "")
-  #   ret[length(ret) + 1] <- ph$pdf
-  # 
-  # pf <- get_page_footer_pdf(rs)
-  # if (pf$pdf != "")
-  #   ret[length(ret) + 1] <- pf$pdf
-  
-
-  
-  
-  
-  return(ret)
-  
-}
-
-
-
 #' @noRd
 paginate_content_pdf <- function(rs, doc) {
   
@@ -330,26 +286,6 @@ paginate_content_pdf <- function(rs, doc) {
   
 }
 
-
-
-update_page_numbers_pdf <- function(path, tpg) {
-  
-  
-  lns <- readLines(path, encoding = "UTF-8")
-  
-  lns <- gsub("[tpg]", tpg, lns, fixed = TRUE)
-  
-  f <- file(path, open = "w+", encoding = "native.enc")
-  
-  writeLines(lns, con = f, useBytes = TRUE)
-  
-  close(f)
-  
-}
-
-
-
-
 # Setup Functions ---------------------------------------------------------
 
 
@@ -442,14 +378,14 @@ page_setup_pdf <- function(rs) {
   } else 
     rs$line_count <- rs$user_line_count
   
-  if (debug) {
-    print(paste("Content Height:", rs$content_size[[1]]))
-    print(paste("Content Width:", rs$content_size[[2]]))
-    print(paste("Line Count:", rs$line_count))
-    print(paste("Line Height:", rs$line_height))
-    print(paste("Gutter Width:", rs$gutter_width))
-    print(paste("Char Width:", rs$char_width))
-  }
+  # if (debug) {
+  #   print(paste("Content Height:", rs$content_size[[1]]))
+  #   print(paste("Content Width:", rs$content_size[[2]]))
+  #   print(paste("Line Count:", rs$line_count))
+  #   print(paste("Line Height:", rs$line_height))
+  #   print(paste("Gutter Width:", rs$gutter_width))
+  #   print(paste("Char Width:", rs$char_width))
+  # }
   
   # Get page template
   pt <- page_template_pdf(rs)

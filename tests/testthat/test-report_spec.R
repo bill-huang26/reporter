@@ -221,8 +221,8 @@ test_that("page_by function works as expected.", {
   # Parameter checks
   expect_error(page_by(tbl, align = "fork"))
   expect_error(page_by(tbl, blank_row = "fork"))
-  
-  
+  expect_error(page_by(tbl, borders = "fork"))
+  expect_error(page_by(tbl, bold = "fork"))
 })
 
 test_that("Width parameter on titles and footnotes works as expected.", {
@@ -271,4 +271,123 @@ test_that("output_type parameter checks work as expected.", {
   expect_equal(res$output_type, "HTML")
   
 
+})
+
+test_that("report_options works as expected.", {
+  
+  res <- create_report(output_type = "rtf") |>
+    report_options(allow_code = T, line_break = F, line_count = 18,
+                   page_wrap = F, auto_page = F, title_block = "paragraph",
+                   line_height = 0.01)
+  
+  expect_equal(res$allow_code, T)  
+  expect_equal(res$line_break, F)
+  expect_equal(res$user_line_count, 18)
+  expect_equal(res$page_wrap, F)
+  expect_equal(res$auto_page, F)
+  expect_equal(res$title_block, "paragraph")
+  expect_equal(res$user_line_height, 0.01)
+})
+
+test_that("report_options traps invalid parameters as expected.", {
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                  report_options(allow_code = "TRUE"), 
+                "`allow_code` should be TRUE or FALSE.")  
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(line_break = "TRUE"), 
+               "`line_break` should be TRUE or FALSE.")  
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(page_wrap = "TRUE"), 
+               "`page_wrap` should be TRUE or FALSE.") 
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(title_block = "para"), 
+               "`title_block` should be 'table' or 'paragraph'.") 
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(line_count = "1"), 
+               "line_count must be a number.") 
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(line_count = 0), 
+               "line_count must be greater than zero.") 
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(line_height = "1"), 
+               "`line_height` should be a numeric value.") 
+  
+  expect_error(res <- create_report(output_type = "rtf") |>
+                 report_options(line_height = 0), 
+               "`line_height` should be greater than 0.")
+  
+  res <- create_report(output_type = "docx") |>
+    report_options(allow_code = T)
+  
+  expect_false(res$allow_code)
+})
+
+test_that("footer_image works as expected.", {
+  
+  res <- create_report(output_type = "rtf") |>
+    footer_image("./image1.jpg", height = "1", width = "1", align = "left") |>
+    footer_image("./image2.jpg", height = "2", width = "2", align = "center") |>
+    footer_image("./image3.jpg", height = "3", width = "3", align = "right")
+  
+  expect_equal(res$footer_image_left, 
+               list("image_path" = "./image1.jpg", "height" = "1", "width" = "1", "align" = "left"))
+  expect_equal(res$footer_image_center, 
+               list("image_path" = "./image2.jpg", "height" = "2", "width" = "2", "align" = "center"))
+  expect_equal(res$footer_image_right, 
+               list("image_path" = "./image3.jpg", "height" = "3", "width" = "3", "align" = "right"))
+  
+  expect_error(footer_image(res, image_path=1), "image_path object must an image file path.")
+  expect_error(footer_image(res, image_path="", align = "top"), 
+               "align must be left, right, center, or centre.")
+})
+
+test_that("header_image works as expected.", {
+  
+  res <- create_report(output_type = "rtf") |>
+    header_image("./image1.jpg", height = "1", width = "1", align = "left") |>
+    header_image("./image2.jpg", height = "2", width = "2", align = "center") |>
+    header_image("./image3.jpg", height = "3", width = "3", align = "right")
+  
+  expect_equal(res$header_image_left, 
+               list("image_path" = "./image1.jpg", "height" = "1", "width" = "1", "align" = "left"))
+  expect_equal(res$header_image_center, 
+               list("image_path" = "./image2.jpg", "height" = "2", "width" = "2", "align" = "center"))
+  expect_equal(res$header_image_right, 
+               list("image_path" = "./image3.jpg", "height" = "3", "width" = "3", "align" = "right"))
+  
+  expect_error(header_image(res, image_path=1), "image_path object must an image file path.")
+  expect_error(header_image(res, image_path="", align = "top"), 
+               "align must be left, right, center, or centre.")
+})
+
+test_that("print.report_spec works as expected.", {
+  base_path <- tempdir()
+  fp <- file.path(base_path, "test.rtf")
+  
+  dat <- iris
+  
+  tbl <- create_table(dat, borders = "none") %>%
+    titles("Table 1.0", "My Nice Report with a Page By", borders = "none") %>%
+    page_by(Species, label = "Species: ", align = "right", borders = "none")
+  
+  rpt <- create_report(fp, output_type = "RTF", font = "Arial",
+                       font_size = 9, orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1) %>%
+    add_content(tbl) %>%
+    page_header("Left", "Right") %>%
+    page_footer("Left1", "Center1", "Right1") %>%
+    footnotes("My footnote 1", "My footnote 2", borders = "none")
+  
+  res <- write_report(rpt, preview = 3)
+  
+  print.report_spec(res)
+  
+  expect_equal(class(res), c("report_spec", "list"))
 })

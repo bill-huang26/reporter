@@ -13,7 +13,8 @@ test_that("create_new_docx() function works as expected.", {
 
 
   
-  p <- create_new_docx("Arial", 12, 0)
+  p <- create_new_docx("Arial", 12, 0, footer_imagePath = "./image.jpg",
+                       header_imagePath = "./image.jpg")
 
 
   expect_true(file.exists(p))
@@ -43,6 +44,10 @@ test_that("create_new_docx() function works as expected.", {
   expect_true(file.exists(file.path(p, "word/footnotes.xml")))
   
   expect_equal(file.exists(file.path(p, "word/endnotes.xml")), TRUE)
+  
+  expect_equal(file.exists(file.path(p, "word/_rels/footer1.xml.rels")), TRUE)
+  
+  expect_equal(file.exists(file.path(p, "word/_rels/header1.xml.rels")), TRUE)
   
 })
 
