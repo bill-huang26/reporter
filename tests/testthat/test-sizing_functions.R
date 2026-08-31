@@ -524,7 +524,24 @@ test_that("get_col_widths_variable works with percentage width as expected.", {
   
   expect_equal(res[["disp"]], 1.6)
   
+  # 100% doesn't exceed the content width
+  dat <- iris
   
+  tbl <- create_table(dat, borders = "none") %>%
+    titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+    define(Sepal.Length, label = "Sepal Length", width = "20.17%", align = "center") %>%
+    define(Sepal.Width, label = "Sepal Width", width = "20.17%", align = "centre") %>%
+    define(Petal.Length, label = "Petal Length", width = "20.17%", align = "centre") %>%
+    define(Petal.Width, label = "Petal.Width", width = "20.17%", align = "centre") %>%
+    define(Species, width = "19.32%", blank_after = TRUE)
+  
+  total_width <- round(9*0.2017, 2) * 4 + round(9*0.1932, 2)
+  # The total width is 9.02, which is greater than 9
+  # The algorithm needs to prevent from total width exceeding 9
+  lbls <- get_labels(dat, tbl)
+  res <- get_col_widths_variable(dat, tbl, lbls, "Arial", 12, "inches", .2, content_width = 9)
+  
+  expect_equal(sum(res), 9)
 })
 
 test_that("get_col_widths_variable works with Chinese as expected.", {
