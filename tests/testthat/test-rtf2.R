@@ -5317,7 +5317,7 @@ test_that("rtf2-141: Output Chinese as expected.", {
     df$trt4 <- df$trt2
     df$trt5 <- df$trt1
     
-    df <- rbind(df, df, df)
+    df <- rbind(df, df, df, df)
     
     tbl <- create_table(df, borders = "all") %>%
       titles("表 14-2.1. 基线人口学特征", "(安全分析集)", borders = "all") %>%

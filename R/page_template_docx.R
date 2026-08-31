@@ -125,7 +125,7 @@ get_page_header_docx <- function(rs) {
     total_width <- sum(width, na.rm = T)
     if (total_width > rs$content_size[["width"]]) {
       
-      stop(sprintf("Total width of page footer %s %s cannot be greater than content width %s %s.",
+      stop(sprintf("Total width of page header %s %s cannot be greater than content width %s %s.",
                    total_width,
                    rs$units,
                    rs$content_size[["width"]],

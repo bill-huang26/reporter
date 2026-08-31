@@ -461,6 +461,12 @@ page_setup_rtf <- function(rs) {
   } else if (rs$font_size == 9) {
     rh <- 244 #round(.165 * 1440) # 225
     lh <- 244 #round(.165 * 1440)  
+    
+    if (tolower(rs$font) == "simsun") {
+      rh <- 246
+      ln <- 246
+    }
+    
     #pb <- "\\page\\line" #fs1\\sl0\\par\\pard\\fs20"
     pb <-  "{\\pard\\pagebb\\fs1\\sl0\\par}\\fs18"
     if (tolower(rs$font) == "courier")
@@ -559,14 +565,14 @@ page_setup_rtf <- function(rs) {
   } else 
     rs$line_count <- rs$user_line_count
   
-  if (debug) {
-    print(paste("Content Height:", rs$content_size[[1]]))
-    print(paste("Content Width:", rs$content_size[[2]]))
-    print(paste("Line Count:", rs$line_count))
-    print(paste("Line Height:", rs$line_height))
-    print(paste("Gutter Width:", rs$gutter_width))
-    print(paste("Char Width:", rs$char_width))
-  }
+  # if (debug) {
+  #   print(paste("Content Height:", rs$content_size[[1]]))
+  #   print(paste("Content Width:", rs$content_size[[2]]))
+  #   print(paste("Line Count:", rs$line_count))
+  #   print(paste("Line Height:", rs$line_height))
+  #   print(paste("Gutter Width:", rs$gutter_width))
+  #   print(paste("Char Width:", rs$char_width))
+  # }
   
   # Get page template
   pt <- page_template_rtf(rs)

@@ -142,6 +142,41 @@ test_that("get_page_header_docx works as expected.", {
 
   expect_equal(ph$lines, 1)
 
+  # Output error as expected
+  image_path <- "data/logo.jpg"
+  
+  rpt4 <- create_report("", font = "Arial", font_size = 12) %>%
+    header_image(image_path, height = 0.5, width = 0.8, align = "left")
+  
+  expect_error(
+    ret <- get_page_header_docx(rpt4),
+    "`page_header` must be used when using `header_image`."
+  )
+  
+  rpt4 <- create_report("", font = "Arial", font_size = 12) %>%
+    header_image(image_path, height = 0.5, width = 4, align = "left") %>%
+    header_image(image_path, height = 0.5, width = 4, align = "center") %>%
+    header_image(image_path, height = 0.5, width = 4, align = "right") %>%
+    page_header(width = c(4,4,4))
+  
+  expect_error(
+    ret <-  page_setup_docx(rpt4),
+    "Total width of page header 12 inches cannot be greater than content width 9 inches."
+  )
+  
+  # Image
+  image_path <- "data/logo.jpg"
+  
+  rpt5 <- create_report("", font = "Arial", font_size = 12) %>%
+    header_image(image_path, height = 0.5, width = 0.8, align = "left") %>%
+    header_image(image_path, height = 0.5, width = 0.8, align = "center") %>%
+    header_image(image_path, height = 0.5, width = 0.8, align = "right") %>%
+    page_header()
+  
+  ret <-  page_setup_docx(rpt5)
+  
+  expect_equal(ret$page_template$page_header$image_path, c("data/logo.jpg", "data/logo.jpg", "data/logo.jpg"))
+  expect_equal(ret$page_template$page_header$lines, 3)
 })
 
  
@@ -162,6 +197,41 @@ test_that("get_page_footer_docx works as expected.", {
 
   expect_equal(pf$lines, 1)
 
+  # Output error as expected
+  image_path <- "data/logo.jpg"
+  
+  rpt4 <- create_report("", font = "Arial", font_size = 12) %>%
+    footer_image(image_path, height = 0.5, width = 0.8, align = "left")
+  
+  expect_error(
+    ret <- get_page_footer_docx(rpt4),
+    "`page_footer` must be used when using `footer_image`."
+  )
+  
+  rpt4 <- create_report("", font = "Arial", font_size = 12) %>%
+    footer_image(image_path, height = 0.5, width = 4, align = "left") %>%
+    footer_image(image_path, height = 0.5, width = 4, align = "center") %>%
+    footer_image(image_path, height = 0.5, width = 4, align = "right") %>%
+    page_footer(width = c(4,4,4))
+  
+  expect_error(
+    ret <-  page_setup_docx(rpt4),
+    "Total width of page footer 12 inches cannot be greater than content width 9 inches."
+  )
+  
+  # Image
+  image_path <- "data/logo.jpg"
+  
+  rpt5 <- create_report("", font = "Simsun", font_size = 12) %>%
+    footer_image(image_path, height = 0.5, width = 0.8, align = "left") %>%
+    footer_image(image_path, height = 0.5, width = 0.8, align = "center") %>%
+    footer_image(image_path, height = 0.5, width = 0.8, align = "right") %>%
+    page_footer()
+  
+  ret <-  page_setup_docx(rpt5)
+  
+  expect_equal(ret$page_template$page_footer$image_path, c("data/logo.jpg", "data/logo.jpg", "data/logo.jpg"))
+  expect_equal(ret$page_template$page_footer$lines, 3)
 })
 
 

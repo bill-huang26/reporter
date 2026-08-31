@@ -2191,7 +2191,7 @@ header_image <- function(x, image_path, height, width, align = "left") {
   }
   
   if (!align %in% c("left", "right", "center", "centre")) {
-    stop("align must be left or right.")
+    stop("align must be left, right, center, or centre.")
   }
   
   header_image <- list()

@@ -149,4 +149,16 @@ test_that("get_page_footnotes_text works as expected.", {
   
 })
 
-
+test_that("get_break_lines works as expected.", {
+  
+  tbl <- create_table(iris) %>%
+    define(Sepal.Length, break_label = "(Cont.)")
+  
+  fdat <- iris
+  
+  fdat$..break_label1 <- ifelse(iris$Species!="", paste0(iris$Species, " (Cont.)"))
+  
+  fdat2 <- get_break_lines(fdat, c(1, 1, 1, 1, 0.1), tbl, 0.13)
+  
+  expect_equal(fdat2$..break_label_lines1, rep(2, nrow(fdat2)))
+})

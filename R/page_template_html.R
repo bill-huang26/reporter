@@ -105,7 +105,7 @@ get_page_header_html <- function(rs) {
   total_width <- sum(width, na.rm = T)
   if (total_width > rs$content_size[["width"]]) {
     
-    stop(sprintf("Total width of page footer %s %s cannot be greater than content width %s %s.",
+    stop(sprintf("Total width of page header %s %s cannot be greater than content width %s %s.",
                  total_width,
                  rs$units,
                  rs$content_size[["width"]],
@@ -1478,14 +1478,14 @@ get_cell_borders_html <- function(row, col, nrow, ncol, brdrs,
   
 }
 
-get_page_numbers_html <- function(val, tpg = TRUE) {
-  
-  ret <- val
-  
-  ret <- gsub("[pg]", "\\chpgn ", ret, fixed = TRUE)
-  
-  if (tpg)
-    ret <- gsub("[tpg]", "{\\field{\\*\\fldinst  NUMPAGES }}", ret, fixed = TRUE)
-  
-  return(ret)
-}
+# get_page_numbers_html <- function(val, tpg = TRUE) {
+#   
+#   ret <- val
+#   
+#   ret <- gsub("[pg]", "\\chpgn ", ret, fixed = TRUE)
+#   
+#   if (tpg)
+#     ret <- gsub("[tpg]", "{\\field{\\*\\fldinst  NUMPAGES }}", ret, fixed = TRUE)
+#   
+#   return(ret)
+# }

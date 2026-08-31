@@ -597,15 +597,15 @@ page_setup_html <- function(rs) {
   } else
     rs$line_count <- rs$user_line_count
 
-  if (debug) {
-    print(paste("Font Size:", rs$font_size))
-    print(paste("Content Height:", rs$content_size[[1]]))
-    print(paste("Content Width:", rs$content_size[[2]]))
-    print(paste("Line Count:", rs$line_count))
-    print(paste("Line Height:", rs$line_height))
-    print(paste("Gutter Width:", rs$gutter_width))
-    print(paste("Char Width:", rs$char_width))
-  }
+  # if (debug) {
+  #   print(paste("Font Size:", rs$font_size))
+  #   print(paste("Content Height:", rs$content_size[[1]]))
+  #   print(paste("Content Width:", rs$content_size[[2]]))
+  #   print(paste("Line Count:", rs$line_count))
+  #   print(paste("Line Height:", rs$line_height))
+  #   print(paste("Gutter Width:", rs$gutter_width))
+  #   print(paste("Char Width:", rs$char_width))
+  # }
   # 
   # Get page template
   pt <- page_template_html(rs)

@@ -265,3 +265,14 @@ test_that("get_page_footnotes_html works as expected.", {
   expect_equal(res4$lines, 2)
   
 })
+
+test_that("get_line_height_html works as expected.", {
+  
+  rs <- create_report("", units = "inches")
+  rs$row_height <- 0.5
+  
+  
+  res <- get_line_height_html(rs)
+  
+  expect_equal(res, " style = \"line-height: 0.5in; overflow: hidden;\"")
+})

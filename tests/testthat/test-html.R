@@ -3072,8 +3072,8 @@ test_that("html-80: Output Chinese as expected.", {
     font_lst <- c(8, 9, 10, 11, 12)
     
     for (f in font_lst) {
-      if (f != 8) {
-        df_output <- rbind(df, df, df, df)
+      if (f %in% c(8, 9)) {
+        df_output <- rbind(df, df, df, df, df, df)
       } else {
         df_output <- rbind(df, df, df, df, df)
       }
