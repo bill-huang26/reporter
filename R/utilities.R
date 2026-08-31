@@ -1763,7 +1763,7 @@ apply_widths <- function(dat, wdths, algns) {
       } else if (algns[nm] == "right") {
         
         ret[[nm]] <- stri_pad_left(ret[[nm]], cw)
-      } else if (algns[nm] == "center") {
+      } else if (algns[nm] %in% c("center", "centre")) {
         
         ret[[nm]] <- stri_pad_both(ret[[nm]], cw) 
       }
