@@ -763,7 +763,7 @@ get_text_body_html <- function(rs, txt, width, line_count, lpg_rows,
     # Add blank above content if requested
     a <- NULL
     if (i == 1 & content_blank_row %in% c("both", "above"))
-      a <- "<br>\n"
+      a <- paste0(rs$blank_row, "\n")
     
     
     # Sum up lines

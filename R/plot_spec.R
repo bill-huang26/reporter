@@ -876,7 +876,7 @@ get_plot_body_html <- function(plt, plot_path, talign, rs,
   # Add blank above content if requested
   a <- NULL
   if (content_blank_row %in% c("both", "above"))
-    a <- "<br>"
+    a <- rs$blank_row
   
   
   # Get sum of all items to this point

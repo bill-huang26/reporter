@@ -377,7 +377,7 @@ create_table_html <- function(rs, ts, pi, content_blank_row, wrap_flag,
   
   a <- NULL
   if (content_blank_row %in% c("above", "both"))
-    a <- "<br>"
+    a <- rs$blank_row
   
   
   blnks <- c()
@@ -459,7 +459,7 @@ get_page_footnotes_html <- function(rs, spec, spec_width, lpg_rows, row_count,
   b <- NULL
   blen <- 0
   if (content_blank_row %in% c("below", "both")) {
-    b <- "<br>"
+    b <- rs$blank_row
     blen <- 1
   }
   
@@ -484,13 +484,13 @@ get_page_footnotes_html <- function(rs, spec, spec_width, lpg_rows, row_count,
     
     if (vflag == "bottom" & len_diff > 0) {
   
-      ublnks <- c(b, rep("<br>", len_diff))
+      ublnks <- c(b, rep(rs$blank_row, len_diff))
   
     } else {
   
       if ((wrap_flag & len_diff > 0)) {
         if (vflag == "bottom" | has_page_footer(rs))
-          lblnks <- c(rep("<br>", len_diff), b)
+          lblnks <- c(rep(rs$blank_row, len_diff), b)
       } else {
         lblnks <- b
       }

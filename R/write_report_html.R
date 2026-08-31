@@ -573,9 +573,13 @@ page_setup_html <- function(rs) {
   if (!is.null(rs$user_line_height)) {
     rs$row_height <- rs$user_line_height
     rs$line_height <- rs$user_line_height
+    rs$blank_row <- sprintf("<div style=\"height: %s%s; clear: both;\"></div>",
+                            rs$user_line_height,
+                            ifelse(rs$units == "inches", "in", rs$units))
   } else {
     rs$row_height <- rh
     rs$line_height <- rh
+    rs$blank_row <- "<br>"
   }
   rs$char_width <- cw
   
