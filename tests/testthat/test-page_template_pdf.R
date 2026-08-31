@@ -299,7 +299,13 @@ test_that("get_title_header_pdf function works as expected.", {
   th
   expect_equal(length(th$pdf), 4)
   expect_equal(th$lines, 4)
-
+  
+  rpt4 <- create_report("", font = "Arial", font_size = 12) %>%
+    title_header("Hello", "Goodbye", right = paste("Right "), borders = "all",
+                 blank_row = "both")
+  rpt4 <- page_setup_pdf(rpt4)
+  th <-rpt4$page_template$title_hdr
+  expect_equal(th$lines, 4)
 })
 
 # test_that("get_title_header_pdf function works as expected with borders.", {
@@ -375,7 +381,8 @@ test_that("get_page_header_pdf works as expected.", {
   
   
   rpt2 <- create_report("", font = "Arial", font_size = 12) %>%
-    page_header(left= c("Hello", "Goodbye"), right = "there") 
+    page_header(left= c("Hello", "Goodbye"), right = "there", center = "Center",
+                width = c(3, 3, 3)) 
   
   rpt2 <- page_setup_pdf(rpt2)
   
@@ -507,7 +514,52 @@ test_that("get_pageby_pdf works as expected.", {
 
   expect_equal(res$lines, 2)
   expect_equal(length(res$pdf), 1)
+  
+  # test 2
+  tbl <- create_table(mtcars) %>%
+    page_by(cyl, "Cylinders:", blank_row = "both", borders = "all")
+  
+  rpt <- create_report("", font = "Arial", font_size = 12) %>%
+    titles("Hello") %>%
+    footnotes("Goodbye") %>%
+    add_content(tbl)
+  
+  rpt <- page_setup_pdf(rpt)
+  
+  res <- get_page_by_pdf(tbl$page_by, rpt$content_size[["width"]], 
+                         "virginica", rpt, "left")
+  
+  expect_true(res$lines > 3)
 
+  # test 3
+  fp <- ""
+  
+  dat <- iris
+  dat$Pgby <- as.character(dat$Species)
+  dat <- dat[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width", "Pgby")]
+  
+  long_label <- "This is a long page by label which should take: "
+
+  tbl <- create_table(dat, borders = "outside") %>%
+    titles("Table 1.0", "My Nice Report with a Page By") %>%
+    page_by(Pgby, label = long_label, bold = "label", blank_row = "none") %>%
+    define(Pgby, visible = FALSE)
+  
+  rpt <- create_report(fp, output_type = "pdf", font = "Arial",
+                       font_size = 10, orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1) %>%
+    add_content(tbl) %>%
+    footnotes("My footnote 1", "My footnote 2", borders = "none")
+  
+  rpt <- page_setup_pdf(rpt)
+  
+  res <- get_page_by_pdf(tbl$page_by, 
+                         # rpt$content_size[["width"]], 
+                         width = 2,
+                         "This is a long page by label which should take: This is a long page by label which should take: ", 
+                         rpt, "left")
+  
+  expect_equal(res$lines, 5)
 })
 
 
