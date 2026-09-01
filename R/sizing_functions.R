@@ -174,12 +174,12 @@ get_page_wraps <- function(content_width, ts, widths, gutter, control_cols) {
         
         # Add width for current column
         pg[nm] <- widths[nm] + gutter
-        
+
       } else {
         
         # If sum of widths does not exceed page size, add to pg and keep going
         pg[nm] <- widths[nm] + gutter
-        
+
       } 
     }
     
@@ -396,7 +396,7 @@ create_stub <- function(dat, ts) {
 #' @noRd
 get_col_widths <- function(dat, ts, labels, char_width, uom, 
                            merge_label_row = TRUE,
-                           content_width = NULL) {
+                           content_width = NULL, rs = NULL) {
 
   defs <- ts$col_defs
   if (uom == "cm") {
@@ -493,6 +493,23 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
   width_vars <- c()
   width_lst <- c()
   width_per_lst <- c()
+  
+  # Stub width
+  if (!is.null(ts$stub)) {
+    if (!is.null(ts$stub$width)) {
+      width_vars <- c(width_vars, "stub")
+      
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", ts$stub$width)) {
+        width_per_lst <- c(width_per_lst, as.numeric(sub("%", "", ts$stub$width)) / 100)
+        fraction <- as.numeric(sub("%", "", ts$stub$width)) / 100
+        width_lst <- c(width_lst, round(content_width * fraction, 2))
+      } else {
+        width_lst <- c(width_lst, ts$stub$width)
+      }
+    }
+  }
+  
+  # Column width
   for (def in defs) {
     if (!is.null(def$width)) {
       width_vars <- c(width_vars, def$var_c)
@@ -511,16 +528,23 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
   # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
   # -- to make sure total length won't exceed total width
   if (length(width_per_lst) > 1 & length(width_per_lst) == length(width_lst)) {
-    remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
-    last_width <- min(remain_width, width_lst[length(width_lst)])
-    width_lst[length(width_lst)] <- last_width
+    if (sum(width_per_lst) <= 1) {
+      remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
+      last_width <- min(remain_width, width_lst[length(width_lst)])
+      width_lst[length(width_lst)] <- last_width
+      
+      # Make sure total words don't exceed line_size
+      total_words <- sum(round(width_lst / char_width))
+      while (total_words > rs$line_size) {
+        width_lst[length(width_lst)] <- width_lst[length(width_lst)] - char_width
+        total_words <- sum(round(width_lst / char_width))
+      }
+    }
   }
-  
   if (length(width_vars) > 0) {
     for (i in seq_len(length(width_vars))) {
       width_var <- width_vars[i]
       user_width <- width_lst[i]
-      
       if (width_var %in% names(dat) & !is.null(user_width) && user_width > 0) {
         if (user_width >= mwidths[[width_var]]) {
           ret[[width_var]] <- user_width
@@ -554,17 +578,17 @@ get_col_widths <- function(dat, ts, labels, char_width, uom,
   # }
   
   # Deal with stub
-  if (!is.null(ts$stub)) {
- 
-    # Add stub width if exists   
-    if (!is.null(ts$stub$width)) {
-      ret[["stub"]] <- ts$stub$width
-      defnms[length(defnms) + 1] <- "stub"
-    }
-    
-    # print(ret[["stub"]])
-    # print(ts$stub$width)
-  }
+  # if (!is.null(ts$stub)) {
+  # 
+  #   # Add stub width if exists   
+  #   if (!is.null(ts$stub$width)) {
+  #     ret[["stub"]] <- ts$stub$width
+  #     defnms[length(defnms) + 1] <- "stub"
+  #   }
+  #   
+  #   # print(ret[["stub"]])
+  #   # print(ts$stub$width)
+  # }
   
   # Turn into vector if needed
   ret <- unlist(ret)
@@ -840,6 +864,23 @@ get_col_widths_variable <- function(dat, ts, labels, font,
   width_vars <- c()
   width_lst <- c()
   width_per_lst <- c()
+  
+  # Stub width
+  if (!is.null(ts$stub)) {
+    if (!is.null(ts$stub$width)) {
+      width_vars <- c(width_vars, "stub")
+      
+      if (grepl("^[0-9]+(\\.[0-9]+)?%$", ts$stub$width)) {
+        width_per_lst <- c(width_per_lst, as.numeric(sub("%", "", ts$stub$width)) / 100)
+        fraction <- as.numeric(sub("%", "", ts$stub$width)) / 100
+        width_lst <- c(width_lst, round(content_width * fraction, 2))
+      } else {
+        width_lst <- c(width_lst, ts$stub$width)
+      }
+    }
+  }
+  
+  # Column width
   for (def in defs) {
     if (!is.null(def$width)) {
       width_vars <- c(width_vars, def$var_c)
@@ -858,9 +899,11 @@ get_col_widths_variable <- function(dat, ts, labels, font,
   # -- If total percentage <= 100%, the last width should be min(remaining width, total width*percentage)
   # -- to make sure total length won't exceed total width
   if (length(width_per_lst) > 1 & length(width_per_lst) == length(width_lst)) {
-    remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
-    last_width <- min(remain_width, width_lst[length(width_lst)])
-    width_lst[length(width_lst)] <- last_width
+    if (sum(width_per_lst) <= 1) {
+      remain_width <- content_width - sum(width_lst[1:length(width_lst)-1])
+      last_width <- min(remain_width, width_lst[length(width_lst)])
+      width_lst[length(width_lst)] <- last_width
+    }
   }
   
   if (length(width_vars) > 0) {
@@ -906,21 +949,21 @@ get_col_widths_variable <- function(dat, ts, labels, font,
   # }
   
   # Deal with stub
-  if (!is.null(ts$stub)) {
-    
-    # Add stub width if exists   
-    if (!is.null(ts$stub$width)) {
-      if (ts$stub$width >= mwidths[["stub"]]) {
-        ret[["stub"]] <- ts$stub$width
-      } else {
-        ret[["stub"]] <- mwidths[["stub"]] + gutter_width
-      }
-      defnms[length(defnms) + 1] <- "stub"
-    }
-    
-    # print(ret[["stub"]])
-    # print(ts$stub$width)
-  }
+  # if (!is.null(ts$stub)) {
+  #   
+  #   # Add stub width if exists   
+  #   if (!is.null(ts$stub$width)) {
+  #     if (ts$stub$width >= mwidths[["stub"]]) {
+  #       ret[["stub"]] <- ts$stub$width
+  #     } else {
+  #       ret[["stub"]] <- mwidths[["stub"]] + gutter_width
+  #     }
+  #     defnms[length(defnms) + 1] <- "stub"
+  #   }
+  #   
+  #   # print(ret[["stub"]])
+  #   # print(ts$stub$width)
+  # }
   
   # Turn into vector if needed
   ret <- unlist(ret)
