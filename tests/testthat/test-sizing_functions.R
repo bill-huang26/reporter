@@ -544,6 +544,38 @@ test_that("get_col_widths_variable works with percentage width as expected.", {
   expect_equal(sum(res), 9)
 })
 
+test_that("get_col_widths_variable works with stub percentage width as expected.", {
+  
+  fp <- ""
+  
+  dat <- iris[1:50,]
+  dat$Group <- c(rep("A", 10), rep("B", 10), rep("C", 10), rep("D", 10), rep("E", 10))
+  dat$Species <- as.character(dat$Species)
+  
+  tbl <- create_table(dat, borders = "none") %>%
+    titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+    stub(c("Group", "Species"), width = "20%") %>%
+    define(Group, label_row = T, blank_after = T) %>%
+    define(Sepal.Length, label = "Sepal Length", width = "20%", align = "center") %>%
+    define(Sepal.Width, label = "Sepal Width", width = "20%", align = "centre") %>%
+    define(Petal.Length, label = "Petal Length", width = "20%", align = "centre") %>%
+    define(Petal.Width, label = "Petal.Width", width = "20%", align = "centre")
+  
+  rpt <- create_report(fp, output_type = "RTF", font = "Arial",
+                       font_size = 12, orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1)
+  
+  lbls <- get_labels(dat, tbl)
+  
+  rs <- page_setup_rtf(rpt)
+  
+  fdat <- prep_data(dat, tbl, rs$char_width, rs$missing)
+  
+  res <- get_col_widths_variable(fdat, tbl, lbls, "Arial", 12, "inches", .2, content_width = 9)
+  
+  expect_equal(sum(res), 9)
+})
+
 test_that("get_col_widths_variable works with Chinese as expected.", {
 
   df <- read.table(header = TRUE, text = '
@@ -597,6 +629,74 @@ test_that("get_col_widths works as expected.", {
   char_num <- round(res / rs$char_width) - 1
   
   expect_equal(as.numeric(char_num), c(6,13,9,9,8))
+})
+
+test_that("get_col_widths works as expected with 100%.", {
+  
+  fp <- ""
+  
+  dat <- iris
+  
+  tbl <- create_table(dat, borders = "none") %>%
+    titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+    define(Sepal.Length, label = "Sepal Length", width = "20%", align = "center") %>%
+    define(Sepal.Width, label = "Sepal Width", width = "20%", align = "centre") %>%
+    define(Petal.Length, label = "Petal Length", width = "20%", align = "centre") %>%
+    define(Petal.Width, label = "Petal.Width", width = "20%", align = "centre") %>%
+    define(Species, width = "20%", blank_after = TRUE)
+  
+  rpt <- create_report(fp, output_type = "txt", font = "fixed",
+                       orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1) %>%
+    page_header("Left", c("Right1")) %>%
+    add_content(tbl, blank_row = "none") %>%
+    page_footer("Left1", "Center1", "Page [pg] of [tpg]") %>%
+    footnotes("My footnote 1", "My footnote 2")
+  
+  lbls <- get_labels(dat, tbl)
+  
+  rs <- page_setup(rpt)
+  
+  res <- get_col_widths(dat, tbl, lbls, rs$char_width, rs$units,
+                        content_width = rs$content_size[["width"]], rs = rs)
+  
+  char_num <- round(res / rs$char_width)
+  
+  expect_equal(as.numeric(char_num), c(22,22,22,22,20))
+})
+
+test_that("get_col_widths works with stub percentage width as expected.", {
+  
+  fp <- ""
+  
+  dat <- iris[1:50,]
+  dat$Group <- c(rep("A", 10), rep("B", 10), rep("C", 10), rep("D", 10), rep("E", 10))
+  dat$Species <- as.character(dat$Species)
+  
+  tbl <- create_table(dat, borders = "none") %>%
+    titles("Table 1.0", "My Nice Irises", "Another Title") %>%
+    stub(c("Group", "Species"), width = "20%") %>%
+    define(Group, label_row = T, blank_after = T) %>%
+    define(Sepal.Length, label = "Sepal Length", width = "20%", align = "center") %>%
+    define(Sepal.Width, label = "Sepal Width", width = "20%", align = "centre") %>%
+    define(Petal.Length, label = "Petal Length", width = "20%", align = "centre") %>%
+    define(Petal.Width, label = "Petal.Width", width = "20%", align = "centre")
+  
+  rpt <- create_report(fp, output_type = "txt", font = "fixed",
+                       orientation = "landscape") %>%
+    set_margins(top = 1, bottom = 1)
+  
+  lbls <- get_labels(dat, tbl)
+  
+  rs <- page_setup(rpt)
+  
+  fdat <- prep_data(dat, tbl, rs$char_width, rs$missing)
+  
+  res <- get_col_widths(fdat, tbl, lbls, rs$char_width, rs$units,
+                        content_width = rs$content_size[["width"]], rs = rs)
+  
+  char_num <- round(res / rs$char_width)
+  expect_equal(as.numeric(char_num), c(22,22,22,22,20))
 })
 
 test_that("stub_dedupe works as expected", {

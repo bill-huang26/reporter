@@ -61,11 +61,13 @@ parameter.}
 
 \item{width}{The width of the column in the specified units of measure.
 The units of measure are specified on the \code{units} parameter of the
-\code{\link{create_report}} function.  If no width is supplied, the
-\code{\link{write_report}} function will assign a default width based on the 
-width of the column data and the label.  \code{write_report} will not set a 
-column width less than the width of the largest word in the data or label.
-In other words, \code{write_report} will not break words.}
+\code{\link{create_report}} function. Input can be a numeric value or a 
+percentage in a string such like \code{width = 3} or \code{width = "20\%"}.
+If no width is supplied, the \code{\link{write_report}} function will assign 
+a default width based on the width of the column data and the label.  
+\code{write_report} will not set a column width less than the width of the 
+largest word in the data or label. In other words, \code{write_report} will 
+not break words.}
 
 \item{visible}{Whether or not the column should be visible on the report.
 This parameter can be used as a simple way to drop columns from the report.}
