@@ -208,11 +208,13 @@ parameter.</p></dd>
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>The width of the column in the specified units of measure.
 The units of measure are specified on the <code>units</code> parameter of the
-<code><a href="create_report.html">create_report</a></code> function.  If no width is supplied, the
-<code><a href="write_report.html">write_report</a></code> function will assign a default width based on the
-width of the column data and the label.  <code>write_report</code> will not set a
-column width less than the width of the largest word in the data or label.
-In other words, <code>write_report</code> will not break words.</p></dd>
+<code><a href="create_report.html">create_report</a></code> function. Input can be a numeric value or a
+percentage in a string such like <code>width = 3</code> or <code>width = "20%"</code>.
+If no width is supplied, the <code><a href="write_report.html">write_report</a></code> function will assign
+a default width based on the width of the column data and the label.
+<code>write_report</code> will not set a column width less than the width of the
+largest word in the data or label. In other words, <code>write_report</code> will
+not break words.</p></dd>
 
 
 <dt id="arg-visible">visible<a class="anchor" aria-label="anchor" href="#arg-visible"></a></dt>
