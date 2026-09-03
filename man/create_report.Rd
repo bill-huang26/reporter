@@ -51,7 +51,7 @@ pass the desired character string to the missing parameter.}
 
 \item{font}{The font to use on the report.  The font specified will be
 used for the entire report.  Valid values are "Courier", "Arial", "Times",
-"Simsun" and "fixed".  The value of "fixed" will create a fixed-width, text style
+"SimSun" and "fixed".  The value of "fixed" will create a fixed-width, text style
 report in Courier font.  The \code{font} parameter only applies to 
 RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".  Note that
 the keyword "Courier" actually uses "Courier New" in the rendered report.
