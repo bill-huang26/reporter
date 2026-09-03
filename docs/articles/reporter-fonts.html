@@ -158,11 +158,12 @@
 <h3 id="specify-fonts-and-borders">Specify Fonts and Borders<a class="anchor" aria-label="anchor" href="#specify-fonts-and-borders"></a>
 </h3>
 <p>By default, the <strong>reporter</strong> package will create
-fixed-width style reports in Courier font. The package supports two
-additional fonts: Arial and Times New Roman. The package also supports
-the ability to turn on borders for your content. To demonstrate, the
-simple demographics table seen previously is reproduced below in Arial
-font with borders around the table, titles, and footnotes.</p>
+fixed-width style reports in Courier font. The package supports three
+additional fonts: Arial, Times New Roman, and SimSun. The package also
+supports the ability to turn on borders for your content. To
+demonstrate, the simple demographics table seen previously is reproduced
+below in Arial font with borders around the table, titles, and
+footnotes.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://reporter.r-sassy.org">reporter</a></span><span class="op">)</span></span>
 <span></span>
@@ -206,6 +207,65 @@ font with borders around the table, titles, and footnotes.</p>
 <span><span class="co"># View report</span></span>
 <span><span class="co"># file.show(tmp)</span></span></code></pre></div>
 <p><img src="../man/images/fonts.png" alt="Font example image"></p>
+</div>
+<div class="section level3">
+<h3 id="chinese-language-support">Chinese Language Support<a class="anchor" aria-label="anchor" href="#chinese-language-support"></a>
+</h3>
+<p>The “SimSun” font supports reporting in the Chinese language. The
+font can be specified as the other English language fonts. Here is an
+example of a report using “SimSun” font:</p>
+<pre><code><span>    <span class="co"># Read in prepared data</span></span>
+<span>    <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span>header <span class="op">=</span> <span class="cn">TRUE</span>, text <span class="op">=</span> <span class="st">'</span></span>
+<span><span class="st">      group1   group2            trt1         trt2         subgroup</span></span>
+<span><span class="st">      "性别"   "男"              "75 (51.7)"  "91 (59.5)"  "≥65岁"</span></span>
+<span><span class="st">      "性别"   "女"              "70 (48.3)"  "62 (40.5)"  "≥65岁"</span></span>
+<span><span class="st">      "年龄"   "例数"            "145"        "153"        "≥65岁"</span></span>
+<span><span class="st">      "年龄"   "平均数"          "64.7"       "65.8"       "≥65岁"</span></span>
+<span><span class="st">      "年龄"   "中位数"          "65.0"       "66.0"       "≥65岁"</span></span>
+<span><span class="st">      "年龄"   "标准差"          "9.7"        "8.3"        "≥65岁"</span></span>
+<span><span class="st">      "年龄"   "最小值, 最大值"  "40, 83"     "43.85"      "≥65岁"'</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">df</span><span class="op">$</span><span class="va">trt3</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">trt1</span></span>
+<span>    <span class="va">df</span><span class="op">$</span><span class="va">trt4</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">trt2</span></span>
+<span>    <span class="va">df</span><span class="op">$</span><span class="va">trt5</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">trt1</span></span>
+<span>    </span>
+<span>    <span class="co"># Create table</span></span>
+<span>    <span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_table.html">create_table</a></span><span class="op">(</span><span class="va">df</span>, borders <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/titles.html">titles</a></span><span class="op">(</span><span class="st">"表 14-2.1. 基线人口学特征"</span>, <span class="st">"(安全分析集)"</span>, borders <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/stub.html">stub</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group1"</span>, <span class="st">"group2"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/page_by.html">page_by</a></span><span class="op">(</span><span class="va">subgroup</span>, </span>
+<span>      label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"亚组 - 这是一段很长的字，预计会占两行以上。"</span>,</span>
+<span>      <span class="st">"用来测试空白行的宽度是否需要缩减。切割文字的函數需 修改，分割不需要用空白："</span><span class="op">)</span>, </span>
+<span>              borders <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group1</span>, label_row <span class="op">=</span> <span class="cn">T</span>, blank_after <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">group2</span>, indent <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt1</span>, label <span class="op">=</span> <span class="st">"试验药物一"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt2</span>, label <span class="op">=</span> <span class="st">"试验药物二"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt3</span>, label <span class="op">=</span> <span class="st">"试验药物三"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt4</span>, label <span class="op">=</span> <span class="st">"试验药物四"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">trt5</span>, label <span class="op">=</span> <span class="st">"安慰剂"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/define.html">define</a></span><span class="op">(</span><span class="va">subgroup</span>, visible <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/spanning_header.html">spanning_header</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"trt1"</span>, to <span class="op">=</span> <span class="st">"trt3"</span>, label <span class="op">=</span> <span class="st">"高试验药物"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/spanning_header.html">spanning_header</a></span><span class="op">(</span>from <span class="op">=</span> <span class="st">"trt4"</span>, to <span class="op">=</span> <span class="st">"trt5"</span>, label <span class="op">=</span> <span class="st">"低试验药物"</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".docx"</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">rpt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_report.html">create_report</a></span><span class="op">(</span><span class="va">fp</span>, output_type <span class="op">=</span> <span class="st">"docx"</span>, font <span class="op">=</span> <span class="st">"SimSun"</span>,</span>
+<span>                         font_size <span class="op">=</span> <span class="fl">10</span>, orientation <span class="op">=</span> <span class="st">"portrait"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/set_margins.html">set_margins</a></span><span class="op">(</span>top <span class="op">=</span> <span class="fl">1</span>, bottom <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/page_header.html">page_header</a></span><span class="op">(</span><span class="st">"研究123"</span>, <span class="st">"分析数据审阅说明"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/add_content.html">add_content</a></span><span class="op">(</span><span class="va">tbl</span>, blank_row <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/page_footer.html">page_footer</a></span><span class="op">(</span><span class="st">"左页尾"</span>, <span class="st">"中页尾"</span>, <span class="st">"第 [pg] 页, 共 [tpg] 页"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu"><a href="../reference/footnotes.html">footnotes</a></span><span class="op">(</span><span class="st">"用于分析目的。其中包括人口统计学、治疗组和人群标帜。"</span>, </span>
+<span>                <span class="st">"受试者水平分析数据集。"</span>, borders <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">rpt</span><span class="op">)</span></span>
+<span>    </span>
+<span>    <span class="co"># Uncomment to view</span></span>
+<span>    <span class="co"># file.show(res$path)</span></span>
+<span>      </span></code></pre>
+<p>And here is the result:</p>
+<p><img src="../man/images/fonts2.png" alt="SimSun example report"></p>
 <p>Next: <a href="reporter-figure.html">Example 11: Figure</a></p>
 </div>
   </div>

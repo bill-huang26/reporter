@@ -72,7 +72,11 @@
 #' used for the entire report.  Valid values are "Courier", "Arial", "Times",
 #' "Simsun" and "fixed".  The value of "fixed" will create a fixed-width, text style
 #' report in Courier font.  The \code{font} parameter only applies to 
-#' RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".
+#' RTF, HTML, PDF, and DOCX reports.  The default value is "Courier".  Note that
+#' the keyword "Courier" actually uses "Courier New" in the rendered report.
+#' There is no discernible difference between "Courier" and "Courier New" for most
+#' output types.  "SimSun" is a font for rendering both traditional and simplified 
+#' Chinese characters. 
 #' @param font_size The size of the font to use on the report. The \code{font_size}
 #' specified will be used for the entire report.  Valid values are 8, 9, 10, 11,
 #' and 12.  The \code{font_size} parameter only applies to RTF, PDF, HTML, and  

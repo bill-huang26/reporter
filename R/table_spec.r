@@ -366,10 +366,11 @@ create_table <- function(x, show_cols = "all", use_attributes = "all",
 #' variable.  Valid values are TRUE or FALSE.  Default is FALSE.
 #' @param blank_before Whether to place a blank row before unique values of this
 #' variable.  Valid values are TRUE or FALSE.  Default is FALSE.
-#' @param dedupe Whether to dedupe the values for this variable. Set to TRUE for 
-#' a variable that is deduped only showing the value on the first row of each group.
-#' As for deduping on multiple variables, set to a character vector such as
-#' \code{c("subjid", "arm")}.
+#' @param dedupe Whether to dedupe the values for this variable. Valid values are
+#' TRUE, FALSE, or a vector a variable names. TRUE will dedupe the defined variable
+#' only by the values in that variable.  To dedupe by the values of multiple variables,
+#' pass a vector of variable names, i.e. \code{dedupe = c('var1', 'var2')}.  
+#' Note that deduping by invisible variables is allowed.   
 #' @param id_var Whether this variable should be considered an ID variable.
 #' ID variables are retained on each page when the page is wrapped. ID variables
 #' are also moved to the far left of the page.
