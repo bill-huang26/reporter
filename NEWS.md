@@ -10,10 +10,13 @@ line height.
 so user can see what the current values are.
 - Allow percentage style column widths on the `define()` function, passed as a 
 character string with a percent sign, i.e "10%".
-- Added "SimSum" font for Chinese language support.
+- Added "SimSun" font for Chinese language support.
 - Fixed bug that caused an error on numeric page by values.
-- Fixed line break counting on RTF code insertion. 
+- Fixed line break counting on RTF/HTML code insertion. 
 - Fixed bug to allow missing values in the page by variable.
+- Fixed pagination of page by when lines are wrapped in TXT.
+- Fixed padding of "centre" alignment in TXT.
+- Fixed footer location when font size is different content size in PDF.
 
 # reporter 1.4.8
 
