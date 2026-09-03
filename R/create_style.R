@@ -50,7 +50,7 @@
 #'   HotPink, Lime, Magenta, OrangeRed, SpringGreen
 #' }
 #' @param font_name The name of the font to use on the report.  Valid values
-#' are "Courier", "Arial", or "Times".  The default is "Courier".
+#' are "Courier", "Arial", "Times", or "SimSun".  The default is "Courier".
 #' @param font_size The default font size to use for the report.  This font
 #' size will be used for all text, unless overridden by another font size 
 #' parameter.

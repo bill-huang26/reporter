@@ -58,8 +58,9 @@
 #' \itemize{
 #'   \item The current version supports both a monospace, fixed-width style 
 #'   report and a variable-width style report.  The monospace report is the 
-#'   default.  To create a variable width report, set the font parameter on
-#'   the \code{create_report} function to 'Arial', 'Courier', or 'Times'.
+#'   requested with the font name "fixed".  To create a variable width report, 
+#'   set the font parameter on
+#'   the \code{create_report} function to 'Arial', 'Courier', 'Times', or 'SimSun'.
 #'   \item If a font is selected, it will be applied uniformly to the entire
 #'   report.  The package has no capabilities to mix different fonts in the 
 #'   same report.
@@ -74,12 +75,6 @@
 #'   has no capabilities for sorting.  Use the sorting functionality in 
 #'   Base R or supplemental packages to sort the data prior to sending to
 #'   \strong{reporter}.
-#'   \item For monospace reports, titles, footnotes, page headers, and page 
-#'   footers must fit in the available space. 
-#'   If they don't, the \strong{reporter} package will 
-#'   generate a warning.  In these situations, the recommended course of 
-#'   action is to split the offending string into two or more strings that 
-#'   fit within the available width.
 #'   \item The \strong{reporter} package will never break a word. That means you 
 #'   cannot set a column width that is less than the length of the longest 
 #'   word.  If you wish to break words, add the breaks with
@@ -92,8 +87,9 @@
 #'   \item The max automatic column width
 #'   is 5 inches.  Longer data values will be wrapped.
 #'   \item The package support plots from \strong{ggplot2}. These plots
-#'   can be added to RTF, PDF, HTML, and DOCX output types.  The package does not 
-#'   support Base R plots.
+#'   can be added to RTF, PDF, HTML, and DOCX output types.  Plots from other
+#'   packages can be added to a report by rendering the plot as a JPEG file,
+#'   and adding it to plot as a static image.
 #'   \item The package currently supports styling for HTML reports.  
 #'   This styling allows setting background colors, font colors, border
 #'   colors, and some font sizing and bolding.   

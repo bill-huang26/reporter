@@ -188,8 +188,9 @@ for more information.</p>
 has some limitations.  Those
 assumptions and limitations are as follows:</p><ul><li><p>The current version supports both a monospace, fixed-width style
   report and a variable-width style report.  The monospace report is the
-  default.  To create a variable width report, set the font parameter on
-  the <code>create_report</code> function to 'Arial', 'Courier', or 'Times'.</p></li>
+  requested with the font name "fixed".  To create a variable width report,
+  set the font parameter on
+  the <code>create_report</code> function to 'Arial', 'Courier', 'Times', or 'SimSun'.</p></li>
 <li><p>If a font is selected, it will be applied uniformly to the entire
   report.  The package has no capabilities to mix different fonts in the
   same report.</p></li>
@@ -204,12 +205,6 @@ assumptions and limitations are as follows:</p><ul><li><p>The current version su
   has no capabilities for sorting.  Use the sorting functionality in
   Base R or supplemental packages to sort the data prior to sending to
   <strong>reporter</strong>.</p></li>
-<li><p>For monospace reports, titles, footnotes, page headers, and page
-  footers must fit in the available space.
-  If they don't, the <strong>reporter</strong> package will
-  generate a warning.  In these situations, the recommended course of
-  action is to split the offending string into two or more strings that
-  fit within the available width.</p></li>
 <li><p>The <strong>reporter</strong> package will never break a word. That means you
   cannot set a column width that is less than the length of the longest
   word.  If you wish to break words, add the breaks with
@@ -222,8 +217,9 @@ assumptions and limitations are as follows:</p><ul><li><p>The current version su
 <li><p>The max automatic column width
   is 5 inches.  Longer data values will be wrapped.</p></li>
 <li><p>The package support plots from <strong>ggplot2</strong>. These plots
-  can be added to RTF, PDF, HTML, and DOCX output types.  The package does not
-  support Base R plots.</p></li>
+  can be added to RTF, PDF, HTML, and DOCX output types.  Plots from other
+  packages can be added to a report by rendering the plot as a JPEG file,
+  and adding it to plot as a static image.</p></li>
 <li><p>The package currently supports styling for HTML reports.
   This styling allows setting background colors, font colors, border
   colors, and some font sizing and bolding.</p></li>
