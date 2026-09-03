@@ -70,6 +70,9 @@ TXT reports, no fonts are supported.
 The RTF, PDF, HTML, and DOCX output types support Courier, Arial, Times New Roman, 
 and SimSun.  SimSun is a font specifically for Chinese characters.
 
+Note that the "Courier" font keyword actually produces "Courier New" on the output
+report.  
+
 [top](#top)
 
 ******
