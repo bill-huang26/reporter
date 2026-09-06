@@ -173,7 +173,7 @@ test_that("get_page_header_html works as expected.", {
     header_image(image_path, height = 0.5, width = 0.8, align = "right") %>%
     page_header()
   
-  rpt5$modified_path <- ""
+  rpt5$modified_path <- tempfile(fileext = ".html")
   
   ret <-  page_setup_html(rpt5)
   
@@ -229,7 +229,7 @@ test_that("get_page_footer_html works as expected.", {
     footer_image(image_path, height = 0.5, width = 0.8, align = "right") %>%
     page_footer()
   
-  rpt5$modified_path <- ""
+  rpt5$modified_path <- tempfile(fileext = ".html")
   
   ret <-  page_setup_html(rpt5)
   
