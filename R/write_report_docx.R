@@ -660,7 +660,7 @@ page_setup_docx <- function(rs) {
     # This is for adding extra blanks after the table, left more buffer to prevent from
     # unexpected page break
     rs$blank_row_below <- paste0('<w:p><w:pPr>
-              				<w:spacing w:after="0" w:line="', round(rs$row_height * conv) + radj - 3,
+              				<w:spacing w:after="8" w:line="', round(rs$row_height * conv) + radj - 3,
                                  '" w:lineRule="auto"/>
               				<w:contextualSpacing/>
               				<w:rPr>
