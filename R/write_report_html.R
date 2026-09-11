@@ -91,6 +91,8 @@ get_html_document <- function(rs) {
     fnt <- "Times New Roman"
   } else if (tolower(rs$font) == "courier") {
     fnt <- "Courier New"
+  } else if (tolower(rs$font) == "simsun") {
+    fnt <- 'SimSun, "宋体", "PingFang SC", "STSong", "Songti SC", serif' 
   }
     
   
