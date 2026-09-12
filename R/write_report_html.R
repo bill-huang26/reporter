@@ -103,7 +103,7 @@ get_html_document <- function(rs) {
   # Prepare header
   ret[length(ret) + 1] <- paste0("<!DOCTYPE html>\n",
                                  "<html>\n", "<head>")
-  
+  ret[length(ret) + 1] <- '<meta charset="UTF-8">'
   ret[length(ret) + 1] <- "<style>"
   ret[length(ret) + 1] <- paste0("@media print{\n",
                                  "@page {size:", rs$orientation, ";",
