@@ -1219,6 +1219,9 @@ get_table_body_html <- function(rs, tbl, widths, algns, talgn, tbrdrs,
         if (i==1 & frb & any(cell_border %in% c("top", "all", "outside")) &
             !any(brdrs %in% c("all", "inside"))) {
           exclude_top <-  NULL
+        } else if (i > 1 & any(cell_border %in% c("top", "all", "outside")) & 
+                   !any(brdrs %in% c("all", "inside"))) {
+          exclude_top <-  NULL
         }
         
         b <- get_cell_borders_html(i, j, nrow(t), ncol(t), brdrs, flgs[i], 
