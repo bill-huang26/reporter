@@ -4,7 +4,14 @@
 \alias{cell_style}
 \title{A style specification for a table cell}
 \usage{
-cell_style(indicator = NULL, bold = FALSE)
+cell_style(
+  indicator = NULL,
+  bold = FALSE,
+  italic = FALSE,
+  font_color = NULL,
+  cell_color = NULL,
+  borders = NULL
+)
 }
 \arguments{
 \item{indicator}{A keyword or column name to indicate which rows the cell
@@ -19,6 +26,17 @@ meaning to apply the style to all rows.}
 
 \item{bold}{Whether to bold the text in the cell.  Valid values are TRUE and
 FALSE.  The default is FALSE.}
+
+\item{italic}{Whether to italic the text in the cell.  Valid values are TRUE and
+FALSE.  The default is FALSE.}
+
+\item{font_color}{A character value to indicator the font color for the cell.}
+
+\item{cell_color}{A character value to indicator the background color for the cell.}
+
+\item{borders}{Whether and where to place borders to a cell. Valid values are 'top',
+'bottom', 'left', 'right', 'all', and 'outside'.  Default is NULL.  The border 
+specifications only apply to RTF, HTML, PDF, and DOCX reports.}
 }
 \description{
 A class to define the style for a cell in a table.  This

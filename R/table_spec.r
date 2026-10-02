@@ -591,6 +591,13 @@ define <- function(x, vars, label = NULL, format = NULL,
     }
   }
   
+  # If style is single layer, wrap it in a list to aligned with multiple styles
+  if (!is.null(style)) {
+    if (!any(sapply(style, is.list))) {
+      style <- list(style)
+    }
+  }
+  
   # For each passed variable, create an individual definition
   # This make subsequent processing much easier
   for (nm in vars_c) {
@@ -976,6 +983,14 @@ column_defaults <- function(x, vars = NULL, from = NULL, to = NULL, label = NULL
     align else label_align
   dflt$width = width
   dflt$n = n
+  
+  # If style is single layer, wrap it in a list to aligned with multiple styles
+  if (!is.null(style)) {
+    if (!any(sapply(style, is.list))) {
+      style <- list(style)
+    }
+  }
+  
   dflt$style = style
 
   x$col_dflts[[length(x$col_dflts) + 1]] <- dflt
@@ -1441,6 +1456,14 @@ stub <- function(x, vars, label = "", label_align = NULL,
   } else {
     def$label <- label
   }
+  
+  # If style is single layer, wrap it in a list to aligned with multiple styles
+  if (!is.null(style)) {
+    if (!any(sapply(style, is.list))) {
+      style <- list(style)
+    }
+  }
+  
   def$label_align <- label_align
   def$align <- align
   def$vars <- vars_c
