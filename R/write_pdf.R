@@ -364,20 +364,23 @@ get_header <- function(page_count = 1,
   lst <- list()
   
   lst[[1]] <- pdf_object(1, pdf_dictionary(Type = "/Catalog",
-                                           Pages = ref(5)))
+                                           Pages = ref(6)))
 
   # 
   fn <- "Courier"
   fb <- "Courier-Bold"
   fi <- "Courier-Oblique"
+  fbi <- "Courier-BoldOblique"
   if (tolower(font_name) == "times") {
     fn <- "Times-Roman"
     fb <- "Times-Bold"
     fi <- "Times-Italic"
+    fbi <- "Times-BoldItalic"
   } else if (tolower(font_name) == "arial") {
     fn <- "Helvetica"
     fb <- "Helvetica-Bold"
     fi <- "Helvetica-Oblique"
+    fbi <- "Helvetica-BoldOblique"
   }
 
   
@@ -395,6 +398,11 @@ get_header <- function(page_count = 1,
                                            Subtype = "/Type1", 
                                            BaseFont = paste0("/", fi),
                                            Encoding = "/WinAnsiEncoding"))
+  
+  lst[[5]] <- pdf_object(5, pdf_dictionary(Type = "/Font", 
+                                           Subtype = "/Type1", 
+                                           BaseFont = paste0("/", fbi),
+                                           Encoding = "/WinAnsiEncoding"))
 
   
   if (page_count > 10)
@@ -402,7 +410,7 @@ get_header <- function(page_count = 1,
   else 
     kds <- paste(page_ids, "0 R", collapse = " ")
   
-  lst[[5]] <- pdf_object(5, pdf_dictionary(Type = "/Pages",
+  lst[[6]] <- pdf_object(6, pdf_dictionary(Type = "/Pages",
                                            Kids = pdf_array(kds),
                                            Count = page_count,                                                 
                                            MediaBox = pdf_array(0, 0, 
@@ -462,10 +470,10 @@ get_pages <- function(pages, margin_left, margin_top, page_height, page_width,
   # Also trial and error
   lh <- fontsize  + round(fontsize * .19, 2) 
   
-  # Starting ID is 6 because of standard header objects.
+  # Starting ID is 7 because of standard header objects.
   # This id variable will be incremented along the way 
   # as needed to get unique ids for the objects. 
-  id <- 6
+  id <- 7
   
   pgnum <- 0
   tpg <- length(pages)
@@ -1129,12 +1137,13 @@ pdf_page <- function(id, content_id, graphic_ids = NULL) {
     
     res <- pdf_dictionary(Font = pdf_dictionary(F1 = ref(2),
                                                 F2 = ref(3),
-                                                F3 = ref(4)), 
+                                                F3 = ref(4),
+                                                F4 = ref(5)), 
                           ProcSet = procs,
                           XObject = xobj)
     
     parms <-  pdf_dictionary(Type = "/Page",
-                             Parent = ref(5),
+                             Parent = ref(6),
                              Contents = ref(content_id),
                              Resources = res)
                              
@@ -1144,11 +1153,12 @@ pdf_page <- function(id, content_id, graphic_ids = NULL) {
     
     res <- pdf_dictionary(Font = pdf_dictionary(F1 = ref(2),
                                                 F2 = ref(3),
-                                                F3 = ref(4)), 
+                                                F3 = ref(4),
+                                                F4 = ref(5)), 
                           ProcSet = procs)
     
     parms <-  pdf_dictionary(Type = "/Page",
-                             Parent = ref(5),
+                             Parent = ref(6),
                              Contents = ref(content_id),
                              Resources = res)
   }
@@ -1301,6 +1311,10 @@ get_byte_stream <- function(contents, startx, starty,
   
   if (italics == TRUE)
     bld <- "/F3 "
+  
+  if (bold == TRUE & italics == TRUE) {
+    bld <- "/F4 "
+  }
   
   # Create report line
   ret <- paste0("BT ", bld , fontsize, 

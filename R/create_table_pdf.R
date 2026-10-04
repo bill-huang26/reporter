@@ -1600,12 +1600,12 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
           # row height for it, so at the current row, we need to use previous rh
           # to get the correct y position
           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh_pre, 
-                                               pre_row_total_height + 1)
+                                               mxrw - rline + 1)
           
         } else {
           
           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh_pre, 
-                                               pre_row_total_height )
+                                               mxrw - rline )
           
         }
       }
@@ -1628,11 +1628,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
           
         } else if (i == nrow(t)) {
           ret[[length(ret) + 1]] <- page_vline(tlb * conv, (rline + bs) - rh_pre,
-                                               pre_row_total_height + 1)
+                                               mxrw - rline + 1)
           
         } else {
           ret[[length(ret) + 1]] <- page_vline(tlb * conv, (rline + bs) - rh_pre,
-                                               pre_row_total_height)
+                                               mxrw - rline)
           
         }
       }
@@ -1693,7 +1693,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
                                            (trb - tlb) * conv)
     }
     
-    pre_row_total_height <- mxrw - rline
+    # pre_row_total_height <- mxrw - rline
     
     rline <- mxrw
     
