@@ -4827,7 +4827,9 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
       "cyl"    "6 Cylinder and more and more" "4 ( 21.1%)"  "3 ( 23.1%)"
       "cyl"    "4 Cylinder and more and more" "5 ( 26.3%)"  "6 ( 46.2%)"')
     
-    df$cylflg <- ifelse(df$var == "cyl", TRUE, FALSE)
+    # df$cylflg <- ifelse(df$var == "cyl", TRUE, FALSE)
+    df$cylflg <- c(F,F,F,F,F,T,F,T)
+    df$cylflg2 <- c(F,F,F,F,F,F,T,F)
     df$ampgflg <- ifelse(df$var == "ampg", T, F)
     df$test_flag <- c(T,T,F,T,T,F,T,T)
     
@@ -4836,24 +4838,28 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
     tbl <- create_table(df, first_row_blank = T, borders = c("none")) %>%
       stub(c("var", "label"), width = 2.06, 
            style = list(
-             cell_style(bold = TRUE, 
+             cell_style(bold = F, 
                         italic = TRUE,
-                        cell_color = "white",
-                        borders = c("left", "right", "top"),
+                        cell_color = "yellow",
+                        borders = c("left", "right"),
                         indicator = "labelrow"),
              cell_style(bold = FALSE, 
                         italic = FALSE,
                         cell_color = "cyan",
-                        borders = c("right", "bottom"),
                         indicator = "blankrow"),
              cell_style(bold = FALSE, 
                         italic = FALSE,
-                        cell_color = "yellow",
-                        borders = c("bottom"),
-                        indicator = NULL)
+                        cell_color = "purple",
+                        borders = c( "bottom"),
+                        indicator = cylflg),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        cell_color = "green",
+                        borders = c( "left"),
+                        indicator = cylflg2)
            )) %>%
       
-      define(var, blank_after = T, label_row = TRUE, group_border = T,
+      define(var, blank_after = T, label_row = TRUE, group_border = F,
              format = c(ampg = "Miles Per Gallon and more bold\ntext to be added to test function",
                         cyl = "Cylinders")) %>%
       
@@ -4863,14 +4869,10 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
              style = list(
                cell_style(italic = TRUE,
                           bold = TRUE,
-                          font_color = "blue",
-                          cell_color = "gray",
-                          borders = c("top", "bottom"),
+                          borders = c("top"),
                           indicator = "ampgflg"),
                cell_style(italic = FALSE,
                           bold = FALSE,
-                          font_color = "white",
-                          cell_color = "olive",
                           borders = c("left", "right"),
                           indicator = "cylflg")
              )) %>%
@@ -4879,15 +4881,119 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
              style = list(
                cell_style(bold = FALSE,
                           italic = TRUE,
-                          font_color = "red",
-                          borders = "left",
+                          borders = c("left"),
                           indicator = "datarow"),
                cell_style(bold = TRUE,
-                          font_color = "blue",
                           borders = "left",
                           indicator = "ampgflg")
              )) %>%
+      define(ampgflg, visible = FALSE) %>%
       define(cylflg, visible = FALSE) %>%
+      define(cylflg2, visible = FALSE) %>%
+      define(test_flag, visible = FALSE)
+    
+    
+    # Create report and add content
+    rpt <- create_report(fp, orientation = "portrait", output_type = "pdf",
+                         font = "Times") %>%
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>%
+      titles("Table 1.0", "Various cell styles") %>%
+      add_content(tbl) %>%
+      footnotes("* Motor Trend, 1974") %>%
+      page_footer(left = "Left",
+                  center = "Confidential",
+                  right = "Page [pg] of [tpg]")
+    
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
+
+test_that("pdf2-123a: Various cell styles with turning bottom borders on/off work as expected", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test123a.pdf")
+    
+    
+    # Width calculation should be correct for bold text. No overflow
+    df <- read.table(header = TRUE, text = '
+      var      label                          A             B
+      "ampg"   "N and more and more"          "19"          "13"
+      "ampg"   "Mean and more and more"       "18.8 (6.5)"  "22.0 (4.9)"
+      "ampg"   "Median and more and more"     "16.4"        "21.4"
+      "ampg"   "Q1 - Q3 and more and more"    "15.1 - 21.2" "19.2 - 22.8"
+      "ampg"   "Range and more and more"      "10.4 - 33.9" "14.7 - 32.4"
+      "cyl"    "8 Cylinder and more and more" "10 ( 52.6%)" "4 ( 30.8%)"
+      "cyl"    "6 Cylinder and more and more" "4 ( 21.1%)"  "3 ( 23.1%)"
+      "cyl"    "4 Cylinder and more and more" "5 ( 26.3%)"  "6 ( 46.2%)"')
+    
+    # df$cylflg <- ifelse(df$var == "cyl", TRUE, FALSE)
+    df$cylflg <- c(F,F,F,F,F,T,F,T)
+    df$cylflg2 <- c(F,F,F,F,F,F,T,F)
+    df$ampgflg <- ifelse(df$var == "ampg", T, F)
+    df$test_flag <- c(T,T,F,T,T,F,T,T)
+    
+    
+    # Create table
+    tbl <- create_table(df, first_row_blank = T, borders = c("none")) %>%
+      stub(c("var", "label"), width = 2.06, 
+           style = list(
+             cell_style(bold = F, 
+                        italic = TRUE,
+                        cell_color = "yellow",
+                        borders = c("left", "right", "bottom"),
+                        indicator = "labelrow"),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        borders = c( "left"),
+                        cell_color = "cyan",
+                        indicator = "blankrow"),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        borders = c( "bottom"),
+                        indicator = cylflg),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        cell_color = "green",
+                        borders = c( "left"),
+                        indicator = cylflg2)
+           )) %>%
+      
+      define(var, blank_after = T, label_row = TRUE, group_border = F,
+             format = c(ampg = "Miles Per Gallon and more bold\ntext to be added to test function",
+                        cyl = "Cylinders")) %>%
+      
+      define(label, indent = .25) %>%
+      
+      define(A, label = "Group A", align = "center", n = 19,
+             style = list(
+               cell_style(italic = TRUE,
+                          bold = TRUE,
+                          borders = c("top"),
+                          indicator = "ampgflg"),
+               cell_style(italic = FALSE,
+                          bold = FALSE,
+                          borders = c("left", "right"),
+                          indicator = "cylflg")
+             )) %>%
+      
+      define(B, label = "Group B", align = "center", n = 13,
+             style = list(
+               cell_style(bold = FALSE,
+                          italic = TRUE,
+                          borders = c("left"),
+                          indicator = "datarow"),
+               cell_style(bold = TRUE,
+                          borders = "left",
+                          indicator = "ampgflg")
+             )) %>%
+      define(ampgflg, visible = FALSE) %>%
+      define(cylflg, visible = FALSE) %>%
+      define(cylflg2, visible = FALSE) %>%
       define(test_flag, visible = FALSE)
     
     
@@ -4914,7 +5020,7 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
 test_that("pdf2-123b: Cell styles replicate inside borders as expected", {
   
   if (dev == TRUE) {
-    fp <- file.path(base_path, "pdf2/test123b.pdf")
+    fp <- file.path(base_path, "pdf2/test123b_inside.pdf")
     
     
     # Width calculation should be correct for bold text. No overflow
@@ -4935,7 +5041,7 @@ test_that("pdf2-123b: Cell styles replicate inside borders as expected", {
     
     
     # Create table
-    tbl <- create_table(df, first_row_blank = T, borders = c("none")) %>%
+    tbl <- create_table(df, first_row_blank = T, borders = c("inside")) %>%
       stub(c("var", "label"), width = 2.06, 
            style = list(
              cell_style(bold = TRUE, 
@@ -4971,8 +5077,8 @@ test_that("pdf2-123b: Cell styles replicate inside borders as expected", {
                           indicator = "ampgflg"),
                cell_style(italic = FALSE,
                           bold = FALSE,
-                          font_color = "white",
-                          cell_color = "olive",
+                          font_color = "purple",
+                          cell_color = "gold",
                           borders = "all",
                           indicator = "cylflg")
              )) %>%
@@ -5103,7 +5209,113 @@ test_that("pdf2-123c: Single cell borders work as expected", {
   }
 })
 
-
+test_that("pdf2-123d: Font and cell color from cell style works as expected", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "pdf2/test123d.pdf")
+    
+    
+    # Width calculation should be correct for bold text. No overflow
+    df <- read.table(header = TRUE, text = '
+      var      label                          A             B
+      "ampg"   "N and more and more"          "19"          "13"
+      "ampg"   "Mean and more and more"       "18.8 (6.5)"  "22.0 (4.9)"
+      "ampg"   "Median and more and more"     "16.4"        "21.4"
+      "ampg"   "Q1 - Q3 and more and more"    "15.1 - 21.2" "19.2 - 22.8"
+      "ampg"   "Range and more and more"      "10.4 - 33.9" "14.7 - 32.4"
+      "cyl"    "8 Cylinder and more and more" "10 ( 52.6%)" "4 ( 30.8%)"
+      "cyl"    "6 Cylinder and more and more" "4 ( 21.1%)"  "3 ( 23.1%)"
+      "cyl"    "4 Cylinder and more and more" "5 ( 26.3%)"  "6 ( 46.2%)"')
+    
+    df$cylflg <- ifelse(df$var == "cyl", TRUE, FALSE)
+    df$ampgflg <- ifelse(df$var == "ampg", T, F)
+    df$test_flag <- c(T,T,F,T,T,F,T,T)
+    
+    
+    # Create table
+    tbl <- create_table(df, first_row_blank = T, borders = c("none")) %>%
+      stub(c("var", "label"), width = 2.06, 
+           style = list(
+             cell_style(bold = TRUE, 
+                        italic = TRUE,
+                        font_color = "purple",
+                        cell_color = "#BBFFBB",
+                        borders = c("all"),
+                        indicator = "labelrow"),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        cell_color = "cyan",
+                        indicator = "blankrow"),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        cell_color = "yellow",
+                        borders = c("bottom", "left"),
+                        indicator = "ampgflg"),
+             cell_style(bold = FALSE, 
+                        italic = FALSE,
+                        cell_color = "yellow",
+                        borders = c("bottom"),
+                        indicator = NULL)
+           )) %>%
+      
+      define(var, blank_after = T, label_row = TRUE, group_border = T,
+             format = c(ampg = "Miles Per Gallon and more bold\ntext to be added to test function",
+                        cyl = "Cylinders")) %>%
+      
+      define(label, indent = .25) %>%
+      
+      define(A, label = "Group A", align = "center", n = 19,
+             style = list(
+               cell_style(italic = TRUE,
+                          bold = TRUE,
+                          font_color = "blue",
+                          cell_color = "gray",
+                          borders = c("top", "left"),
+                          indicator = "ampgflg"),
+               cell_style(italic = FALSE,
+                          bold = FALSE,
+                          font_color = "brown",
+                          cell_color = "gold",
+                          borders = c("left", "right"),
+                          indicator = "cylflg")
+             )) %>%
+      
+      define(B, label = "Group B", align = "center", n = 13,
+             style = list(
+               cell_style(bold = FALSE,
+                          italic = TRUE,
+                          font_color = "red",
+                          borders = "left",
+                          indicator = "datarow"),
+               cell_style(bold = TRUE,
+                          font_color = "green",
+                          cell_color = "#000079",
+                          borders = c("left", "right"),
+                          indicator = "ampgflg")
+             )) %>%
+      define(cylflg, visible = FALSE) %>%
+      define(test_flag, visible = FALSE)
+    
+    
+    # Create report and add content
+    rpt <- create_report(fp, orientation = "portrait", output_type = "pdf",
+                         font = "Times") %>%
+      page_header(left = "Client: Motor Trend", right = "Study: Cars") %>%
+      titles("Table 1.0", "Various cell styles") %>%
+      add_content(tbl) %>%
+      footnotes("* Motor Trend, 1974") %>%
+      page_footer(left = "Left",
+                  center = "Confidential",
+                  right = "Page [pg] of [tpg]")
+    
+    
+    
+    res <- write_report(rpt)
+    expect_equal(file.exists(fp), TRUE)
+  } else {
+    expect_equal(TRUE, TRUE)
+  }
+})
 # # User Tests --------------------------------------------------------------
 
 # Lots of special characters not working
