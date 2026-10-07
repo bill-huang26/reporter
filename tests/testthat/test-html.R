@@ -3340,7 +3340,7 @@ test_that("html-81: Various cell styles work as expected", {
              cell_style(bold = TRUE, 
                         italic = TRUE,
                         borders = "all",
-                        cell_color = "white",
+                        cell_color = "#BBFFBB",
                         indicator = "labelrow"),
              cell_style(bold = FALSE, 
                         italic = FALSE,

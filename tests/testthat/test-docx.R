@@ -3969,7 +3969,7 @@ test_that("docx-98: Various cell styles work as expected", {
            style = list(
              cell_style(bold = TRUE, 
                         italic = TRUE,
-                        cell_color = "white",
+                        cell_color = "#BBFFBB",
                         borders = "all",
                         indicator = "labelrow"),
              cell_style(bold = FALSE, 
@@ -4038,6 +4038,29 @@ test_that("docx-98: Various cell styles work as expected", {
   }
 })
 
+test_that("docx-99: Percentage column widths work with 100% as expected.", {
+  
+  if (dev == TRUE) {
+    fp <- file.path(base_path, "docx/test99.docx")
+    
+    date_location <- paste0(
+      "Date: 24 Sep 2026 (Thursday) Time: 12:30-14:00\n",
+      "Venue: Hybrid meeting (Telephone Conference / Taipei meeting room 07/08)")
+    
+    txt <- create_text(date_location, align = "center", borders = c("outside")) |>
+      titles("Theme: Sharing", blank_row = "none", borders = "none",
+             align = "center", font_size = 13, bold = T)
+    
+    rpt <- create_report(fp, output_type = "docx", font = "Arial",
+                         font_size = 11, orientation = "portrait") |>
+      add_content(txt, align = "center")
+    
+    res <- write_report(rpt)
+    
+    expect_equal(file.exists(fp), TRUE)
+  } else
+    expect_equal(TRUE, TRUE)
+})
 # User Tests --------------------------------------------------------------
 
 

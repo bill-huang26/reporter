@@ -1755,7 +1755,7 @@ para_wr <- function(txt, font_size, bold, italics){
 #' @noRd
 run <- function(txt) {
   
-  ret <- paste0('<w:r><w:t xml:space="preserve">', encodeDOCX(txt), '</w:t></w:r>', collapse = "")
+  ret <- paste0('<w:r><w:t xml:space="preserve">', encodeDOCX(txt), '</w:t></w:r>', collapse = "<w:r><w:br/></w:r>")
   
   return(ret)
   

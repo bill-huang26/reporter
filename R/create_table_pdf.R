@@ -1815,35 +1815,35 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #' the ..row field does not account for page wrapping.  Need number
 #' of lines on this particular page.
 #' @noRd
-# get_table_body_pdf_back <- function(rs, tbl, widths, algns, talgn, tbrdrs, 
-#                                ystart = 0, spwidths = list(), 
+# get_table_body_pdf_back <- function(rs, tbl, widths, algns, talgn, tbrdrs,
+#                                ystart = 0, spwidths = list(),
 #                                brdr_flag = FALSE, frb = FALSE, styles, ts) {
-#   
+# 
 #   border_flag <- FALSE
-#   
+# 
 #   if ("..blank" %in% names(tbl)) {
 #     flgs <- tbl$..blank
 #   } else {
 #     flgs <- NA
-#   } 
-#   
+#   }
+# 
 #   # Count lines per row
 #   rws <- c()
 #   cnt <- 0
-#   
+# 
 #   nms <- names(widths)
 #   nms <- nms[!is.na(nms)]
 #   nms <- nms[!is.controlv(nms)]
 #   wdths <- widths[nms]
-#   
+# 
 #   #saveRDS(spwidths, "spwidths0a.rds")
-#   
+# 
 #   if (!"..blank" %in% names(tbl)) {
 #     blnks <- rep("", nrow(tbl))
 #   } else {
 #     blnks <- tbl$..blank
-#   } 
-#   
+#   }
+# 
 #   # Deal with one column situation
 #   if (length(nms) == 1) {
 #     t <- as.data.frame(tbl[[nms]])
@@ -1851,13 +1851,13 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #   } else {
 #     t <- tbl[ , nms]
 #   }
-#   
+# 
 #   conv <- rs$point_conversion
 #   unts <- rs$units
 #   bs <- rs$border_spacing
 #   bh <- rs$border_height
 #   cp <- rs$cell_padding
-#   
+# 
 #   brdrs <- strip_borders(tbrdrs)
 #   if (all(tbrdrs == "body"))
 #     brdrs <- c("top", "bottom", "left", "right")
@@ -1867,11 +1867,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #     rh <- rs$row_height + bh
 #   } else {
 #     rh <- rs$row_height
-#   } 
-#   
-#   # Sum up widths 
+#   }
+# 
+#   # Sum up widths
 #   width <- sum(wdths, na.rm = TRUE)
-#   
+# 
 #   # Get content alignment codes
 #   if (talgn == "right") {
 #     tlb <- rs$content_size[["width"]] - width
@@ -1883,65 +1883,65 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #     tlb <- 0
 #     trb <- width
 #   }
-#   
+# 
 #   rline <- ystart + 1
-#   
+# 
 #   ret <- c()
 #   fs <- rs$font_size
-#   
+# 
 #   defs <- ts$col_defs
-#   
+# 
 #   # For break labels, prepare the break label columns for later use
 #   break_label_col <- c()
 #   if (any(grepl("..break_label", names(tbl)))) {
-#     
+# 
 #     for (d in 1:length(defs)) {
 #       if (!is.null(defs[[d]]$break_label)){
 #         break_label_col <- c(break_label_col, defs[[d]]$var_c)
 #       }
 #     }
 #   }
-#   
+# 
 #   pdf(NULL)
 #   par(family = get_font_family(rs$font), ps = fs)
-#   
+# 
 #   # Loop for rows
 #   for(i in seq_len(nrow(t))) {
-#     
+# 
 #     yline <- rline
 #     mxrw <- yline
 #     cnt <- cnt + 1
-#   
-#     # Loop for columns 
+# 
+#     # Loop for columns
 #     for(j in nms) {
-#       
+# 
 #       # Seems like this should be done already
 #       # Need to get widths from split_cells
 #       if (all(class(tbl[i, j]) != "character")) {
 #         vl <- as.character(tbl[i, j])
 #       } else {
 #         vl <- tbl[i, j]
-#       } 
-#       
+#       }
+# 
 #       if (flgs[i] %in% c("B", "A", "L")) {
-#         
+# 
 #         # Strip out line feeds for label rows
 #         #vl <- gsub("\n", " ", vl, fixed = TRUE)
-#         
+# 
 #         #browser()
 #         # Recalculate based on total width of table
 #         #stmp <- split_string_text(vl, sum(wdths), rs$units)
-#         
+# 
 #         #tmp <- stmp$text
-#         
+# 
 #         tmp <- strsplit(vl, "\n", fixed = TRUE)[[1]]
-#         
+# 
 #       } else {
-#       
+# 
 #         tmp <- strsplit(vl, "\n", fixed = TRUE)[[1]]
 #       }
-#         
-#       
+# 
+# 
 #       if (j == nms[1]) {
 #         lb <- tlb
 #         rb <- lb + wdths[j]
@@ -1949,16 +1949,16 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #         lb <- rb
 #         rb <- lb + wdths[j]
 #       }
-#       
+# 
 #       # If value is empty or blank
 #       if (length(tmp) == 0) {
 #         yline <- yline + rh
 #       } else if (length(trimws(tmp)) == 0) {
 #         yline <- yline + rh
 #       } else {
-#         
+# 
 #         stl <- get_cell_styles(j, styles, flgs, i, tbl)
-#       
+# 
 #         # Loop for cell wraps
 #         for (ln in seq_len(length(tmp))) {
 #           lb_cell <- lb
@@ -1969,7 +1969,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #               if (!is.null(defs[[cur_break_label_col]]$indent)) {
 #                 lb_cell <- lb_cell + defs[[cur_break_label_col]]$indent
 #               }
-#               
+# 
 #               # Get the style again according to original column
 #               stl <- get_cell_styles(cur_break_label_col, styles, flgs, i, tbl)
 #             }
@@ -1986,16 +1986,16 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           } else {
 #             width_cell <- spwidths[[i]][[j]][ln]
 #           }
-#           
+# 
 #           bflg <- FALSE
 #           if (stl$bold) {
-#             bflg <- TRUE 
+#             bflg <- TRUE
 #           }
-#           
-#           ret[[length(ret) + 1]] <- page_text(tmp[ln], fs, 
+# 
+#           ret[[length(ret) + 1]] <- page_text(tmp[ln], fs,
 #                                               bold = bflg,
 #                                               italics = stl$italic,
-#                                               xpos = get_points(lb_cell, 
+#                                               xpos = get_points(lb_cell,
 #                                                                 rb,
 #                                                                 width_cell,
 #                                                                 units = unts,
@@ -2004,49 +2004,49 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           yline <- yline + rh
 #         }
 #       }
-#       
+# 
 #       if (yline > mxrw)
 #         mxrw <- yline
-#       
+# 
 #       yline <- rline
-#       
+# 
 #     }
-#     
+# 
 #     # Get group border information for later use
 #     group_border <- ""
 #     if ("..group_border" %in% names(tbl)) {
 #       group_border <- tbl[["..group_border"]][i]
 #     }
-#     
+# 
 #     # Don't draw group line for first blank row
 #     if (blnks[i] %in% c("B", "A") & i == 1){
 #       group_border <- ""
 #     }
-#     
+# 
 #     # Don't draw group line for last record when table border is all, bottom, outside
 #     if (i == nrow(t) & any(brdrs %in% c("all", "outside", "bottom"))) {
 #       group_border <- ""
 #     }
 # 
-#     # Loop for columns 
+#     # Loop for columns
 #     has_any_top_border <- FALSE
 #     has_any_bottom_border <- FALSE
 #     for(k in seq_len(length(nms))) {
 #       j <- nms[k]
-#       
+# 
 #       cell_left_border <- FALSE
 #       cell_right_border <- FALSE
 #       cell_top_border <- FALSE
 #       cell_bottom_border <- FALSE
-#       
+# 
 #       # Get borders from cell_style
 #       stl <- get_cell_styles(j, styles, flgs, i, tbl)
-#       
+# 
 #       # For right cell border
 #       # - No table "all", "inside" border
 #       # - For last column, no table "outside", "right" border
 #       # - Current cell's right border or righter cell's left border
-#       if (!any(brdrs %in% c("all", "inside")) & 
+#       if (!any(brdrs %in% c("all", "inside")) &
 #           !(any(brdrs %in% c("outside", "right")) & (j == nms[length(nms)] | flgs[i] %in% c("B", "A", "L")))) {
 #         if (!is.null(stl$borders)) {
 #           if (any(stl$borders %in% c("right", "all", "outside"))) {
@@ -2054,7 +2054,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #             cell_right_border <- TRUE
 #           }
 #         }
-#         
+# 
 #         if (!cell_right_border & j != nms[length(nms)]) {
 #           stl_righter <- get_cell_styles(nms[k+1], styles, flgs, i, tbl)
 #           if (!is.null(stl_righter$borders)) {
@@ -2065,7 +2065,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           }
 #         }
 #       }
-#       
+# 
 #       # For left border in first column
 #       if (!any(brdrs %in% c("outside", "left", "all")) & (j == nms[1] | flgs[i] %in% c("B", "A", "L"))) {
 #         if (!is.null(stl$borders)) {
@@ -2074,10 +2074,10 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           }
 #         }
 #       }
-#       
+# 
 #       # For bottom cell border
 #       bottom_border_trigger <- ""
-#       if (!any(brdrs %in% c("all", "inside")) & 
+#       if (!any(brdrs %in% c("all", "inside")) &
 #           !(any(brdrs %in% c("outside", "bottom")) & (i == nrow(t))) &
 #           group_border != "bottom") {
 #         if (!is.null(stl$borders)) {
@@ -2086,7 +2086,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #             bottom_trigger_row <- i
 #           }
 #         }
-#         
+# 
 #         if (!cell_bottom_border & i != nrow(t)) {
 #           stl_below <- get_cell_styles(j, styles, flgs, i + 1, tbl)
 #           if (!is.null(stl_below$borders)) {
@@ -2098,7 +2098,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           }
 #         }
 #       }
-#       
+# 
 #       # For top border in first row
 #       if (!is.null(frb)) {
 #         if (frb != "FALSE" & i == 1) {
@@ -2109,10 +2109,10 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           }
 #         }
 #       }
-#       
+# 
 #       # Applies inside vertical borders & cell right border
 #       if ((any(brdrs %in% c("all", "inside")) & j != nms[length(nms)] & !blnks[i] %in% c("B", "A", "L"))) {
-#         
+# 
 #         if (j == nms[1]) {
 #           lb <- tlb
 #           rb <- lb + wdths[j]
@@ -2120,36 +2120,36 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #           lb <- rb
 #           rb <- lb + wdths[j]
 #         }
-#         
-#         if (i == 1) { 
-#           
+# 
+#         if (i == 1) {
+# 
 #           if (is.null(frb)) {
-#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1, 
+#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1,
 #                                                mxrw - rline + 1)
 #            } else if (frb == FALSE) {
-#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1, 
+#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1,
 #                                                mxrw - rline + 1)
 #            } else {
-#              ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+#              ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                   mxrw - rline + 1)
 #            }
-#           
+# 
 #         } else if (i == nrow(t)) {
-#           
-#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+# 
+#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                mxrw - rline + 1)
-#         
+# 
 #         } else {
-#           
-#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+# 
+#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                mxrw - rline )
-#           
+# 
 #         }
 #       }
-#       
+# 
 #       # Draw cell right borders
 #       if (cell_right_border) {
-#         
+# 
 #         if (blnks[i] %in% c("B", "A", "L")) {
 #           lb <- tlb
 #           rb <- trb
@@ -2162,33 +2162,33 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #             rb <- tlb + sum(wdths[1:k])
 #           }
 #         }
-#         
-#         if (i == 1) { 
-#           
+# 
+#         if (i == 1) {
+# 
 #           if (is.null(frb)) {
-#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1, 
+#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1,
 #                                                  mxrw - rline + 1)
 #           } else if (frb == FALSE) {
-#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1, 
+#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh - 1,
 #                                                  mxrw - rline + 1)
 #           } else {
-#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+#             ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                  mxrw - rline + 1)
 #           }
-#           
+# 
 #         } else if (i == nrow(t)) {
-#           
-#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+# 
+#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                mxrw - rline + 1)
-#           
+# 
 #         } else {
-#           
-#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh, 
+# 
+#           ret[[length(ret) + 1]] <- page_vline(rb * conv, (rline + bs) - rh,
 #                                                mxrw - rline )
-#           
+# 
 #         }
 #       }
-#       
+# 
 #       # Draw Cell left border for first column
 #       if (cell_left_border) {
 # 
@@ -2217,11 +2217,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 # 
 #         }
 #       }
-#       
+# 
 #       # Draw cell bottom border
 #       if (cell_bottom_border) {
 #         has_any_bottom_border <- TRUE
-#         
+# 
 #         if (blnks[bottom_trigger_row] %in% c("B", "A", "L")) {
 #           bottom_border_length <- (trb - tlb) * conv
 #           lb <- tlb
@@ -2233,7 +2233,7 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #             lb <- tlb + sum(wdths[1:(k-1)])
 #           }
 #         }
-#         
+# 
 #         if (bottom_trigger_row == nrow(t)) {
 #           ret[[length(ret) + 1]] <- page_hline(lb * conv, (rline + bs) + 1,
 #                                                bottom_border_length)
@@ -2242,11 +2242,11 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #                                                bottom_border_length)
 #         }
 #       }
-#       
+# 
 #       # Draw cell top border
 #       if (cell_top_border) {
 #         has_any_top_border <- TRUE
-#         
+# 
 #         if (blnks[i] %in% c("B", "A", "L")) {
 #           top_border_length <- (trb - tlb) * conv
 #           lb <- tlb
@@ -2258,23 +2258,23 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #             lb <- tlb + sum(wdths[1:(k-1)])
 #           }
 #         }
-#         
+# 
 #         ret[[length(ret) + 1]] <- page_hline(lb * conv, (rline + bs) - rh,
 #                                              top_border_length)
 #       }
-#       
+# 
 #     } # end of column loop
-#     
+# 
 #     # Applies inside horizontal borders
 #     if ((any(brdrs %in% c("all", "inside")) & i < nrow(t)) |
-#         (group_border == "bottom" & i < nrow(t)) 
+#         (group_border == "bottom" & i < nrow(t))
 #         ) {
-#       ret[[length(ret) + 1]] <- page_hline(tlb * conv, mxrw -rh + bs, 
+#       ret[[length(ret) + 1]] <- page_hline(tlb * conv, mxrw -rh + bs,
 #                                            (trb - tlb) * conv)
 #     }
-#     
+# 
 #     rline <- mxrw
-#     
+# 
 #     # Add border height if the line is drawn by group border
 #     # Only add border height inside the table. Like outside border doesn't add additional height
 #     # Group border should apply
@@ -2283,75 +2283,75 @@ get_table_body_pdf <- function(rs, tbl, widths, algns, talgn, tbrdrs,
 #     } else if (has_any_bottom_border & i < nrow(t)) {
 #       # rline <- rline + bh
 #     }
-#     
+# 
 #     # if (has_any_top_border) {
 #     #   rline <- rline + bh
 #     # }
 #   } # end of row loop
-#   
+# 
 #   dev.off()
-#   
+# 
 #   if (frb & "body" %in% tbrdrs) {
-#     
-#     
-#     ypos <- ystart - rs$row_height - rs$row_height + bh 
-#     
+# 
+# 
+#     ypos <- ystart - rs$row_height - rs$row_height + bh
+# 
 #     #ylen <- cnt * rh
 #     ylen <- rline - rh + rs$row_height + bs + 1
-#     
+# 
 #   } else {
 # 
 #     ypos <- ystart - rs$row_height + bh - 1
-#     
+# 
 #     #ylen <- cnt * rh
 #     ylen <- rline - rh + bs + 1
 #   }
-#   
+# 
 #   if (any(brdrs %in% c("all", "left", "outside"))) {
-#     
+# 
 #     ret[[length(ret) + 1]] <- page_vline(tlb * conv, ypos, ylen - ypos)
 #   }
 #   if (any(brdrs %in% c("all", "right", "outside"))) {
-#     
+# 
 #     ret[[length(ret) + 1]] <- page_vline(trb * conv, ypos, ylen - ypos)
 #   }
-#   
+# 
 #   # pnts <- cnt * rh
-#   pnts <- ylen - ystart + rh 
-#   
+#   pnts <- ylen - ystart + rh
+# 
 #   if (any(brdrs %in% c("all", "bottom", "outside"))) {
-#     
-#     
-#     # ret[[length(ret) + 1]] <- page_hline(tlb * conv, ypos + ylen, 
+# 
+# 
+#     # ret[[length(ret) + 1]] <- page_hline(tlb * conv, ypos + ylen,
 #     #                                      (trb - tlb) * conv)
-#     
-#     ret[[length(ret) + 1]] <- page_hline(tlb * conv, ylen, 
+# 
+#     ret[[length(ret) + 1]] <- page_hline(tlb * conv, ylen,
 #                                          (trb - tlb) * conv)
-#     
+# 
 #     border_flag <- TRUE
 #     if (any(brdrs %in% c("all"))) {
-#       
-#       pnts <- pnts - bh 
+# 
+#       pnts <- pnts - bh
 #     }
 #    # pnts <- pnts + bh
-#     
+# 
 #   } else if (group_border == "bottom") {
-#     ret[[length(ret) + 1]] <- page_hline(tlb * conv, ylen, 
+#     ret[[length(ret) + 1]] <- page_hline(tlb * conv, ylen,
 #                                          (trb - tlb) * conv)
 #   }
 # 
 #   # fcntr <- fcntr + 1
 #   # saveRDS(ret, paste0("ret", fcntr, ".rds"))
 # 
-#   
+# 
 #   rws <- rline
-#   
+# 
 #   res <- list(pdf = ret,
 #               lines = pnts / rs$row_height,
 #               points = pnts ,
 #               border_flag = border_flag)
-#   
+# 
 #   return(res)
-#   
-#   
+# 
+# 
 # }

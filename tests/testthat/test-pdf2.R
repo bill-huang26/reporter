@@ -4913,7 +4913,7 @@ test_that("pdf2-123: Various cell styles with turning bottom borders on/off work
   }
 })
 
-test_that("pdf2-123a: Various cell styles with turning bottom borders on/off work as expected", {
+test_that("pdf2-123a: More Various cell styles with turning bottom borders on/off work as expected", {
   
   if (dev == TRUE) {
     fp <- file.path(base_path, "pdf2/test123a.pdf")
@@ -5020,7 +5020,7 @@ test_that("pdf2-123a: Various cell styles with turning bottom borders on/off wor
 test_that("pdf2-123b: Cell styles replicate inside borders as expected", {
   
   if (dev == TRUE) {
-    fp <- file.path(base_path, "pdf2/test123b_inside.pdf")
+    fp <- file.path(base_path, "pdf2/test123b.pdf")
     
     
     # Width calculation should be correct for bold text. No overflow
@@ -5041,7 +5041,7 @@ test_that("pdf2-123b: Cell styles replicate inside borders as expected", {
     
     
     # Create table
-    tbl <- create_table(df, first_row_blank = T, borders = c("inside")) %>%
+    tbl <- create_table(df, first_row_blank = T, borders = c("none")) %>%
       stub(c("var", "label"), width = 2.06, 
            style = list(
              cell_style(bold = TRUE, 
