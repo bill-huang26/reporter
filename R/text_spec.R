@@ -1161,7 +1161,9 @@ get_text_body_docx <- function(rs, txt, width, line_count, lpg_rows,
                  "<w:tr><w:tc>",
                  '<w:tcPr><w:tcW w:w="', tw, '"/>', cb, '</w:tcPr>',
                  '<w:p>',
-                 '<w:pPr><w:jc w:val="', algn, '"/></w:pPr>')
+                 '<w:pPr><w:jc w:val="', algn, '"/>',
+                 '<w:spacing w:after="0" w:before="0"/>', # Prevent from additional blank line
+                 '</w:pPr>')
   rwft <- paste0("</w:p></w:tc></w:tr>\n</w:tbl>\n")
   
   ret <- list()
