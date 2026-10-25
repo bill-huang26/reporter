@@ -472,10 +472,6 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
           
           if (wrap_flag) {
             vflag <- "bottom"
-          } else {
-            # If not wrapping, assign original valign for inserting table_break
-            # for report footnotes
-            vflag <- rs$footnotes[[1]]$valign
           }
         }
       }
@@ -533,8 +529,10 @@ get_page_footnotes_docx <- function(rs, spec, spec_width, lpg_rows, row_count,
     }
   }
 
+  # make sure the last page without blank row still has table break for report footnote
+  # See test78
   tbr <- NULL
-  if (vflag == "bottom") {
+  if (vflag == "bottom" | (has_bottom_footnotes(rs) & vflag != "bottom")) {
     if (length(ublnks) == 0) {
       tbr <- rs$table_break
     }
